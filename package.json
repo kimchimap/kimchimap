@@ -1,0 +1,13 @@
+{
+  "name": "kimchimap",
+  "private": true,
+  "version": "0.0.0",
+  "description": "국산김치맵 개발 하네스",
+  "packageManager": "pnpm@12.3.4",
+  "scripts": {
+    "harness": "./scripts/harness",
+    "verify": "./scripts/harness verify",
+    "verify:harness": "./scripts/harness verify-harness",
+    "test": "./scripts/harness test-harness"
+  }
+}

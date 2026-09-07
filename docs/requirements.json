@@ -1,0 +1,121 @@
+[
+  {
+    "id": "R01",
+    "title": "제품 범위·한국어·오픈소스 경계",
+    "document": "docs/product.md",
+    "acceptance": "구현/테스트/실연동/운영 상태 분리; 제외 기능 미추가",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R02",
+    "title": "최신 안정 버전·호환성·고정",
+    "document": "docs/versions.md",
+    "acceptance": "공식 출처/확인일/호환 build 증거; Preview/latest 금지",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R03",
+    "title": "모노레포·라이선스",
+    "document": "docs/product.md",
+    "acceptance": "frontend/backend 분리, 라이선스 임의 선택 금지, 서드파티 장부",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R04",
+    "title": "계층·트랜잭션",
+    "document": "docs/architecture.md",
+    "acceptance": "ArchUnit; Entity API 노출/직접 Repository/순환 차단; OSIV off",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R05",
+    "title": "원산지 모델·검색 의미",
+    "document": "docs/data-quality.md",
+    "acceptance": "동일 scope AND/국가 OR; 혼합/미확인/분쟁/만료; 날짜 불변",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R06",
+    "title": "실제 허용 수집",
+    "document": "docs/ingestion.md",
+    "acceptance": "명세 기반 client/계약; checkpoint/멱등/lease/429/누락/override 보존",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R07",
+    "title": "PostGIS·지도",
+    "document": "docs/architecture.md",
+    "acceptance": "5174 실제 변환, 공간 인덱스·미터·bbox/반경·상한·SDK fallback",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R08",
+    "title": "로그인·세션",
+    "document": "docs/security.md",
+    "acceptance": "PKCE/state/nonce/JWT·Redis 원자 회전·재사용·즉시 폐기·CSRF",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R09",
+    "title": "제보·증빙·검수",
+    "document": "docs/security.md",
+    "acceptance": "소유권·이미지 재인코딩·비공개·동시 검수·불변 승인",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R10",
+    "title": "전체 프론트 UX",
+    "document": "docs/frontend.md",
+    "acceptance": "모바일/PC 필수 화면·필터·상태·접근성·서버 타입 생성",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R11",
+    "title": "API·공통 보안",
+    "document": "docs/api.md",
+    "acceptance": "HTTP/한국어 오류·상한·trace·인가·SSRF·prod fail closed",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R12",
+    "title": "로컬 재현",
+    "document": "docs/local-development.md",
+    "acceptance": "실제 PostGIS/Redis·권한 분리·환경 진단·볼륨/.env 보존",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R13",
+    "title": "실행 하네스",
+    "document": "docs/local-development.md",
+    "acceptance": "실제 도구·전체 검증·하네스 회귀 테스트·미구현 실패",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R14",
+    "title": "한국어 Git",
+    "document": "docs/git-workflow.md",
+    "acceptance": "훅/PR 공통 검증·허용 명칭·영어 편법·의미 리뷰",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R15",
+    "title": "브랜치·보호",
+    "document": "docs/git-workflow.md",
+    "acceptance": "최신 dev·실제 remote ref 차단·병합/OID cleanup·보호 dry-run/apply",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R16",
+    "title": "필수 테스트",
+    "document": "docs/testing.md",
+    "acceptance": "단위/실제 DB/Redis/계약/E2E/보안/성능, 외부 smoke 분리",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  },
+  {
+    "id": "R17",
+    "title": "단계·완료 보고",
+    "document": "docs/plans/active/service-implementation.md",
+    "acceptance": "전 범위 수용 기준·명령 결과·외부 차단·다음 재개점·9항목 보고",
+    "serviceStatus": "NOT_IMPLEMENTED"
+  }
+]
