@@ -30,7 +30,10 @@ public class ProductionConfiguration {
       URI origin = URI.create(environment.getRequiredProperty("PUBLIC_ORIGIN"));
       if (!"https".equals(origin.getScheme())
           || origin.getHost() == null
-          || origin.getUserInfo() != null) {
+          || origin.getUserInfo() != null
+          || origin.getQuery() != null
+          || origin.getFragment() != null
+          || !origin.getPath().isEmpty()) {
         throw new IllegalStateException("운영 공개 주소는 HTTPS origin이어야 합니다.");
       }
     };

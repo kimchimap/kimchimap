@@ -35,3 +35,5 @@
 카카오 OAuth callback은 `/api/v1/auth/callback/kakao`, local redirect URI는 `http://localhost:5173/api/v1/auth/callback/kakao`로 고정했다. 로그인 구현 단계에서 Spring Security의 callback base URI와 일치시킨다.
 
 검색 구현 예: `groups: [{usage: "SIDE_DISH", ingredients: [{ingredientId: "…", mode: "DOMESTIC"}, {ingredientId: "…", mode: "DOMESTIC"}]}]`. 식재료 ID는 카탈로그에서 얻는다. OriginMode는 DOMESTIC/COUNTRIES/IMPORTED_UNSPECIFIED/UNKNOWN이며 COUNTRIES일 때 countries를 지정한다. includeMixed는 COUNTRIES에서만 허용한다. maxAgeDays는 실제 observedAt 기준, evidenceKinds는 대표 공개 근거 기준이다. 전체 속성·enum은 생성 OpenAPI를 따른다. [검색 결정](decisions/0006-spatial-search.md)을 참조한다.
+
+P06a 구현: GET /auth/csrf, POST /auth/refresh, POST /auth/logout, POST /auth/logout-all, GET/DELETE /members/me. 카카오 진입·콜백은 P06b에서 연결한다. refresh/logout은 Origin과 CSRF 헤더·쿠키가 필요하다. logout-all은 Bearer도 필요하며 회원 정보·탈퇴는 활성 Bearer를 요구한다. Access Token 응답은 no-store이고 Refresh Token은 응답 본문에 포함하지 않는다.
