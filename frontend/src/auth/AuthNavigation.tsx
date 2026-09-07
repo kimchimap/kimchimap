@@ -37,7 +37,10 @@ export function AuthNavigation() {
         <>
           <Link to="/reports">내 제보</Link>
           {session.member?.role === "ADMIN" && (
-            <Link to="/admin/reports">제보 검수</Link>
+            <>
+              <Link to="/admin/reports">제보 검수</Link>
+              <Link to="/admin/ingestion">수집 관리</Link>
+            </>
           )}
           <button onClick={() => void signOut()}>로그아웃</button>
         </>

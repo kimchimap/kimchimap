@@ -203,4 +203,10 @@ public class ReportRepository {
         .query(Item.class)
         .list();
   }
+
+  public void removeExpiredRequests() {
+    jdbc.sql(
+            "DELETE FROM app.report_request WHERE (owner_id,request_key) IN (SELECT owner_id,request_key FROM app.report_request WHERE expires_at<=CURRENT_TIMESTAMP ORDER BY expires_at LIMIT 1000 FOR UPDATE SKIP LOCKED)")
+        .update();
+  }
 }

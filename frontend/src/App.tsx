@@ -13,6 +13,8 @@ import {
   ReportDetailPage,
 } from "./report/ReportPages";
 
+import { IngestionPage } from "./ingestion/IngestionPage";
+
 function Home() {
   const connection = useQuery({
     queryKey: ["system-status"],
@@ -101,6 +103,7 @@ export function App() {
         <Route path="/auth/complete" element={<AuthCompletePage />} />
         <Route path="/bookmarks" element={<BookmarksPage />} />
         <Route path="/media/new" element={<PhotoUploadPage />} />
+        <Route path="/admin/ingestion" element={<IngestionPage />} />
         <Route path="/reports/new" element={<NewReportPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/reports/:id" element={<ReportDetailPage />} />

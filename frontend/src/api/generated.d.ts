@@ -4,6 +4,102 @@
  */
 
 export interface paths {
+    "/api/v1/admin/ingestion/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["jobs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/ingestion/jobs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/ingestion/jobs/{id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/ingestion/jobs/{id}/quarantines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["quarantines"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/ingestion/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["sources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/ingestion/sources/{id}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/reports": {
         parameters: {
             query?: never;
@@ -458,6 +554,88 @@ export interface components {
             schemeName?: string;
             sourceName?: string;
         };
+        IngestionEvent: {
+            /** Format: date-time */
+            createdAt?: string;
+            errorCode?: string;
+            /** Format: int64 */
+            id?: number;
+            /** Format: int32 */
+            pageNo?: number;
+            status?: string;
+        };
+        IngestionEventPage: {
+            items?: components["schemas"]["IngestionEvent"][];
+            /** Format: int64 */
+            nextCursor?: number;
+        };
+        IngestionJobStatus: {
+            /** Format: int64 */
+            changedCount?: number;
+            errorCode?: string;
+            fullListingCompleted?: boolean;
+            /** Format: uuid */
+            id?: string;
+            mode?: string;
+            /** Format: date-time */
+            nextAttemptAt?: string;
+            /** Format: int32 */
+            nextPage?: number;
+            /** Format: int32 */
+            pageBudget?: number;
+            /** Format: int32 */
+            pagesProcessed?: number;
+            /** Format: int64 */
+            quarantinedCount?: number;
+            /** Format: int64 */
+            readCount?: number;
+            /** Format: date-time */
+            requestedAt?: string;
+            /** Format: uuid */
+            sourceId?: string;
+            status?: string;
+            /** Format: int64 */
+            totalCount?: number;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        IngestionQuarantineItem: {
+            /** Format: date-time */
+            createdAt?: string;
+            errorCode?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            pageNo?: number;
+            /** Format: int32 */
+            rowIndex?: number;
+        };
+        IngestionQuarantinePage: {
+            items?: components["schemas"]["IngestionQuarantineItem"][];
+            /** Format: uuid */
+            nextCursor?: string;
+        };
+        IngestionRunRequest: {
+            mode: string;
+            /** Format: int32 */
+            pageBudget: number;
+            reason: string;
+        };
+        IngestionSourceStatus: {
+            collectionAllowed?: boolean;
+            credentialConfigured?: boolean;
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            intervalSeconds?: number;
+            /** Format: date-time */
+            lastCompletedUntil?: string;
+            name?: string;
+            /** Format: date-time */
+            nextRunAt?: string;
+            republicationAllowed?: boolean;
+            scheduled?: boolean;
+        };
         IngredientFilter: {
             countries?: string[];
             includeMixed?: boolean;
@@ -669,6 +847,146 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    jobs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IngestionJobStatus"][];
+                };
+            };
+        };
+    };
+    detail_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IngestionJobStatus"];
+                };
+            };
+        };
+    };
+    events: {
+        parameters: {
+            query?: {
+                cursor?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IngestionEventPage"];
+                };
+            };
+        };
+    };
+    quarantines: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IngestionQuarantinePage"];
+                };
+            };
+        };
+    };
+    sources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IngestionSourceStatus"][];
+                };
+            };
+        };
+    };
+    run: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestionRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IngestionJobStatus"];
+                };
+            };
+        };
+    };
     list_2: {
         parameters: {
             query?: {

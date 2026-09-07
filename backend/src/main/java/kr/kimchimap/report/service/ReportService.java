@@ -260,4 +260,12 @@ public class ReportService {
   private static ApiException missing() {
     return new ApiException(HttpStatus.NOT_FOUND, "REPORT_NOT_FOUND", "제보를 찾을 수 없습니다.");
   }
+
+  @org.springframework.scheduling.annotation.Scheduled(
+      fixedDelayString = "PT1H",
+      initialDelayString = "PT1H")
+  @Transactional
+  public void cleanExpiredRequests() {
+    reports.removeExpiredRequests();
+  }
 }

@@ -38,3 +38,5 @@ origin_record 날짜는 observed_at(실제 관찰), source_updated_at(원문 갱
 V6는 bookmark의 회원/업소 유일 키와 media의 소유자·무작위 저장 키·크기/해상도·해시·TEMPORARY/ATTACHED/DELETING 상태를 추가한다. 공개 플래그는 ATTACHED와 관리자 개인정보 검토 시각/행위자 없이는 켤 수 없다. 현재 API는 공개 플래그를 변경하지 않으며 제보 검수 연결은 후속 작업이다.
 
 제보 구현: 일곱 번째 마이그레이션은 report/current_revision, 불변 report_revision/report_media/report_review, 24시간 report_request를 추가한다. 검수 이력에는 공개 반영한 품목과 개인정보 검토한 사진 목록을 남긴다. 내부 USER_REPORT 출처는 제보별 공개 동의에 근거하며 외부 데이터 허가와 별개다. 상세 결정은 [제보 공개 반영](decisions/0010-report-publication.md)을 따른다.
+
+여덟 번째 마이그레이션: ingestion_request는 관리자 요청 키·해시·작업·24시간 만료를 보관하며 ingestion_request_audit는 실행자·소스·사유·예산의 불변 감사를 남긴다. 제보·수집 요청의 만료 인덱스를 추가했다.

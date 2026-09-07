@@ -25,3 +25,7 @@ Spring scheduler와 bounded executor, source+scope UNIQUE 활성 job을 사용�
 스케줄러는 기본 꺼져 있다. `INGEST_SCHEDULING_ENABLED=true`와 허가된 ingestion_source.enabled=true를 함께 설정해야 동작한다. 주기는 ingestion_source.interval_seconds(최소 86400), 다음 실행은 next_run_at, 30일 이상 지난 전체 대조가 우선이다. 자동 하루 예산은 1,000페이지이며 미완료 작업은 다음 예정 주기에 재개한다. 설정은 로컬 운영자가 앱 DB 계정으로 변경하고 이후 관리자 화면에 연결한다. 예약된 실행은 단일 bounded executor, 다중 프로세스 상호 배제는 DB lease/fencing으로 보장한다.
 
 페이지별 성공·오류는 수정·삭제가 거부되는 ingestion_job_event에 남는다. 세부 레코드 오류는 격리 코드와 최소 식별자로 기록하며 원문·비밀값을 로그에 남기지 않는다. SUCCEEDED는 해당 창의 페이지 처리 완료를 뜻한다. quarantined_count가 0이 아니면 모든 업소 반영 완료가 아니다. SOURCE_TOTAL_CHANGED는 재개 대신 새 작업을 요구한다. Retry-After가 7일을 넘으면 일찍 재시도하지 않고 수동 검토가 필요한 실패로 남긴다.
+
+관리자 구현: `/api/v1/admin/ingestion` 아래 sources, jobs, jobs/{id}, jobs/{id}/events, jobs/{id}/quarantines, sources/{id}/runs를 제공한다. 재실행은 UUID 요청 키와 사유·모드·1~100페이지 예산을 받으며 202로 접수한다. 동일 키 재전송은 예산을 중복 추가하지 않는다. 관리자별 시간당 10회와 DB 잠금·불변 감사를 적용한다. 소스 허가와 키 설정이 없으면 거부한다. 원문과 내부 잠금 식별자는 응답에서 제외한다.
+
+정기 수집 생성과 명시적 작업 실행을 분리했다. 정기 수집은 기존 조건을 유지하며 접수된 작업은 기본 실행기가 별도 스레드에서 처리한다. 테스트에서는 `app.ingestion.worker-enabled=false`로 두고 통제된 실행을 사용한다. 스케줄 등록 자체는 항상 활성화하여 사진·만료 요청 정리가 외부 정기 수집 설정에 종속되지 않게 했다.

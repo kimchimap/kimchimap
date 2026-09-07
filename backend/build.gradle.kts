@@ -108,3 +108,19 @@ spotless {
     endWithNewline()
   }
 }
+
+tasks.register<JavaExec>("memberAdmin") {
+  group = "application"
+  description = "서버 운영자의 회원 권한 변경 계획·명시적 적용"
+  classpath = sourceSets.main.get().runtimeClasspath
+  mainClass = "kr.kimchimap.KimchimapApplication"
+  args(
+      "--app.member.command=admin",
+      "--app.member.id=${providers.gradleProperty("memberId").getOrElse("")}",
+      "--app.member.role=${providers.gradleProperty("memberRole").getOrElse("ADMIN")}",
+      "--app.member.reason=${providers.gradleProperty("memberReason").getOrElse("")}",
+      "--app.member.apply=${providers.gradleProperty("memberApply").getOrElse("false")}",
+      "--app.ingestion.worker-enabled=false",
+      "--server.port=0",
+  )
+}
