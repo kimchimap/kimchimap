@@ -2,7 +2,7 @@
 
 식재료 원산지를 메뉴·용도·출처·확인 날짜와 함께 검색하는 모바일 우선 웹 프로젝트입니다.
 
-현재 **업소·원산지 모델 구현** 단계입니다. Spring MVC 서버, React 안내 화면, PostgreSQL/PostGIS·Redis 연결, Flyway 초기화, OpenAPI 타입 생성과 테스트가 동작합니다. 업소 상세·식재료/국가 카탈로그 API와 불변 원산지 기록의 공개 판정도 구현했습니다. 지도 검색·로그인·제보·수집은 후속 작업이며 실제 원산지 데이터는 아직 없습니다.
+현재 **공간 검색 구현** 단계입니다. Spring MVC 서버, React 안내 화면, PostgreSQL/PostGIS·Redis 연결, Flyway 초기화, OpenAPI 타입 생성과 테스트가 동작합니다. 업소 상세·식재료/국가 카탈로그 API와 불변 원산지 기록의 공개 판정도 구현했습니다. DB 지도 영역·반경·원산지 조합 검색을 구현했습니다. 지도 UI·로그인·제보·수집은 후속 작업이며 실제 원산지 데이터는 아직 없습니다.
 
 ## 로컬 실행
 
@@ -30,7 +30,7 @@ Git·Python3.9 이상·Docker가 필요합니다. macOS/Linux ARM64·AMD64 런�
 
 ```sh
 ./scripts/runtime pnpm --dir frontend exec playwright install chromium
-./scripts/harness verify-unit origin-model
+./scripts/harness verify-unit spatial-search
 ```
 
 단위 검증은 하네스·환경·포맷·타입·실제 DB/Redis·API 타입·모바일/PC E2E·양쪽 빌드를 포함합니다. `./scripts/harness verify`는 전체 서비스의 후속 검사까지 포함하므로 외부 수집 계약 미구현 단계에서는 실패합니다. 이를 서비스 전체 완료로 해석하지 않습니다.

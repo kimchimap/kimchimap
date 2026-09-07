@@ -44,15 +44,30 @@ tasks.register<Test>("integrationTest") {
   group = "verification"
   testClassesDirs = sourceSets.test.get().output.classesDirs
   classpath = sourceSets.test.get().runtimeClasspath
-  useJUnitPlatform { includeTags("integration") }
+  useJUnitPlatform {
+    includeTags("integration")
+    excludeTags("performance")
+  }
   shouldRunAfter(tasks.test)
+}
+
+tasks.register<Test>("performanceTest") {
+  description = "실제 검색 쿼리 실행 계획과 측정 결과"
+  group = "verification"
+  testClassesDirs = sourceSets.test.get().output.classesDirs
+  classpath = sourceSets.test.get().runtimeClasspath
+  useJUnitPlatform { includeTags("performance") }
+  outputs.upToDateWhen { false }
 }
 
 tasks.register<Test>("generateOpenApi") {
   description = "실제 서버 계약을 결정적으로 생성"
   testClassesDirs = sourceSets.test.get().output.classesDirs
   classpath = sourceSets.test.get().runtimeClasspath
-  useJUnitPlatform { includeTags("integration") }
+  useJUnitPlatform {
+    includeTags("integration")
+    excludeTags("performance")
+  }
   filter { includeTestsMatching("*FoundationIntegrationTest.exportsOpenApi") }
   outputs.upToDateWhen { false }
 }

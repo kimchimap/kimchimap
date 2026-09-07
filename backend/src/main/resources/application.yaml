@@ -49,3 +49,5 @@ springdoc:
     enabled: false
 app:
   public-origin: ${PUBLIC_ORIGIN:http://localhost:5173}
+  search:
+    cursor-secret: ${SEARCH_CURSOR_SECRET:}

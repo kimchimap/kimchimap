@@ -24,3 +24,5 @@ api-generate는 실행된 Spring OpenAPI 문서를 deterministic snapshot으로 
 verify는 핵심 검사 전체를 실행하고 실패들을 모아서 비정상 종료한다. verify-harness 성공과 verify 실패는 동시에 정상적인 현재 상태다. 실행 로그는 날짜/환경/명령/exit/범위와 함께 validation.md에 기록한다. 실패를 없애기 위한 테스트 삭제·무조건 skip·범위 축소·일괄 규칙 해제·보안 약화·성공 코드 위장은 금지한다.
 
 P03 검증: OriginValueTest/OriginPublicationPolicyTest는 분류·혼합비·품목 경계·상충·만료·철회·정렬을 검증한다. OriginModelIntegrationTest는 실제 PostGIS에 대해 공개/비공개/미승인 근거, 날짜 보존, 지정 독립성, 카탈로그 확장, 수정 금지, 외부 ID 중복, 잘못된 좌표와 상세 상한을 검증한다. ApplicationIntegrationSupport는 테스트 클래스별 컨테이너 생명주기에 맞춰 Spring 문맥을 폐기하여 이전 컨테이너 연결을 재사용하지 않는다.
+
+P04 검증: 검색 입력/서명 cursor/Redis 장애 대체 단위 테스트, 실제 DB 반경·영역 경계/원산지 조합/동률 페이지/변환/실제 Redis 요청 제한을 검증한다. 성능은 독립 `performanceTest`로 실행하고 단위/통합에서 중복 실행하지 않는다. 전체 verify와 spatial-search 작업 단위에는 성능을 포함하며 테스트 skip이 아니다. [측정 결과](performance.md)를 참조한다.

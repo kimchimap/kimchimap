@@ -1,6 +1,50 @@
 {
   "components": {
     "schemas": {
+      "Bounds": {
+        "properties": {
+          "east": {
+            "format": "double",
+            "type": "number"
+          },
+          "north": {
+            "format": "double",
+            "type": "number"
+          },
+          "south": {
+            "format": "double",
+            "type": "number"
+          },
+          "west": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "east",
+          "north",
+          "south",
+          "west"
+        ],
+        "type": "object"
+      },
+      "Center": {
+        "properties": {
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "type": "object"
+      },
       "Claim": {
         "properties": {
           "classification": {
@@ -132,6 +176,34 @@
         },
         "type": "object"
       },
+      "IngredientFilter": {
+        "properties": {
+          "countries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "includeMixed": {
+            "type": "boolean"
+          },
+          "ingredientId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "DOMESTIC",
+              "COUNTRIES",
+              "IMPORTED_UNSPECIFIED",
+              "UNKNOWN"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "IngredientItem": {
         "properties": {
           "category": {
@@ -145,6 +217,61 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Item": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "businessStatus": {
+            "type": "string"
+          },
+          "distanceMeters": {
+            "format": "double",
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "matchedScopes": {
+            "items": {
+              "$ref": "#/components/schemas/MatchedScope"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MatchedScope": {
+        "properties": {
+          "groupIndex": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "usage": {
             "type": "string"
           }
         },
@@ -250,6 +377,98 @@
         },
         "type": "object"
       },
+      "ScopeFilter": {
+        "properties": {
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/IngredientFilter"
+            },
+            "type": "array"
+          },
+          "usage": {
+            "enum": [
+              "SIDE_DISH",
+              "STEW",
+              "MAIN_DISH",
+              "OTHER",
+              "UNKNOWN"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchRequest": {
+        "properties": {
+          "bounds": {
+            "$ref": "#/components/schemas/Bounds"
+          },
+          "center": {
+            "$ref": "#/components/schemas/Center"
+          },
+          "cursor": {
+            "type": "string"
+          },
+          "evidenceKinds": {
+            "items": {
+              "enum": [
+                "SIGNBOARD_OBSERVATION",
+                "USER_SUBMISSION",
+                "SUPPLY_VERIFICATION"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeFilter"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxAgeDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "radiusMeters": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SearchResponse": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "type": "string"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "zoomRequired": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "SystemStatus": {
         "properties": {
           "serviceName": {
@@ -312,6 +531,36 @@
         },
         "tags": [
           "catalog-controller"
+        ]
+      }
+    },
+    "/api/v1/restaurants/search": {
+      "post": {
+        "operationId": "search",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "map-search-controller"
         ]
       }
     },

@@ -12,3 +12,5 @@
 Codex는 루트 AGENTS.md와 작업 디렉터리의 지침을 함께 읽는다. [공식 AGENTS.md 안내](https://learn.chatgpt.com/docs/agent-configuration/agents-md)에 따라 짧은 실행 지침과 상세 문서를 분리한다. 외부 키·권한·데이터 허가를 지침만으로 획득했다고 해석하지 않는다.
 
 현재 작업: [업소와 원산지 모델](plans/active/origin-model.md), [불변 기록 결정](decisions/0005-origin-revisions.md).
+
+공간 검색: [결정](decisions/0006-spatial-search.md), [측정](performance.md), [진행 계획](plans/active/spatial-search.md).

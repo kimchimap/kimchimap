@@ -28,9 +28,9 @@ import org.testcontainers.utility.MountableFile;
 @Tag("integration")
 @org.springframework.test.annotation.DirtiesContext(
     classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
-abstract class ApplicationIntegrationSupport {
+public abstract class ApplicationIntegrationSupport {
   @Container
-  static final GenericContainer<?> DATABASE =
+  protected static final GenericContainer<?> DATABASE =
       new GenericContainer<>(
               "postgis/postgis:18-3.6@sha256:60f6ad1d21ea86a67d47780b9a0d1e1d200500f62b19293fa834d0dea80b8677")
           .withCreateContainerCmdModifier(command -> command.withPlatform("linux/amd64"))
@@ -76,8 +76,8 @@ abstract class ApplicationIntegrationSupport {
   }
 
   @LocalServerPort int port;
-  @Autowired JdbcTemplate jdbc;
-  @Autowired StringRedisTemplate redis;
+  @Autowired protected JdbcTemplate jdbc;
+  @Autowired protected StringRedisTemplate redis;
   protected final HttpClient client =
       HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
