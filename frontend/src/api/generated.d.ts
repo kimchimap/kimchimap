@@ -27,7 +27,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_3"];
+        get: operations["detail_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -94,6 +94,54 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/origin-corrections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["correct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/origins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/origins/{scope}/{ingredient}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail_3"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -701,6 +749,71 @@ export interface components {
             selectedRecordId?: string;
             status?: string;
         };
+        OriginAdminDetail: {
+            corrections?: components["schemas"]["OriginCorrectionAudit"][];
+            group?: components["schemas"]["OriginAdminGroup"];
+            records?: components["schemas"]["OriginAdminRecord"][];
+        };
+        OriginAdminGroup: {
+            /** Format: date-time */
+            decidedAt?: string;
+            /** Format: uuid */
+            ingredientId?: string;
+            ingredientName?: string;
+            /** Format: uuid */
+            restaurantId?: string;
+            restaurantName?: string;
+            /** Format: uuid */
+            scopeId?: string;
+            scopeName?: string;
+            status?: string;
+            usage?: string;
+            /** Format: int64 */
+            version?: number;
+        };
+        OriginAdminGroupPage: {
+            items?: components["schemas"]["OriginAdminGroup"][];
+            /** Format: int32 */
+            nextOffset?: number;
+            truncated?: boolean;
+        };
+        OriginAdminRecord: {
+            classification?: string;
+            evidenceKind?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            observedAt?: string;
+            originalExpression?: string;
+            /** Format: uuid */
+            reportId?: string;
+            /** Format: date-time */
+            reviewedAt?: string;
+            sourceName?: string;
+            /** Format: date-time */
+            sourceUpdatedAt?: string;
+            /** Format: date-time */
+            validUntil?: string;
+            withdrawalReason?: string;
+            withdrawn?: boolean;
+        };
+        OriginCorrectionAudit: {
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: uuid */
+            id?: string;
+            reason?: string;
+        };
+        OriginCorrectionRequest: {
+            /** Format: int64 */
+            expectedVersion: number;
+            /** Format: uuid */
+            ingredientId: string;
+            reason: string;
+            /** Format: uuid */
+            scopeId: string;
+            withdrawRecordIds: string[];
+        };
         ReportClaim: {
             classification: string;
             components: components["schemas"]["ReportOriginComponent"][];
@@ -867,7 +980,7 @@ export interface operations {
             };
         };
     };
-    detail_3: {
+    detail_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -983,6 +1096,77 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["IngestionJobStatus"];
+                };
+            };
+        };
+    };
+    correct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OriginCorrectionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OriginAdminDetail"];
+                };
+            };
+        };
+    };
+    list_3: {
+        parameters: {
+            query?: {
+                status?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OriginAdminGroupPage"];
+                };
+            };
+        };
+    };
+    detail_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope: string;
+                ingredient: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OriginAdminDetail"];
                 };
             };
         };

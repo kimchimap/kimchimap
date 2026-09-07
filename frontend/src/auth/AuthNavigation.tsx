@@ -40,6 +40,7 @@ export function AuthNavigation() {
             <>
               <Link to="/admin/reports">제보 검수</Link>
               <Link to="/admin/ingestion">수집 관리</Link>
+              <Link to="/admin/origins">원산지 정정</Link>
             </>
           )}
           <button onClick={() => void signOut()}>로그아웃</button>

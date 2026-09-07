@@ -4,7 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Link } from "react-router";
+import { MemberGate } from "../auth/MemberGate";
 import { ApiError } from "../api/client";
 import type { components } from "../api/generated";
 import { sessionSnapshot, subscribeSession } from "../auth/session";
@@ -22,17 +22,9 @@ export function IngestionPage() {
   return (
     <main id="main-content">
       <h1>데이터 수집 관리</h1>
-      {session.status === "unknown" || session.status === "loading" ? (
-        <p role="status">로그인을 확인하고 있습니다.</p>
-      ) : session.status !== "authenticated" ? (
-        <p>
-          <Link to="/login">로그인</Link>한 뒤 이용해 주세요.
-        </p>
-      ) : session.member.role !== "ADMIN" ? (
-        <p role="alert">관리자만 이용할 수 있습니다.</p>
-      ) : (
-        <Dashboard memberId={session.member.id ?? ""} />
-      )}
+      <MemberGate admin>
+        <Dashboard memberId={session.member?.id ?? ""} />
+      </MemberGate>
     </main>
   );
 }

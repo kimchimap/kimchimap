@@ -35,6 +35,13 @@ public class OriginWriteRepository {
     this.jdbc = jdbc;
   }
 
+  public void lockPublicationScope(UUID scope) {
+    jdbc.sql("SELECT id FROM app.serving_scope WHERE id=:scope FOR UPDATE")
+        .param("scope", scope)
+        .query(UUID.class)
+        .single();
+  }
+
   public Optional<UUID> lockScope(UUID scope, UUID restaurant, String usage) {
     return jdbc.sql(
             "SELECT id FROM app.serving_scope WHERE id=:scope AND restaurant_id=:restaurant AND usage=:usage FOR UPDATE")

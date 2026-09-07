@@ -71,8 +71,9 @@ public record SearchRequest(
   }
 
   public record IngredientFilter(
-      UUID ingredientId, OriginMode mode, Set<String> countries, boolean includeMixed) {
+      UUID ingredientId, OriginMode mode, Set<String> countries, Boolean includeMixed) {
     public IngredientFilter {
+      includeMixed = Boolean.TRUE.equals(includeMixed);
       require(ingredientId != null && mode != null, "식재료와 원산지 조건이 필요합니다.");
       countries = countries == null ? Set.of() : Set.copyOf(countries);
       require(
