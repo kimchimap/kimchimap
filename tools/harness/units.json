@@ -17,9 +17,6 @@
       "build"
     ],
     "notImplemented": [
-      "test-contract",
-      "ingest-run",
-      "ingest-status",
       "smoke-external"
     ]
   },
@@ -41,9 +38,6 @@
       "build"
     ],
     "notImplemented": [
-      "test-contract",
-      "ingest-run",
-      "ingest-status",
       "smoke-external"
     ]
   },
@@ -66,9 +60,29 @@
       "build"
     ],
     "notImplemented": [
-      "test-contract",
-      "ingest-run",
-      "ingest-status",
+      "smoke-external"
+    ]
+  },
+  "public-data-ingestion": {
+    "plan": "docs/plans/active/public-data-ingestion.md",
+    "checks": [
+      "verify-harness",
+      "doctor",
+      "format-backend",
+      "format-frontend",
+      "lint",
+      "typecheck",
+      "test-backend",
+      "test-frontend",
+      "test-integration",
+      "test-performance",
+      "api-check",
+      "test-e2e",
+      "build-backend",
+      "build",
+      "test-contract"
+    ],
+    "notImplemented": [
       "smoke-external"
     ]
   }

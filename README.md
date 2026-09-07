@@ -2,7 +2,7 @@
 
 식재료 원산지를 메뉴·용도·출처·확인 날짜와 함께 검색하는 모바일 우선 웹 프로젝트입니다.
 
-현재 **공간 검색 구현** 단계입니다. Spring MVC 서버, React 안내 화면, PostgreSQL/PostGIS·Redis 연결, Flyway 초기화, OpenAPI 타입 생성과 테스트가 동작합니다. 업소 상세·식재료/국가 카탈로그 API와 불변 원산지 기록의 공개 판정도 구현했습니다. DB 지도 영역·반경·원산지 조합 검색을 구현했습니다. 지도 UI·로그인·제보·수집은 후속 작업이며 실제 원산지 데이터는 아직 없습니다.
+현재 **공공데이터 수집 구현·검증** 단계입니다. Spring MVC 서버, React 안내 화면, PostgreSQL/PostGIS·Redis 연결, Flyway 초기화, OpenAPI 타입 생성과 테스트가 동작합니다. 업소 상세·식재료/국가 카탈로그 API와 불변 원산지 기록의 공개 판정도 구현했습니다. DB 지도 영역·반경·원산지 조합 검색을 구현했습니다. 공식 일반음식점 수집기로 제한 범위 200건 중 199개 업소를 저장하고 공개 조회를 확인했습니다. 전화번호·출처·전화 연결 화면도 제공합니다. 지도 UI·로그인·제보는 후속 작업이며 실제 원산지 데이터는 아직 없습니다.
 
 ## 로컬 실행
 
@@ -30,12 +30,16 @@ Git·Python3.9 이상·Docker가 필요합니다. macOS/Linux ARM64·AMD64 런�
 
 ```sh
 ./scripts/runtime pnpm --dir frontend exec playwright install chromium
-./scripts/harness verify-unit spatial-search
+./scripts/harness verify-unit public-data-ingestion
 ```
 
-단위 검증은 하네스·환경·포맷·타입·실제 DB/Redis·API 타입·모바일/PC E2E·양쪽 빌드를 포함합니다. `./scripts/harness verify`는 전체 서비스의 후속 검사까지 포함하므로 외부 수집 계약 미구현 단계에서는 실패합니다. 이를 서비스 전체 완료로 해석하지 않습니다.
+단위 검증은 하네스·환경·포맷·타입·실제 DB/Redis·API 타입·모바일/PC E2E·양쪽 빌드를 포함합니다. `./scripts/harness verify`는 외부 API 합성 계약과 공간 실행계획을 포함한 현재 전체 품질 검사를 실행합니다. 검사가 통과하더라도 아직 구현하지 않은 로그인·제보·전체 지도 화면까지 완료했다는 의미는 아닙니다.
 
 [개발 지침](AGENTS.md) → [문서 목차](docs/index.md) → [후속 계획](docs/plans/active/service-implementation.md).
 [실행 명령](docs/local-development.md), [검증 기록](docs/validation.md), [기여 안내](CONTRIBUTING.md), [보안 제보](SECURITY.md).
 
 main/dev에 PR 필수·강제 push/삭제 금지 ruleset을 적용했습니다. 작업별 검증 후 dev PR 병합을 진행하며 main 릴리스·운영 배포·CI/CD는 범위 밖입니다. 오픈소스 라이선스는 미선택이며 코드·데이터·이미지 이용 조건은 별도로 관리합니다.
+
+## 허용된 업소 기본정보 수집
+
+일반음식점 API 활용 승인과 로컬 Decoding 키 등록 후 `./scripts/harness ingest-run`을 실행합니다. 기본 최대 2페이지이며 `./scripts/harness ingest-status`로 부분 수집·검토 필요 건수를 확인합니다. [소스와 이용 조건](docs/data-sources.md), [재개·예약 정책](docs/ingestion.md)을 확인하세요. `/restaurants/:id/contact`에서 공개 업소의 전화번호를 확인할 수 있습니다. 공공 업소 데이터로 원산지를 추정하지 않습니다.

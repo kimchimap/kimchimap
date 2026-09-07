@@ -51,3 +51,8 @@ app:
   public-origin: ${PUBLIC_ORIGIN:http://localhost:5173}
   search:
     cursor-secret: ${SEARCH_CURSOR_SECRET:}
+  ingestion:
+    public-data-key: ${PUBLIC_DATA_SERVICE_KEY:}
+    scheduling-enabled: ${INGEST_SCHEDULING_ENABLED:false}
+    mode: ${INGEST_MODE:INCREMENTAL}
+    max-pages: ${INGEST_MAX_PAGES:2}

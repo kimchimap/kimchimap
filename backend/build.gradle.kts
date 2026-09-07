@@ -37,7 +37,7 @@ tasks.withType<Test>().configureEach {
   testLogging { events("failed", "skipped") }
 }
 
-tasks.test { useJUnitPlatform { excludeTags("integration") } }
+tasks.test { useJUnitPlatform { excludeTags("integration", "contract") } }
 
 tasks.register<Test>("integrationTest") {
   description = "실제 PostGIS와 Redis 통합 검증"
@@ -58,6 +58,27 @@ tasks.register<Test>("performanceTest") {
   classpath = sourceSets.test.get().runtimeClasspath
   useJUnitPlatform { includeTags("performance") }
   outputs.upToDateWhen { false }
+}
+
+tasks.register<Test>("contractTest") {
+  description = "외부 API 명세와 오류 응답 계약 검증"
+  group = "verification"
+  testClassesDirs = sourceSets.test.get().output.classesDirs
+  classpath = sourceSets.test.get().runtimeClasspath
+  useJUnitPlatform { includeTags("contract") }
+}
+
+listOf("ingestRun" to "run", "ingestStatus" to "status").forEach { (taskName, command) ->
+  tasks.register<JavaExec>(taskName) {
+    group = "application"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "kr.kimchimap.KimchimapApplication"
+    args(
+        "--app.ingestion.command=$command",
+        "--server.port=0",
+        "--app.ingestion.scheduling-enabled=false",
+    )
+  }
 }
 
 tasks.register<Test>("generateOpenApi") {

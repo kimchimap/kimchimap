@@ -132,6 +132,20 @@
         },
         "type": "object"
       },
+      "Contact": {
+        "properties": {
+          "display": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CountryItem": {
         "properties": {
           "code": {
@@ -316,6 +330,9 @@
           },
           "businessStatus": {
             "type": "string"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/Contact"
           },
           "coordinateStatus": {
             "type": "string"

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, Route, Routes } from "react-router";
 import { getSystemStatus } from "./api/client";
+import { RestaurantContactPage } from "./restaurant/RestaurantContactPage";
 
 function Home() {
   const connection = useQuery({
@@ -28,7 +29,7 @@ function Home() {
         <div>
           <h2 id="notice-title">확인된 정보를 차근차근 담겠습니다</h2>
           <p>
-            아직 공개된 업소와 원산지 정보가 없습니다. 정보가 없다는 것은
+            원산지 정보는 아직 확보하지 못했습니다. 정보가 없다는 것은
             수입산이라는 뜻이 아닙니다.
           </p>
         </div>
@@ -81,6 +82,10 @@ export function App() {
       </header>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route
+          path="/restaurants/:id/contact"
+          element={<RestaurantContactPage />}
+        />
         <Route
           path="*"
           element={

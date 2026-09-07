@@ -57,6 +57,29 @@
 - 실제 검색 쿼리로 가상 업소·원산지 각 20,000개에서 두 공간 인덱스를 확인했다. [측정 결과](performance.md). 처리량이나 운영 지연시간 보장은 하지 않는다.
 - V1/V2를 보존하고 V3 인덱스를 추가했다. 로컬 DB 볼륨은 유지했다.
 - 기록: `/tmp/kimchimap-search-unit-gate.log`, `/tmp/kimchimap-search-complete-tests.log`. 성능 상세 산출물은 `backend/build/reports/performance/spatial.json`으로 재현한다.
-- 공공 API 공식 명세를 확인하고 실제 키로 2개 레코드를 조회했다. HTTP 200, resultCode 0. 전화번호 등 불필요한 필드를 제외한 결과만 권한 600의 Git 제외 파일에 보관했다. 서비스 DB에 저장·공개 조회까지 완료한 상태가 아니며 실제 원산지 자료도 없다.
+- 공공 API 공식 명세를 확인하고 실제 키로 2개 레코드를 조회했다. HTTP 200, resultCode 0. 최초 조회 당시 전화번호를 제외한 최소 필드 결과만 권한 600의 Git 제외 파일에 보관했다. 서비스 DB에 저장·공개 조회까지 완료한 상태가 아니며 실제 원산지 자료도 없다.
 
 - P04 `verify`도 실행했다. 성능을 포함한 전체 검사 중 아직 미구현인 외부 수집 계약 `test-contract`만 실패(exit 2), 나머지 통과. 다음 수집 작업에서 실제 계약 검사를 구현한다. 기록: `/tmp/kimchimap-search-full-verify.log`.
+
+## 업소 전화번호 추가 검증 (2026-09-07, P05 진행 중)
+
+- 공개 업소 연락처의 표시 원문·연결용 번호·출처를 저장하고 상세 API에 반영했다. 출처 재게시 권한이 없으면 번호를 반환하지 않는다.
+- `/restaurants/:id/contact`에서 실제 상세 API를 사용하는 연락처 화면과 `tel:` 링크를 연결했다. 전체 지도·목록·상세 동선 연결은 P08에 남아 있다.
+- `pnpm --dir frontend test:run`: 9개 통과. 번호 없음·잘못된 번호·404·정상 전화 링크와 출처 표시를 검증했다. typecheck, lint, build, api:check도 통과했다. 명령은 모두 `./scripts/runtime`으로 실행했다.
+- `backend/gradlew -p backend spotlessApply integrationTest --tests kr.kimchimap.OriginModelIntegrationTest`: 기존 상세 검증과 전화번호 공개 권한·DB 형식 제한 포함 11개 통과.
+- `backend/gradlew -p backend spotlessApply integrationTest --tests kr.kimchimap.IngestionIntegrationTest`: 실제 PostGIS DB에서 수집·전화번호 공개·멱등 재실행·부분 수집 재개·비정상 레코드 격리·429 지연·오래된 실행 임대의 쓰기 거부를 검증하는 4개 테스트 통과. 외부 응답은 테스트 대역이다.
+- 실행 임대 상실 테스트의 첫 실행은 Spring Repository 예외 변환으로 실패했다. 기대한 원인 예외와 메시지를 명시적으로 검증하도록 수정했고, 임대 소유자 변경 및 체크포인트 검사는 유지했다.
+- 실제 업소 전화번호의 수집→서비스 DB→공개 조회 실연동과 수집 기능 전체 검증·PR 병합은 아직 완료하지 않았다.
+
+## 공공데이터 실수집 (2026-09-07)
+
+- 런타임의 Gradle ingestRun 실행: 실제 HTTPS API 2페이지, 200건 읽음·199개 저장·애매한 매칭 1건 격리. 상태 PARTIAL, 다음 페이지 3. 로컬 V4 마이그레이션 적용 성공.
+- DB 조회: 전화번호 7개, 유효 좌표 196개, 원산지 기록 0개. 실업소 원문과 키를 공개 저장소에 추가하지 않았다.
+- 실행 중인 실제 서버에서 수집한 업소 상세·1km 반경 검색 모두 HTTP 200. 해당 업소 포함, 전화번호·출처 반환, 원산지 scope 0 확인.
+- 전체 원천 수집·카카오·원산지 실연동 완료를 의미하지 않는다.
+
+## P05 전체 검증
+
+`./scripts/harness verify` 최종 exit 0. 하네스 28개, 백엔드 단위·계층 20개, 실제 PostGIS/Redis 통합 32개, 공식 합성 계약 5개, 성능 1개, 프론트 9개, 모바일/PC E2E 2개 통과. 포맷·린트·타입·API 계약 일치·양쪽 빌드 통과. 기존 성공 결과는 Gradle의 변경 감지 캐시를 활용했고 새 수집 테스트는 실제 실행했다.
+
+첫 전체 검사에서는 실연동 확인용 서버가 8080 포트를 점유해 E2E가 실패했다. 확인용 서버를 종료하고 원래 E2E 설정 그대로 전체 검사를 재실행하여 통과했다. 검사 범위·보안·서버 재사용 규칙을 완화하지 않았다. 최종 실행 로그는 로컬 `/tmp/kimchimap-ingestion-verify.log`에 있다.

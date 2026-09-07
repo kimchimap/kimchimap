@@ -20,6 +20,33 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
   private record Fixture(UUID restaurant, UUID source, UUID evidence, UUID scope) {}
 
   @Test
+  void contactRequiresUsableNumberAndPermissionToRepublish() throws Exception {
+    var f = fixture(true, true);
+    String path = "/api/v1/restaurants/" + f.restaurant();
+    assertThat(mapper.readTree(get(path).body()).path("contact").isNull()).isTrue();
+    jdbc.update(
+        "UPDATE app.restaurant SET phone_display = '02-0000-0000', phone_number = '0200000000', phone_source_id = ? WHERE id = ?",
+        f.source(),
+        f.restaurant());
+    var contact = mapper.readTree(get(path).body()).path("contact");
+    assertThat(contact.path("display").asString()).isEqualTo("02-0000-0000");
+    assertThat(contact.path("number").asString()).isEqualTo("0200000000");
+    assertThat(contact.path("sourceName").asString()).isEqualTo("테스트 출처");
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE app.restaurant SET phone_number = 'javascript:alert(1)' WHERE id = ?",
+                    f.restaurant()))
+        .rootCause()
+        .isInstanceOf(java.sql.SQLException.class);
+    jdbc.update(
+        "UPDATE app.data_source SET republication_allowed = false WHERE id = ?", f.source());
+    var hidden = get(path).body();
+    assertThat(mapper.readTree(hidden).path("contact").isNull()).isTrue();
+    assertThat(hidden).doesNotContain("0200000000", "02-0000-0000");
+  }
+
+  @Test
   void catalogsUseExtensibleReferenceDataWithoutInventingRestaurants() throws Exception {
     var ingredients = get("/api/v1/catalogs/ingredients");
     assertThat(ingredients.statusCode()).isEqualTo(200);

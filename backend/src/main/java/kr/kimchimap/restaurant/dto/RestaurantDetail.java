@@ -14,10 +14,13 @@ public record RestaurantDetail(
     Double latitude,
     Double longitude,
     String coordinateStatus,
+    Contact contact,
     List<Scope> scopes,
     List<Designation> designations,
     Instant asOf,
     String informationNotice) {
+  public record Contact(String display, String number, String sourceName) {}
+
   public record Scope(UUID id, String name, String usage, String precision, List<Origin> origins) {}
 
   public record Origin(
