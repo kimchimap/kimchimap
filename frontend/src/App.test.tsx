@@ -21,18 +21,22 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("공개 시작 화면", () => {
   it("업소 연락처 경로에서 실제 API 형식의 번호와 전화 링크를 표시한다", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          id: "test-restaurant",
-          name: "가상 테스트 업소",
-          address: "테스트 주소",
-          contact: {
-            display: "02-0000-0000",
-            number: "0200000000",
-            sourceName: "테스트 출처",
-          },
-        }),
+    const fetchMock = vi.fn().mockImplementation((url: string) =>
+      Promise.resolve(
+        url.startsWith("/api/v1/auth/")
+          ? new Response("", { status: 401 })
+          : new Response(
+              JSON.stringify({
+                id: "test-restaurant",
+                name: "가상 테스트 업소",
+                address: "테스트 주소",
+                contact: {
+                  display: "02-0000-0000",
+                  number: "0200000000",
+                  sourceName: "테스트 출처",
+                },
+              }),
+            ),
       ),
     );
     vi.stubGlobal("fetch", fetchMock);

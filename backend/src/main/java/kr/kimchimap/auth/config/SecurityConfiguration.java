@@ -2,9 +2,12 @@ package kr.kimchimap.auth.config;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import kr.kimchimap.auth.repository.OAuthRequestRepository;
+import kr.kimchimap.auth.service.AuthCookies;
 import kr.kimchimap.auth.service.JwtService;
 import kr.kimchimap.auth.service.SessionService;
 import kr.kimchimap.global.web.ApiProblemWriter;
+import kr.kimchimap.member.service.MemberService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -12,6 +15,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -35,7 +40,13 @@ public class SecurityConfiguration {
       Environment environment,
       ApiProblemWriter problems,
       JwtService jwt,
-      SessionService sessions)
+      SessionService sessions,
+      KakaoLoginConfiguration kakao,
+      ClientRegistrationRepository clients,
+      RedisAuthorizationRequests authorizationRequests,
+      MemberService members,
+      AuthCookies cookies,
+      OAuthRequestRepository oauthRequests)
       throws Exception {
     String origin = environment.getProperty("app.public-origin", "http://localhost:5173");
     var csrfTokens = new CookieCsrfTokenRepository();
@@ -68,7 +79,13 @@ public class SecurityConfiguration {
                                 && request.getHeader("Authorization").startsWith("Bearer ")));
     http.authorizeHttpRequests(
         requests -> {
-          requests.requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll();
+          requests
+              .requestMatchers(
+                  HttpMethod.GET,
+                  "/api/v1/auth/csrf",
+                  "/api/v1/auth/login/kakao",
+                  "/api/v1/auth/callback/kakao")
+              .permitAll();
           requests
               .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh", "/api/v1/auth/logout")
               .permitAll();
@@ -102,6 +119,10 @@ public class SecurityConfiguration {
         headers ->
             headers.contentSecurityPolicy(
                 policy -> policy.policyDirectives("default-src 'none'; frame-ancestors 'none'")));
+    kakao.configure(http, clients, authorizationRequests, members, sessions, cookies, environment);
+    http.addFilterBefore(
+        new OAuthAvailabilityFilter(oauthRequests, problems),
+        OAuth2AuthorizationRequestRedirectFilter.class);
     return http.build();
   }
 }

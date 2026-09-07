@@ -207,3 +207,30 @@ footer {
     margin-top: 24px;
   }
 }
+
+.login-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  margin: 16px 0;
+  background: #224b3b;
+  color: white;
+  border-radius: 8px;
+  font-weight: 700;
+}
+header nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px;
+}
+header nav [role="alert"] {
+  position: absolute;
+  z-index: 10;
+  right: 16px;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  background: white;
+  border: 1px solid #a3432f;
+}

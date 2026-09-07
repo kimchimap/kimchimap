@@ -2,7 +2,7 @@
 
 식재료 원산지를 메뉴·용도·출처·확인 날짜와 함께 검색하는 모바일 우선 웹 프로젝트입니다.
 
-현재 **서비스 인증·세션 구현** 단계입니다. Spring MVC 서버, React 안내 화면, PostgreSQL/PostGIS·Redis 연결, Flyway 초기화, OpenAPI 타입 생성과 테스트가 동작합니다. 업소 상세·식재료/국가 카탈로그 API와 불변 원산지 기록의 공개 판정도 구현했습니다. DB 지도 영역·반경·원산지 조합 검색을 구현했습니다. 공식 일반음식점 수집기로 제한 범위 200건 중 199개 업소를 저장하고 공개 조회를 확인했습니다. 전화번호·출처·전화 연결 화면도 제공합니다. 서비스 JWT·Redis 세션과 갱신·폐기 API를 구현했습니다. 카카오 로그인 연결·지도 UI·제보는 후속 작업이며 실제 원산지 데이터는 아직 없습니다.
+현재 **카카오 로그인·브라우저 인증 구현** 단계입니다. Spring MVC 서버, React 안내 화면, PostgreSQL/PostGIS·Redis 연결, Flyway 초기화, OpenAPI 타입 생성과 테스트가 동작합니다. 업소 상세·식재료/국가 카탈로그 API와 불변 원산지 기록의 공개 판정도 구현했습니다. DB 지도 영역·반경·원산지 조합 검색을 구현했습니다. 공식 일반음식점 수집기로 제한 범위 200건 중 199개 업소를 저장하고 공개 조회를 확인했습니다. 전화번호·출처·전화 연결 화면도 제공합니다. 서비스 JWT·Redis 세션과 갱신·폐기 API를 구현했습니다. 카카오 로그인 연결과 브라우저 인증을 구현했으며 실제 계정 로그인은 별도 확인 중입니다. 지도 UI·제보는 후속 작업이며 실제 원산지 데이터는 아직 없습니다.
 
 ## 로컬 실행
 
@@ -30,7 +30,7 @@ Git·Python3.9 이상·Docker가 필요합니다. macOS/Linux ARM64·AMD64 런�
 
 ```sh
 ./scripts/runtime pnpm --dir frontend exec playwright install chromium
-./scripts/harness verify-unit public-data-ingestion
+./scripts/harness verify-unit kakao-login
 ```
 
 단위 검증은 하네스·환경·포맷·타입·실제 DB/Redis·API 타입·모바일/PC E2E·양쪽 빌드를 포함합니다. `./scripts/harness verify`는 외부 API 합성 계약과 공간 실행계획을 포함한 현재 전체 품질 검사를 실행합니다. 검사가 통과하더라도 아직 구현하지 않은 로그인·제보·전체 지도 화면까지 완료했다는 의미는 아닙니다.

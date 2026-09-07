@@ -17,4 +17,4 @@
 - HTTP API: csrf, refresh, logout, logout-all, members/me 조회·탈퇴. 카카오 로그인은 다음 작업이며 우회 로그인 API는 없다.
 - 전체 verify exit 0. 코드·계층·실제 Redis/PostGIS·브라우저·성능·계약·빌드 검사 통과. 상세 증거는 validation.md 참조.
 - 의존성: Boot BOM의 Spring Security7.1.1/Nimbus10.9.1 사용. 초기 이중 시계 검증 문제는 결정 기록에 근거를 남기고 엄격한 단일 정책으로 수정했다.
-- 남은 절차: 커밋·PR 검사·dev 병합·임시 브랜치 삭제. 다음 구현은 카카오 OAuth/OIDC·PKCE·일회성 state·nonce와 프론트 single-flight 갱신이다.
+- 완료 절차: PR #6 squash 병합(bee2709), 임시 브랜치 로컬·원격 삭제, 원래 dev 동기화. 다음 구현은 카카오 OAuth/OIDC·PKCE·일회성 state·nonce와 프론트 single-flight 갱신이다.
