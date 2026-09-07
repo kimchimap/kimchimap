@@ -1,0 +1,238 @@
+{
+  "dev-backend": {
+    "argv": [
+      "./gradlew",
+      "bootRun"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "format-backend": {
+    "argv": [
+      "./gradlew",
+      "spotlessCheck"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "test-backend": {
+    "argv": [
+      "./gradlew",
+      "test"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "test-integration": {
+    "argv": [
+      "./gradlew",
+      "integrationTest"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "test-contract": {
+    "argv": [
+      "./gradlew",
+      "contractTest"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "api-generate": {
+    "argv": [
+      "./gradlew",
+      "generateOpenApi"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "test-performance": {
+    "argv": [
+      "./gradlew",
+      "performanceTest"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "ingest-run": {
+    "argv": [
+      "./gradlew",
+      "ingestRun"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "ingest-status": {
+    "argv": [
+      "./gradlew",
+      "ingestStatus"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "smoke-external": {
+    "argv": [
+      "./gradlew",
+      "externalSmokeTest"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "dev-frontend": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "dev"
+    ],
+    "requires": [
+      "frontend/package.json"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "format-frontend": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "format:check"
+    ],
+    "requires": [
+      "frontend/package.json"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "lint": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "lint"
+    ],
+    "requires": [
+      "frontend/package.json"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "typecheck": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "typecheck"
+    ],
+    "requires": [
+      "frontend/package.json"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "test-frontend": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "test:run"
+    ],
+    "requires": [
+      "frontend/package.json"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "test-e2e": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "test:e2e"
+    ],
+    "requires": [
+      "frontend/package.json"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "api-check": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "api:check"
+    ],
+    "requires": [
+      "frontend/package.json"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "build": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "build"
+    ],
+    "requires": [
+      "frontend/package.json"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/service-implementation.md"
+  },
+  "build-backend": {
+    "argv": [
+      "./gradlew",
+      "bootJar"
+    ],
+    "requires": [
+      "backend/gradlew",
+      "backend/build.gradle.kts"
+    ],
+    "cwd": "backend",
+    "plan": "docs/plans/active/service-implementation.md"
+  }
+}

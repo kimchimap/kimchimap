@@ -1,0 +1,27 @@
+# 실제 검증 기록
+
+확인일: 2026-09-07. 하네스와 로컬 인프라 검증이며 서비스 구현·실연동·운영 준비 완료가 아니다.
+
+환경: macOS ARM64, Python3.9.6, Node22.13.1, Java17.0.16, Docker Desktop4.39/Engine28.0.1. 앱 후보 요구 Java25·Node>=22.22는 미충족.
+
+| 실행 | 결과 | 범위·한계 |
+| --- | --- | --- |
+| hooks-install | exit0 | core.hooksPath 설치, 실제 원격 보호는 별개 |
+| verify-harness | 24개 회귀 테스트 통과 | 임시 Git 훅·메시지·PR·보호 계획·cleanup·설정 보존 |
+| verify | exit2 | 하네스 통과, 앱 미구현 12개 검사 실패; skip·성공 위장 없음 |
+| doctor | exit2 | Java25·Node>=22.22 미충족, Docker·훅·하네스 도구 확인 |
+| pnpm12.3.4 install --lockfile-only --ignore-scripts | exit0 | 실제 lockfile 생성, 앱 의존 없음 |
+| env-init | exit0 | 무작위 로컬 DB/Redis 비밀 설정, 기존 .env 보존 |
+| infra-up | exit0 | 고정 digest 이미지 pull·healthcheck, PostGIS는 AMD64 에뮬레이션 |
+| infra-check | exit0 | PostgreSQL18.6/PostGIS3.6.4, 공간 함수·DML 허용·앱 DDL 거부, 트랜잭션 rollback |
+| infra-down | exit0 | 검증 후 컨테이너/네트워크 종료, DB·Redis 볼륨 보존 |
+| pr-check | exit0 | 실제 한국어 PR 초안 제목/본문 검증, GitHub PR 생성 아님 |
+| Redis 인증 확인 | 성공 | 인증 PONG, 인증 없는 요청 NOAUTH 거부 |
+| 역할 조회 | 성공 | 앱/마이그레이션 역할 superuser/createDB/createRole 모두 false |
+| 좌표 변환 probe | 실행됨 | EPSG5174 (200000,500000)→(127.00078353894504,38.00274602478411). 공식 기준점 정확도 테스트는 아직 없음 |
+| protection-check | exit2 | main effective rules 없음·classic 보호 없음, origin/dev 없음 |
+| protection-plan | exit0, dry-run | admin 권한 조회·추가 계획 출력. 서버 변경·apply 미실행 |
+
+서비스 단위·PostGIS/Redis Testcontainers·외부 계약·Playwright·성능은 아직 구현/실행하지 않았다. 인프라의 SQL probe를 서비스 통합 테스트로 보고하지 않는다. 카카오/공공 API/협회 실연동·실제 업소 원산지 데이터 없음. API 문서 열람은 수집→저장 검증이 아니다.
+
+보안 검사의 한계: 하네스의 메시지 한국어 판정과 비밀 패턴은 보조 검사이며 완전한 의미 분석·비밀 탐지기가 아니다. GitHub 서버 규칙 실제 적용은 미검증. 보호 도구 apply 동작은 mock으로만 테스트했다. Linux/ARM64 네이티브 PostGIS 실행은 미검증이며 PostGIS 자체의 ARM 지원과 선택 이미지의 플랫폼 지원을 구분한다.

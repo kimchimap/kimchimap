@@ -1,0 +1,43 @@
+name: kimchimap-local
+services:
+  db:
+    image: postgis/postgis:18-3.6@sha256:60f6ad1d21ea86a67d47780b9a0d1e1d200500f62b19293fa834d0dea80b8677
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: kimchimap
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?env-init을 먼저 실행하세요}
+      MIGRATOR_PASSWORD: ${MIGRATOR_PASSWORD:?env-init을 먼저 실행하세요}
+      APP_PASSWORD: ${APP_PASSWORD:?env-init을 먼저 실행하세요}
+    ports:
+      - "127.0.0.1:54329:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./init-roles.sh:/docker-entrypoint-initdb.d/20-kimchimap-roles.sh:ro
+      - ./verify-roles.sql:/harness/verify-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d kimchimap"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+  redis:
+    image: redis:8.10.1-alpine@sha256:becdda6c7f4b3fb42e42fd7f120bbf5c54c4caaaf16f26da24e4563d2c1f0576
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?env-init을 먼저 실행하세요}
+    ports:
+      - "127.0.0.1:63799:6379"
+    volumes:
+      - redis-data:/data
+      - ../.local/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli PING | grep -q PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  postgres-data:
+  redis-data:
