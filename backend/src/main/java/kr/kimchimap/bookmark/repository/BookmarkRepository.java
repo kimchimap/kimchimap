@@ -15,7 +15,8 @@ public class BookmarkRepository {
   }
 
   public boolean published(UUID restaurant) {
-    return jdbc.sql("SELECT EXISTS(SELECT 1 FROM app.restaurant WHERE id=:id AND published)")
+    return jdbc.sql(
+            "SELECT EXISTS(SELECT 1 FROM app.restaurant WHERE id=:id AND published AND app.has_domestic_origin(id,CURRENT_TIMESTAMP))")
         .param("id", restaurant)
         .query(Boolean.class)
         .single();
@@ -50,7 +51,7 @@ public class BookmarkRepository {
             """
         SELECT r.id restaurant_id, r.name, r.address, r.business_status, b.created_at saved_at
         FROM app.bookmark b JOIN app.restaurant r ON r.id=b.restaurant_id
-        WHERE b.member_id=:member AND r.published AND (:cursor::uuid IS NULL OR
+        WHERE b.member_id=:member AND r.published AND app.has_domestic_origin(r.id,CURRENT_TIMESTAMP) AND (:cursor::uuid IS NULL OR
           (b.created_at < (SELECT created_at FROM app.bookmark WHERE member_id=:member AND restaurant_id=:cursor)
            OR (b.created_at = (SELECT created_at FROM app.bookmark WHERE member_id=:member AND restaurant_id=:cursor)
                AND b.restaurant_id > :cursor)))

@@ -95,7 +95,8 @@ public class MediaService {
 
   public Download publicImage(UUID id) {
     var row = media.find(id).orElseThrow(MediaService::missing);
-    if (!row.publiclyVisible() || !row.state().equals("ATTACHED")) throw missing();
+    if (!row.publiclyVisible() || !row.state().equals("ATTACHED") || !media.hasPublicRestaurant(id))
+      throw missing();
     try {
       return new Download(storage.read(row.storageKey(), false), row.contentType());
     } catch (IOException exception) {

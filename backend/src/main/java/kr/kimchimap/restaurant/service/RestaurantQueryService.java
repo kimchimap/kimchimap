@@ -39,14 +39,14 @@ public class RestaurantQueryService {
 
   @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
   public RestaurantDetail detail(UUID id) {
+    var asOf = clock.instant();
     var restaurant =
         repository
-            .findPublished(id)
+            .findPublished(id, asOf)
             .orElseThrow(
                 () ->
                     new ApiException(
                         HttpStatus.NOT_FOUND, "RESTAURANT_NOT_FOUND", "공개된 업소를 찾을 수 없습니다."));
-    var asOf = clock.instant();
     var scopes = repository.findScopes(id);
     var claims = repository.findPublicClaims(id, asOf);
     var designations = repository.findDesignations(id);

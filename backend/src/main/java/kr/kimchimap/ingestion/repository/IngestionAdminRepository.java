@@ -17,14 +17,17 @@ public class IngestionAdminRepository {
     this.jdbc = jdbc;
   }
 
-  public List<IngestionAdmin.Source> sources(boolean configured, boolean scheduling) {
+  public List<IngestionAdmin.Source> sources(
+      boolean configured, boolean scheduling, boolean qualified) {
     return jdbc.sql(
             """
         SELECT s.source_id id,d.name,d.collection_allowed,d.republication_allowed,
-          (s.enabled AND :scheduling) scheduled,:configured credential_configured,
+          :qualified domestic_qualification_supported,
+          (s.enabled AND :scheduling AND :qualified) scheduled,:configured credential_configured,
           s.interval_seconds,s.next_run_at,s.last_completed_until
         FROM app.ingestion_source s JOIN app.data_source d ON d.id=s.source_id ORDER BY s.source_id
         """)
+        .param("qualified", qualified)
         .param("configured", configured)
         .param("scheduling", scheduling)
         .query(IngestionAdmin.Source.class)

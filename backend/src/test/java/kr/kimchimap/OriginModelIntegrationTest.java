@@ -22,6 +22,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
   @Test
   void contactRequiresUsableNumberAndPermissionToRepublish() throws Exception {
     var f = fixture(true, true);
+    DomesticOriginFixture.addRice(jdbc, transactions, f.restaurant());
     String path = "/api/v1/restaurants/" + f.restaurant();
     assertThat(mapper.readTree(get(path).body()).path("contact").isNull()).isTrue();
     jdbc.update(
@@ -109,12 +110,23 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
     var f = fixture(true, true);
     claim(f, CABBAGE, "DOMESTIC", "KR", "APPROVED", null);
     claim(f, CABBAGE, "IMPORTED_SPECIFIED", "CN", "APPROVED", null);
+    DomesticOriginFixture.addRice(jdbc, transactions, f.restaurant());
     var response = mapper.readTree(get("/api/v1/restaurants/" + f.restaurant()).body());
-    var origin = response.path("scopes").get(0).path("origins").get(0);
+    var origin =
+        response
+            .path("scopes")
+            .valueStream()
+            .filter(scope -> scope.path("id").asString().equals(f.scope().toString()))
+            .findFirst()
+            .orElseThrow()
+            .path("origins")
+            .get(0);
     assertThat(origin.path("status").asString()).isEqualTo("DISPUTED");
     assertThat(origin.path("selectedRecordId").isNull()).isTrue();
     var expired = fixture(true, true);
     claim(expired, CABBAGE, "DOMESTIC", "KR", "APPROVED", Instant.parse("2026-03-01T00:00:00Z"));
+    assertThat(get("/api/v1/restaurants/" + expired.restaurant()).statusCode()).isEqualTo(404);
+    DomesticOriginFixture.addRice(jdbc, transactions, expired.restaurant());
     assertThat(get("/api/v1/restaurants/" + expired.restaurant()).body()).contains("EXPIRED");
   }
 
@@ -140,9 +152,20 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
         "반찬 김치",
         "테스트 제도 원문 기준");
     jdbc.update("UPDATE app.data_source SET designation_allowed=true WHERE id=?", pending.source());
+    assertThat(get("/api/v1/restaurants/" + pending.restaurant()).statusCode()).isEqualTo(404);
+    DomesticOriginFixture.addRice(jdbc, transactions, pending.restaurant());
     var response = get("/api/v1/restaurants/" + pending.restaurant());
-    assertThat(response.body()).contains("테스트 지정", "반찬 김치").doesNotContain("DOMESTIC");
-    assertThat(mapper.readTree(response.body()).path("scopes").get(0).path("origins").isEmpty())
+    assertThat(response.body()).contains("테스트 지정", "반찬 김치");
+    assertThat(
+            mapper
+                .readTree(response.body())
+                .path("scopes")
+                .valueStream()
+                .filter(scope -> scope.path("id").asString().equals(pending.scope().toString()))
+                .findFirst()
+                .orElseThrow()
+                .path("origins")
+                .isEmpty())
         .isTrue();
     jdbc.update(
         "UPDATE app.data_source SET republication_allowed = false WHERE id = ?", pending.source());
@@ -248,6 +271,8 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
         "CN",
         "APPROVED",
         null);
+    assertThat(get("/api/v1/restaurants/" + f.restaurant()).statusCode()).isEqualTo(404);
+    DomesticOriginFixture.addRice(jdbc, transactions, f.restaurant());
     var response = get("/api/v1/restaurants/" + f.restaurant());
     assertThat(response.statusCode()).isEqualTo(200);
     assertThat(response.body())
@@ -262,9 +287,9 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
     jdbc.update(
         "INSERT INTO app.origin_withdrawal(record_id, reason, actor_reference, withdrawn_at) VALUES (?, '테스트 정정', 'test-admin', CURRENT_TIMESTAMP)",
         id);
-    assertThat(get("/api/v1/restaurants/" + f.restaurant()).body())
-        .contains("UNAVAILABLE")
-        .doesNotContain("DOMESTIC");
+    assertThat(get("/api/v1/restaurants/" + f.restaurant()).statusCode()).isEqualTo(404);
+    DomesticOriginFixture.addRice(jdbc, transactions, f.restaurant());
+    assertThat(get("/api/v1/restaurants/" + f.restaurant()).body()).contains("UNAVAILABLE");
     assertThat(
             jdbc.queryForObject(
                 "SELECT original_expression FROM app.origin_record WHERE id = ?", String.class, id))
@@ -274,6 +299,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
   @Test
   void excessiveScopeCountReturnsExplicitErrorInsteadOfPartialTruth() throws Exception {
     var f = fixture(true, true);
+    claim(f, CABBAGE, "DOMESTIC", "KR", "APPROVED", null);
     jdbc.update(
         """
         INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision)

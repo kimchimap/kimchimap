@@ -59,7 +59,7 @@ class OriginCorrectionIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo(409);
     approve(admin.id(), restaurant, scope, "IMPORTED_SPECIFIED");
     assertThat(search(admin).body()).doesNotContain(restaurant.toString());
-    assertThat(get("/api/v1/restaurants/" + restaurant).body()).contains("DISPUTED");
+    assertThat(get("/api/v1/restaurants/" + restaurant).statusCode()).isEqualTo(404);
   }
 
   @Test
@@ -79,7 +79,7 @@ class OriginCorrectionIntegrationTest extends ApplicationIntegrationSupport {
         .isZero();
     assertThat(correct(admin, scope, 0, List.of(record(scope, "DOMESTIC"))).statusCode())
         .isEqualTo(200);
-    assertThat(get("/api/v1/restaurants/" + restaurant).body()).contains("UNAVAILABLE");
+    assertThat(get("/api/v1/restaurants/" + restaurant).statusCode()).isEqualTo(404);
     assertThat(request("GET", "/api/v1/admin/origins?limit=51", admin, null).statusCode())
         .isEqualTo(400);
     assertThat(

@@ -831,6 +831,7 @@ export interface components {
         IngestionSourceStatus: {
             collectionAllowed?: boolean;
             credentialConfigured?: boolean;
+            domesticQualificationSupported?: boolean;
             /** Format: uuid */
             id?: string;
             /** Format: int32 */

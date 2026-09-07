@@ -1,5 +1,7 @@
 # 로컬 개발과 명령
 
+> 2026-09-08 범위 정정: 국내산 사용 항목이 확인된 업소만 수집·공개한다. 원산지 없는 일반음식점 전체 수집은 중단한다. 과거 수집 엔진 설명은 기술 이력이며 현재 실행 허용을 뜻하지 않는다. 미등록 업소는 제보·검수로 등록한다. [결정 기록](decisions/0015-domestic-only-scope.md).
+
 PostGIS 자체는 ARM64에서 사용할 수 있다. 여기서 AMD64 한정은 선택한 `postgis/postgis:18-3.6` 이미지의 manifest에 대한 설명이다. PostGIS 소프트웨어 전체의 아키텍처 제한이 아니다.
 
 하네스는 macOS/Linux의 Git과 Python3.9+로 실행한다. pnpm 명령은 선택적인 루트 별칭이다. toolchain-install은 Java25·Node24·pnpm12를 사용자 캐시에 준비하고 scripts/runtime과 하네스가 해당 버전을 선택한다. 시스템 Java/Node는 변경하지 않는다. Gradle Wrapper는 공식 checksum과 함께 고정됐다.

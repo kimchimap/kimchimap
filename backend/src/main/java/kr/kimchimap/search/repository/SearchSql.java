@@ -51,7 +51,7 @@ final class SearchSql {
                  public.ST_X(r.location) AS longitude,
                  public.ST_Distance(r.location::public.geography, center.point::public.geography) AS distance_meters
           FROM app.restaurant r CROSS JOIN center
-          WHERE r.published AND r.business_status <> 'CLOSED' AND r.coordinate_status = 'VERIFIED'
+          WHERE r.published AND app.has_domestic_origin(r.id,:asOf) AND r.business_status <> 'CLOSED' AND r.coordinate_status = 'VERIFIED'
             AND %s %s
         ),
         active AS MATERIALIZED (

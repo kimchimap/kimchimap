@@ -52,6 +52,7 @@ it("인증키 없는 소스의 실행을 차단하고 일부 처리 상태를 �
           {
             id: "test-source",
             name: "테스트 소스",
+            domesticQualificationSupported: true,
             collectionAllowed: true,
             republicationAllowed: true,
             credentialConfigured: false,
@@ -74,6 +75,7 @@ it("재실행은 사유와 제한 페이지 수를 전달하고 접수 상태를
           {
             id: "test-source",
             name: "테스트 소스",
+            domesticQualificationSupported: true,
             collectionAllowed: true,
             republicationAllowed: true,
             credentialConfigured: true,
@@ -95,4 +97,29 @@ it("재실행은 사유와 제한 페이지 수를 전달하고 접수 상태를
     expect.any(String),
   );
   expect(await screen.findByRole("status")).toHaveTextContent("접수했습니다");
+});
+
+it("원산지 없는 소스는 키와 이용 허가가 있어도 재실행을 제공하지 않는다", async () => {
+  vi.mocked(readAdmin).mockImplementation(async (path) =>
+    path === "sources"
+      ? [
+          {
+            id: "test-originless",
+            name: "테스트 일반음식점",
+            collectionAllowed: true,
+            republicationAllowed: true,
+            credentialConfigured: true,
+            domesticQualificationSupported: false,
+          },
+        ]
+      : [],
+  );
+  show();
+  expect(
+    await screen.findByText(/국내산 사용 여부를 선별할 수 없는 소스/),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "수집 실행 요청" }),
+  ).not.toBeInTheDocument();
+  expect(requestRun).not.toHaveBeenCalled();
 });

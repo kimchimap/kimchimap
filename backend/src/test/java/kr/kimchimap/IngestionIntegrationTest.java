@@ -19,12 +19,21 @@ import kr.kimchimap.ingestion.repository.IngestionJobRepository;
 import kr.kimchimap.ingestion.service.IngestionJobService;
 import kr.kimchimap.ingestion.service.IngestionPageService;
 import kr.kimchimap.ingestion.service.IngestionWorker;
+import kr.kimchimap.ingestion.service.OriginCollectionPolicy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class IngestionIntegrationTest extends ApplicationIntegrationSupport {
+  @MockitoBean OriginCollectionPolicy collectionPolicy;
+
+  @BeforeEach
+  void allowSyntheticPipelineContract() {
+    // 실서비스의 수집 차단은 DomesticPublicationIntegrationTest에서 실제 정책으로 검증한다.
+    when(collectionPolicy.supportsDomesticQualification()).thenReturn(true);
+  }
+
   @Autowired IngestionJobService jobs;
   @Autowired IngestionJobRepository repository;
   @Autowired IngestionWorker worker;
@@ -39,7 +48,7 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
   }
 
   @Test
-  void partialResumeIsIdempotentAndPublishesBusinessContactWithoutOriginClaims() throws Exception {
+  void partialResumeIsIdempotentAndOriginlessRecordsRemainPrivate() throws Exception {
     var first = row("가상 테스트 첫 업소");
     var second = row("가상 테스트 둘째 업소");
     var third = row("가상 테스트 셋째 업소");
@@ -57,8 +66,8 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
     assertThat(jobs.get(id).changedCount()).isEqualTo(3);
     var restaurant = restaurantId(first);
     var response = get("/api/v1/restaurants/" + restaurant);
-    assertThat(response.statusCode()).isEqualTo(200);
-    assertThat(response.body()).contains("0200000000", "02-0000-0000", "행정안전부");
+    assertThat(response.statusCode()).isEqualTo(404);
+    assertThat(response.body()).doesNotContain("0200000000", "02-0000-0000");
     assertThat(response.body()).doesNotContain("DOMESTIC");
     var collected =
         jdbc.queryForObject(
@@ -94,9 +103,20 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
     assertThat(jobs.get(id).quarantinedCount()).isEqualTo(1);
     assertThat(jobs.get(id).changedCount()).isEqualTo(1);
     var response = get("/api/v1/restaurants/" + restaurantId(usable));
-    assertThat(response.body())
-        .contains("INVALID", "\"contact\":null")
-        .doesNotContain("javascript");
+    assertThat(response.statusCode()).isEqualTo(404);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT coordinate_status FROM app.restaurant WHERE id=?",
+                String.class,
+                restaurantId(usable)))
+        .isEqualTo("INVALID");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT phone_number FROM app.restaurant WHERE id=?",
+                String.class,
+                restaurantId(usable)))
+        .isNull();
+    assertThat(response.body()).doesNotContain("javascript");
   }
 
   @Test

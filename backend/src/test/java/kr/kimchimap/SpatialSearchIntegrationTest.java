@@ -37,6 +37,8 @@ class SpatialSearchIntegrationTest extends ApplicationIntegrationSupport {
     var inside = shop(longitude);
     var boundary = shop(longitude);
     var outside = shop(longitude);
+    for (var shop : List.of(inside, boundary, outside))
+      claim(shop, CABBAGE, "DOMESTIC", List.of("KR"), null, true);
     project(inside.id(), longitude, 99);
     project(boundary.id(), longitude, 100);
     project(outside.id(), longitude, 100.001);
@@ -140,6 +142,11 @@ class SpatialSearchIntegrationTest extends ApplicationIntegrationSupport {
                 100,
                 null));
     assertThat(result.items()).extracting(item -> item.id()).containsExactly(domestic.id());
+    assertThat(search.search(radius(longitude, 500, List.of(), 100, null)).items())
+        .extracting(item -> item.id())
+        .containsExactly(domestic.id());
+    // 혼합 필터도 별도로 국내산 사용 항목이 확인된 업소 안에서 적용한다.
+    claim(mixed, PEPPER, "DOMESTIC", List.of("KR"), null, true);
     var mixedAllowed =
         search.search(
             radius(
@@ -160,6 +167,8 @@ class SpatialSearchIntegrationTest extends ApplicationIntegrationSupport {
     var usa = shop(longitude);
     var unspecified = shop(longitude);
     var unknown = shop(longitude);
+    for (var shop : List.of(china, usa, unspecified, unknown))
+      claim(shop, PEPPER, "DOMESTIC", List.of("KR"), null, true);
     claim(china, CABBAGE, "IMPORTED_SPECIFIED", List.of("CN"), null, true);
     claim(usa, CABBAGE, "IMPORTED_SPECIFIED", List.of("US"), null, true);
     claim(
@@ -219,6 +228,8 @@ class SpatialSearchIntegrationTest extends ApplicationIntegrationSupport {
     var first = shop(longitude);
     var second = shop(longitude);
     var third = shop(longitude);
+    for (var shop : List.of(first, second, third))
+      claim(shop, CABBAGE, "DOMESTIC", List.of("KR"), null, true);
     var page1 = search.search(radius(longitude, 500, List.of(), 1, null));
     var page2 = search.search(radius(longitude, 500, List.of(), 1, page1.nextCursor()));
     var page3 = search.search(radius(longitude, 500, List.of(), 1, page2.nextCursor()));

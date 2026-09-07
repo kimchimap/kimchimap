@@ -26,6 +26,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import tools.jackson.databind.json.JsonMapper;
 
 class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
   private static final UUID CABBAGE = UUID.fromString("00000000-0000-4000-8000-000000000001");
 
   @DynamicPropertySource
@@ -239,13 +240,15 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
     }
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=?",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
                 Integer.class,
                 restaurant))
         .isEqualTo(1);
     UUID scope =
         jdbc.queryForObject(
-            "SELECT id FROM app.serving_scope WHERE restaurant_id=?", UUID.class, restaurant);
+            "SELECT id FROM app.serving_scope WHERE restaurant_id=? AND usage='SIDE_DISH'",
+            UUID.class,
+            restaurant);
     String conflicting =
         create(owner, submission(restaurant, scope, image(owner), "IMPORTED_SPECIFIED"));
     assertThat(
@@ -264,7 +267,7 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo("DISPUTED");
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=?",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
                 Integer.class,
                 restaurant))
         .isEqualTo(2);
@@ -309,10 +312,16 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
     assertThat(get("/api/v1/media/" + image + "?original=true").statusCode()).isEqualTo(401);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=?",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
                 Integer.class,
                 restaurant))
         .isEqualTo(1);
+    jdbc.update(
+        "INSERT INTO app.origin_withdrawal(record_id,reason,actor_reference,withdrawn_at) SELECT id,'테스트 공개 자격 상실','test-admin',CURRENT_TIMESTAMP FROM app.origin_record WHERE restaurant_id=?",
+        restaurant);
+    assertThat(get("/api/v1/media/" + image + "/public").statusCode()).isEqualTo(404);
+    assertThat(request("GET", "/api/v1/media/" + image, owner, null, null).statusCode())
+        .isEqualTo(200);
   }
 
   @Test
@@ -336,7 +345,7 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo(400);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=?",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
                 Integer.class,
                 restaurant))
         .isZero();
@@ -356,6 +365,7 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
         "INSERT INTO app.restaurant(id,name,address,business_status,coordinate_status,published) VALUES (?,?,'테스트 주소','OPEN','MISSING',true)",
         id,
         "가상 테스트 제보 업소 " + id);
+    DomesticOriginFixture.addRice(jdbc, transactions, id);
     return id;
   }
 

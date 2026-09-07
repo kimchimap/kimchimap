@@ -20,6 +20,7 @@ import kr.kimchimap.ingestion.dto.SourceRestaurant;
 import kr.kimchimap.ingestion.repository.IngestionJobRepository;
 import kr.kimchimap.ingestion.service.IngestionJobService;
 import kr.kimchimap.ingestion.service.IngestionWorker;
+import kr.kimchimap.ingestion.service.OriginCollectionPolicy;
 import kr.kimchimap.member.service.MemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tools.jackson.databind.json.JsonMapper;
 
 class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
+  @MockitoBean OriginCollectionPolicy collectionPolicy;
+
+  @BeforeEach
+  void allowSyntheticPipelineContract() {
+    // 실서비스의 수집 차단은 DomesticPublicationIntegrationTest에서 실제 정책으로 검증한다.
+    when(collectionPolicy.supportsDomesticQualification()).thenReturn(true);
+  }
+
   @Autowired MemberService members;
   @Autowired SessionService sessions;
   @Autowired JwtService jwt;
@@ -54,6 +64,7 @@ class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
         permitted,
         "test-designation-" + permitted,
         "테스트 지정 제공기관");
+    DomesticOriginFixture.addRice(jdbc, transactions, restaurant);
     var body = designation(restaurant, permitted);
     assertThat(
             request(
@@ -81,9 +92,7 @@ class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
             Map.of("designation", body, "reason", "테스트 최초 확인"));
     assertThat(created.statusCode()).isEqualTo(201);
     String id = json.readTree(created.body()).path("id").asString();
-    assertThat(get("/api/v1/restaurants/" + restaurant).body())
-        .contains("테스트 지정 제도", "반찬 김치에만 적용")
-        .doesNotContain("DOMESTIC");
+    assertThat(get("/api/v1/restaurants/" + restaurant).body()).contains("테스트 지정 제도", "반찬 김치에만 적용");
     var changed = new HashMap<>(body);
     changed.put("cancelledOn", "2026-09-01");
     var updated =
@@ -104,7 +113,7 @@ class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo(409);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=?",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
                 Integer.class,
                 restaurant))
         .isZero();

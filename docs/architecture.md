@@ -1,5 +1,7 @@
 # 아키텍처
 
+> 2026-09-08 범위 정정: 국내산 사용 항목이 확인된 업소만 수집·공개한다. 원산지 없는 일반음식점 전체 수집은 중단한다. 과거 수집 엔진 설명은 기술 이력이며 현재 실행 허용을 뜻하지 않는다. 미등록 업소는 제보·검수로 등록한다. [결정 기록](decisions/0015-domestic-only-scope.md).
+
 React/Vite → 동일 사이트 `/api/v1` → 단일 Spring Boot MVC → PostgreSQL/PostGIS 및 Redis. 파일 저장은 웹 루트 밖의 로컬 저장소 어댑터. Spring scheduler는 별도 제한된 executor에서 소스 어댑터를 실행한다. 메시지 브로커는 도입하지 않는다.
 
 기능 패키지: restaurant, origin, certification, search, auth, member, bookmark, report, media, ingestion, global. 각 패키지는 controller/service/repository/entity/dto 중 필요한 계층만 둔다. global은 설정·예외·보안 기반만 포함한다.

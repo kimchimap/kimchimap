@@ -15,26 +15,34 @@ public class IngestionWorker {
   private final PublicDataRestaurantClient client;
   private final IngestionPageService pages;
   private final Clock clock;
+  private final OriginCollectionPolicy collectionPolicy;
 
   public IngestionWorker(
       IngestionJobRepository jobs,
       PublicDataRestaurantClient client,
       IngestionPageService pages,
-      Clock clock) {
+      Clock clock,
+      OriginCollectionPolicy collectionPolicy) {
     this.jobs = jobs;
     this.client = client;
     this.pages = pages;
     this.clock = clock;
+    this.collectionPolicy = collectionPolicy;
   }
 
   public boolean processOne(UUID jobId) {
     var acquired = jobs.acquire(UUID.randomUUID(), jobId);
     if (acquired.isEmpty()) return false;
     var job = acquired.get();
+    if (!collectionPolicy.supportsDomesticQualification()) {
+      jobs.failure(job, "ORIGIN_QUALIFIED_SOURCE_REQUIRED", clock.instant(), false);
+      return true;
+    }
     try {
       var page = client.fetch(job.nextPage(), job.pageSize(), job.sinceAt(), job.untilAt());
       var prepared = pages.prepare(job, page);
       pages.commit(job, page, prepared);
+
     } catch (SourceFailure failure) {
       boolean retry = failure.retryable() && job.retryCount() < 3;
       Duration delay = failure.retryAfter();

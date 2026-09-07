@@ -1,6 +1,7 @@
 package kr.kimchimap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -13,14 +14,25 @@ import java.util.concurrent.Executors;
 import kr.kimchimap.auth.service.JwtService;
 import kr.kimchimap.auth.service.SessionService;
 import kr.kimchimap.ingestion.repository.IngestionJobRepository;
+import kr.kimchimap.ingestion.service.OriginCollectionPolicy;
 import kr.kimchimap.member.service.MemberService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tools.jackson.databind.json.JsonMapper;
 
 @TestPropertySource(properties = "app.ingestion.public-data-key=test-contract-key")
 class AdminIngestionIntegrationTest extends ApplicationIntegrationSupport {
+  @MockitoBean OriginCollectionPolicy collectionPolicy;
+
+  @BeforeEach
+  void allowSyntheticPipelineContract() {
+    // 실서비스의 수집 차단은 DomesticPublicationIntegrationTest에서 실제 정책으로 검증한다.
+    when(collectionPolicy.supportsDomesticQualification()).thenReturn(true);
+  }
+
   @Autowired MemberService members;
   @Autowired SessionService sessions;
   @Autowired JwtService jwt;

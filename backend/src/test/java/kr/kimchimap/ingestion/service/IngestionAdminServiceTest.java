@@ -23,12 +23,13 @@ class IngestionAdminServiceTest {
         key = UUID.randomUUID(),
         source = IngestionJobRepository.PUBLIC_DATA_SOURCE;
     when(repository.receipt(actor, key)).thenReturn(Optional.empty());
-    when(repository.sources(false, false))
+    when(repository.sources(false, false, false))
         .thenReturn(
             List.of(
                 new IngestionAdmin.Source(
-                    source, "테스트 소스", true, true, false, false, 86400, null, null)));
-    var service = new IngestionAdminService(repository, jobs, "", false);
+                    source, "테스트 소스", true, true, false, false, false, 86400, null, null)));
+    var service =
+        new IngestionAdminService(repository, jobs, new OriginCollectionPolicy(), "", false);
     assertThatThrownBy(
             () ->
                 service.request(
