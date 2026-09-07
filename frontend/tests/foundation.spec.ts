@@ -11,7 +11,7 @@ test("공개 화면은 실제 서버에 연결하고 가상 업소를 노출하�
     "서버가 정상적으로 연결되었습니다.",
   );
   await expect(
-    page.getByText(/아직 공개된 업소와 원산지 정보가 없습니다/),
+    page.getByText(/원산지 정보는 아직 확보하지 못했습니다/),
   ).toBeVisible();
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,

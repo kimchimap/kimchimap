@@ -138,6 +138,11 @@ export interface components {
             kind?: string;
             ratio?: number;
         };
+        Contact: {
+            display?: string;
+            number?: string;
+            sourceName?: string;
+        };
         CountryItem: {
             code?: string;
             name?: string;
@@ -208,6 +213,7 @@ export interface components {
             /** Format: date-time */
             asOf?: string;
             businessStatus?: string;
+            contact?: components["schemas"]["Contact"];
             coordinateStatus?: string;
             designations?: components["schemas"]["Designation"][];
             /** Format: uuid */

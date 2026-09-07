@@ -4,13 +4,13 @@ import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 
-function renderApp() {
+function renderApp(path = "/") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[path]}>
         <App />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -20,7 +20,50 @@ function renderApp() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("공개 시작 화면", () => {
-  it("공개 데이터가 없다는 안내와 실제 API 연결 상태를 표시한다", async () => {
+  it("업소 연락처 경로에서 실제 API 형식의 번호와 전화 링크를 표시한다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: "test-restaurant",
+          name: "가상 테스트 업소",
+          address: "테스트 주소",
+          contact: {
+            display: "02-0000-0000",
+            number: "0200000000",
+            sourceName: "테스트 출처",
+          },
+        }),
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderApp("/restaurants/test-restaurant/contact");
+    expect(
+      await screen.findByRole("heading", { name: "가상 테스트 업소" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "전화 걸기" })).toHaveAttribute(
+      "href",
+      "tel:0200000000",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/restaurants/test-restaurant",
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
+
+  it("공개되지 않은 업소의 연락처에 전화 링크를 표시하지 않는다", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 404 })),
+    );
+    renderApp("/restaurants/test-restaurant/contact");
+    expect(
+      await screen.findByText("공개된 업소 정보를 찾을 수 없습니다."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "전화 걸기" }),
+    ).not.toBeInTheDocument();
+  });
+  it("원산지 데이터가 없다는 안내와 실제 API 연결 상태를 표시한다", async () => {
     vi.stubGlobal(
       "fetch",
       vi
@@ -33,7 +76,7 @@ describe("공개 시작 화면", () => {
     );
     renderApp();
     expect(
-      screen.getByText(/아직 공개된 업소와 원산지 정보가 없습니다/),
+      screen.getByText(/원산지 정보는 아직 확보하지 못했습니다/),
     ).toBeInTheDocument();
     expect(
       await screen.findByText("서버가 정상적으로 연결되었습니다."),

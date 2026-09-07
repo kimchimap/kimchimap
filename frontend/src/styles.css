@@ -15,6 +15,22 @@ body {
 a {
   color: inherit;
 }
+.call-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: #224b3b;
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+}
+.contact-source {
+  font-size: 14px;
+  color: #59685d;
+}
 button {
   font: inherit;
   cursor: pointer;

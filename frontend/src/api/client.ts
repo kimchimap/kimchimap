@@ -6,6 +6,18 @@ export class ApiError extends Error {
   }
 }
 
+export async function getRestaurant(
+  id: string,
+  signal?: AbortSignal,
+): Promise<components["schemas"]["RestaurantDetail"]> {
+  const response = await fetch(
+    `/api/v1/restaurants/${encodeURIComponent(id)}`,
+    signal ? { signal } : {},
+  );
+  if (!response.ok) throw new ApiError(response.status);
+  return response.json() as Promise<components["schemas"]["RestaurantDetail"]>;
+}
+
 export async function getSystemStatus(
   signal?: AbortSignal,
 ): Promise<components["schemas"]["SystemStatus"]> {

@@ -28,29 +28,35 @@ PostGIS upstream 초기화 후 init-roles.sh가 앱 schema와 migrator/app 역�
 | format-backend / format-frontend | Spotless/프론트 formatter 검사 |
 | lint / typecheck | frontend lint/typecheck 실행 |
 | test-backend / test-frontend | 실제 단위·UI 테스트 실행 |
-| test-integration / test-contract | DB/Redis 통합 실행, 외부 API 계약은 후속 구현 |
-| test-e2e / test-performance | Playwright 실행, 공간 실행계획은 후속 구현 |
+| test-integration / test-contract | DB/Redis 통합, 공식 구조의 합성 외부 API 계약 검사 |
+| test-e2e / test-performance | Playwright 실행, 실제 공간 실행계획 검사 |
 | api-generate / api-check | OpenAPI 생성 및 프론트 생성 타입/계약 비교 |
 | build / build-backend | 프론트 build / 백엔드 bootJar 실행 |
-| ingest-run / ingest-status | 허용 소스 수집 관리 task 필요, 사용자 입력 URL 금지 |
+| ingest-run / ingest-status | 허용된 일반음식점 실제 수집·상태 조회, 사용자 입력 URL 금지 |
 | smoke-external | 키·허가 있는 실제 연동 별도 task 필요 |
 | verify | 하네스+서비스 모든 핵심 검사, 현재 미구현이면 실패 |
 | branch-start / commit-check / pr-check / pr-prepare | Git 절차 문서 참조 |
 | branch-cleanup / protection-check / protection-plan | 기본 조회/dry-run, 명시 apply 분리 |
 
-서비스 연결 명세는 tools/harness/commands.json이다. requires 파일만 만들면 성공하는 구조가 아니며 해당 task의 실제 종료 코드가 반영된다. 없는 task·누락 앱·실패 검사는 exit2로 보고한다. ingest task는 backend 단계에서 source allowlist와 관리자 권한을 확인하는 구현을 연결하며 현재 수집 task는 미구현으로 거부한다.
+서비스 연결 명세는 tools/harness/commands.json이다. requires 파일만 만들면 성공하는 구조가 아니며 해당 task의 실제 종료 코드가 반영된다. 없는 task·누락 앱·실패 검사는 exit2로 보고한다. ingest task는 고정된 허용 소스와 이용 허가를 확인한다. 로컬 실행자 명령이며 관리자 HTTP 인가는 인증 구현 후 연결한다.
 
 후속 로컬 frontend는 localhost:5173, backend는 localhost:8080으로 고정하고 Vite /api 프록시를 구성한다. 카카오 JS 키는 브라우저 공개 키로 취급하되 REST/Client Secret은 VITE_*에 넣지 않는다. OAuth redirect/도메인 등록·쿼터·실제 smoke는 별도 문서 결과로 남긴다.
 
-verify-harness는 하네스 전용이다. 현재 앱 기반 검증은 verify-unit application-foundation으로 실행하고 실제 formatter·linter·타입·단위·DB/Redis·API·E2E·build를 모두 확인한다. 전체 verify는 미구현 수집 계약으로 실패한다.
+verify-harness는 하네스 전용이다. 현재 앱 기반 검증은 verify-unit application-foundation으로 실행하고 실제 formatter·linter·타입·단위·DB/Redis·API·E2E·build를 모두 확인한다. 전체 verify에는 외부 API 계약 테스트도 포함한다. 실제 외부 연동은 별도로 실행한다.
 
 
 ## 현재 실행 가능한 앱 명령
 
-dev-backend/dev-frontend, format-backend/format-frontend, lint/typecheck, test-backend/test-frontend/test-integration/test-e2e, api-generate/api-check, build/build-backend를 구현했다. 위 표의 연결 계약은 실제 이 작업에 연결됐다. test-contract/test-performance/ingest-run/ingest-status/smoke-external은 해당 후속 기능 전까지 미구현 실패를 유지한다.
+dev-backend/dev-frontend, format-backend/format-frontend, lint/typecheck, test-backend/test-frontend/test-integration/test-e2e, api-generate/api-check, build/build-backend를 구현했다. 위 표의 연결 계약은 실제 이 작업에 연결됐다. test-contract/test-performance/ingest-run/ingest-status도 연결했다. 통합 smoke-external 명령은 카카오 실연동 단계 전까지 미구현 실패를 유지한다.
 
 `toolchain-install` → `scripts/runtime pnpm install --frozen-lockfile --ignore-scripts` → `infra-up` 후 서버/UI를 실행한다. E2E 전 `scripts/runtime pnpm --dir frontend exec playwright install chromium`이 필요하다. E2E는 기존 서버를 재사용하지 않고 직접 실행·종료한다.
 
 `.local/integrations.env`에는 KAKAO_JAVASCRIPT_KEY/KAKAO_CLIENT_ID(REST API 키)/KAKAO_CLIENT_SECRET/PUBLIC_DATA_SERVICE_KEY(Decoding)를 입력한다. 카카오 도메인은 http://localhost:5173, 로그인 callback 계약은 http://localhost:5173/api/v1/auth/callback/kakao다. 파일 권한600, git-common-dir 기준 .local을 읽는다. env 파일은 shell로 실행하지 않고 허용 키만 파싱한다.
 
 공간 검색 검증: `./scripts/harness verify-unit spatial-search`. 실제 2만 건 검색 실행 계획은 `./scripts/harness test-performance`로 재현한다. SEARCH_CURSOR_SECRET은 운영에서 32바이트 이상으로 설정하며 로컬 미설정 시 프로세스 메모리에만 생성된다. 키 변경·로컬 재시작은 기존 검색 cursor를 무효화한다.
+
+## 공공데이터 수집
+
+`./scripts/harness ingest-run`은 등록된 Decoding 키로 최근 7일 범위의 업소를 최대 2페이지 수집한다. 재실행하면 이전 PARTIAL의 다음 페이지부터 같은 창을 이어간다. `./scripts/harness ingest-status`로 상태·페이지·반영/격리 건수를 조회한다. 키는 `.local/integrations.env`에만 두며 조회 결과는 로컬 DB에 저장한다.
+
+기본값을 바꿀 때는 실행 환경의 `INGEST_MODE=FULL` 또는 `INGEST_MAX_PAGES=5`를 지정한다. FULL도 페이지 예산만큼 처리하며 전국 수집 완료로 간주하지 않는다. 예약 수집은 `INGEST_SCHEDULING_ENABLED=true`와 DB source.enabled 설정을 함께 사용한다. [실행 정책](ingestion.md)을 먼저 확인한다. 예약 활성화 시 새 비용이나 이용 허가를 대신 승인하지 않는다.

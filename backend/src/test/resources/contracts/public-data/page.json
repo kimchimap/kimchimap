@@ -1,0 +1,17 @@
+{
+  "response": {
+    "header": {"resultCode": "0", "resultMsg": "정상"},
+    "body": {
+      "dataType": "JSON", "pageNo": 1, "numOfRows": 2, "totalCount": 3,
+      "items": {"item": [
+        {"OPN_ATMY_GRP_CD": "TEST-CITY", "MNG_NO": "TEST-001", "BPLC_NM": "가상 테스트 음식점 첫째",
+          "ROAD_NM_ADDR": "테스트 주소 첫째", "LOTNO_ADDR": "", "SALS_STTS_CD": "01", "SALS_STTS_NM": "영업/정상",
+          "CRD_INFO_X": "200000", "CRD_INFO_Y": "450000", "DAT_UPDT_PNT": "2026-09-05 22:48:18",
+          "LAST_MDFCN_PNT": "20260904163307", "TELNO": "02-0000-0000", "NOT_FOR_STORAGE": "보존하지 않을 임의 필드"},
+        {"OPN_ATMY_GRP_CD": "TEST-CITY", "MNG_NO": "TEST-002", "BPLC_NM": "가상 테스트 음식점 둘째",
+          "ROAD_NM_ADDR": "", "LOTNO_ADDR": "테스트 지번 주소", "SALS_STTS_CD": "01", "SALS_STTS_NM": "영업/정상",
+          "CRD_INFO_X": "", "CRD_INFO_Y": "", "DAT_UPDT_PNT": "2026-09-05 22:48:18", "TELNO": ""}
+      ]}
+    }
+  }
+}

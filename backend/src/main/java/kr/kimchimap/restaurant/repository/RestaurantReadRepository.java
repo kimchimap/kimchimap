@@ -18,7 +18,10 @@ public class RestaurantReadRepository {
       String businessStatus,
       Double latitude,
       Double longitude,
-      String coordinateStatus) {}
+      String coordinateStatus,
+      String phoneDisplay,
+      String phoneNumber,
+      String phoneSourceName) {}
 
   public record ScopeRow(UUID id, String name, String usage, String precision) {}
 
@@ -66,9 +69,12 @@ public class RestaurantReadRepository {
   public Optional<RestaurantRow> findPublished(UUID id) {
     return jdbc.sql(
             """
-        SELECT id, name, address, business_status, public.ST_Y(location) AS latitude,
-               public.ST_X(location) AS longitude, coordinate_status
-        FROM app.restaurant WHERE id = :id AND published
+        SELECT r.id, r.name, r.address, r.business_status, public.ST_Y(r.location) AS latitude,
+               public.ST_X(r.location) AS longitude, r.coordinate_status,
+               CASE WHEN s.republication_allowed THEN r.phone_display END AS phone_display,
+               CASE WHEN s.republication_allowed THEN r.phone_number END AS phone_number,
+               CASE WHEN s.republication_allowed THEN s.name END AS phone_source_name
+        FROM app.restaurant r LEFT JOIN app.data_source s ON s.id=r.phone_source_id WHERE r.id = :id AND r.published
         """)
         .param("id", id)
         .query(RestaurantRow.class)

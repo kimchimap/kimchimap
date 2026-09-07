@@ -80,6 +80,10 @@ public class RestaurantQueryService {
         restaurant.latitude(),
         restaurant.longitude(),
         restaurant.coordinateStatus(),
+        restaurant.phoneNumber() == null
+            ? null
+            : new RestaurantDetail.Contact(
+                restaurant.phoneDisplay(), restaurant.phoneNumber(), restaurant.phoneSourceName()),
         scopeDtos,
         designations,
         asOf,
