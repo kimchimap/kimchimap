@@ -257,6 +257,192 @@
         },
         "type": "object"
       },
+      "DesignationAdminView": {
+        "properties": {
+          "designation": {
+            "$ref": "#/components/schemas/DesignationInput"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/DesignationRevision"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DesignationCreateRequest": {
+        "properties": {
+          "designation": {
+            "$ref": "#/components/schemas/DesignationInput"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "designation",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "DesignationInput": {
+        "properties": {
+          "applicableItems": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "cancelledOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "criteriaOriginal": {
+            "maxLength": 5000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "designatedOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "expiresOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "externalId": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "publiclyVisible": {
+            "type": "boolean"
+          },
+          "restaurantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "schemeName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "applicableItems",
+          "criteriaOriginal",
+          "externalId",
+          "publiclyVisible",
+          "restaurantId",
+          "schemeName",
+          "sourceId"
+        ],
+        "type": "object"
+      },
+      "DesignationListItem": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "publiclyVisible": {
+            "type": "boolean"
+          },
+          "restaurantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "schemeName": {
+            "type": "string"
+          },
+          "sourceAllowed": {
+            "type": "boolean"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DesignationRevision": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DesignationSource": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "officialUrl": {
+            "type": "string"
+          },
+          "termsReference": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DesignationUpdateRequest": {
+        "properties": {
+          "designation": {
+            "$ref": "#/components/schemas/DesignationInput"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "designation",
+          "expectedVersion",
+          "reason"
+        ],
+        "type": "object"
+      },
       "IngestionEvent": {
         "properties": {
           "createdAt": {
@@ -541,6 +727,150 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "MatchCandidate": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MatchListItem": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reviewable": {
+            "type": "boolean"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MatchReviewDetail": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/MatchCandidate"
+            },
+            "type": "array"
+          },
+          "coordinateStatus": {
+            "type": "string"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "restaurantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          },
+          "sourceUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "MatchReviewRequest": {
+        "properties": {
+          "decision": {
+            "minLength": 1,
+            "pattern": "MATCHED|DISTINCT",
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "restaurantId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "expectedVersion",
+          "reason"
+        ],
         "type": "object"
       },
       "MatchedScope": {
@@ -1278,6 +1608,186 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/admin/designations": {
+      "get": {
+        "operationId": "list_1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "restaurantId",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DesignationListItem"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-designation-controller"
+        ]
+      },
+      "post": {
+        "operationId": "create_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesignationCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesignationAdminView"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-designation-controller"
+        ]
+      }
+    },
+    "/api/v1/admin/designations/sources": {
+      "get": {
+        "operationId": "sources_1",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DesignationSource"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-designation-controller"
+        ]
+      }
+    },
+    "/api/v1/admin/designations/{id}": {
+      "get": {
+        "operationId": "detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesignationAdminView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-designation-controller"
+        ]
+      },
+      "put": {
+        "operationId": "update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesignationUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesignationAdminView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-designation-controller"
+        ]
+      }
+    },
     "/api/v1/admin/ingestion/jobs": {
       "get": {
         "operationId": "jobs",
@@ -1308,7 +1818,7 @@
     },
     "/api/v1/admin/ingestion/jobs/{id}": {
       "get": {
-        "operationId": "detail_4",
+        "operationId": "detail_6",
         "parameters": [
           {
             "in": "path",
@@ -1536,6 +2046,116 @@
         ]
       }
     },
+    "/api/v1/admin/matches": {
+      "get": {
+        "operationId": "list_5",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MatchListItem"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-match-controller"
+        ]
+      }
+    },
+    "/api/v1/admin/matches/{id}": {
+      "get": {
+        "operationId": "detail_5",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchReviewDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-match-controller"
+        ]
+      }
+    },
+    "/api/v1/admin/matches/{id}/reviews": {
+      "post": {
+        "operationId": "review_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchReviewDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-match-controller"
+        ]
+      }
+    },
     "/api/v1/admin/origin-corrections": {
       "post": {
         "operationId": "correct",
@@ -1573,7 +2193,7 @@
     },
     "/api/v1/admin/origins": {
       "get": {
-        "operationId": "list_3",
+        "operationId": "list_4",
         "parameters": [
           {
             "in": "query",
@@ -1628,7 +2248,7 @@
     },
     "/api/v1/admin/origins/{scope}/{ingredient}": {
       "get": {
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "in": "path",
@@ -1673,7 +2293,7 @@
     },
     "/api/v1/admin/reports": {
       "get": {
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "in": "query",
@@ -1727,7 +2347,7 @@
     },
     "/api/v1/admin/reports/{id}": {
       "get": {
-        "operationId": "detail_2",
+        "operationId": "detail_3",
         "parameters": [
           {
             "in": "path",
@@ -1899,7 +2519,7 @@
     },
     "/api/v1/bookmarks": {
       "get": {
-        "operationId": "list_1",
+        "operationId": "list_2",
         "parameters": [
           {
             "in": "query",
@@ -2341,7 +2961,7 @@
     },
     "/api/v1/reports/{id}": {
       "get": {
-        "operationId": "detail",
+        "operationId": "detail_1",
         "parameters": [
           {
             "in": "path",
@@ -2375,7 +2995,7 @@
         ]
       },
       "patch": {
-        "operationId": "update",
+        "operationId": "update_1",
         "parameters": [
           {
             "in": "path",
@@ -2497,7 +3117,7 @@
     },
     "/api/v1/restaurants/{id}": {
       "get": {
-        "operationId": "detail_1",
+        "operationId": "detail_2",
         "parameters": [
           {
             "in": "path",

@@ -4,6 +4,54 @@
  */
 
 export interface paths {
+    "/api/v1/admin/designations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_1"];
+        put?: never;
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/designations/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["sources_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/designations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail"];
+        put: operations["update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/ingestion/jobs": {
         parameters: {
             query?: never;
@@ -27,7 +75,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_4"];
+        get: operations["detail_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -100,6 +148,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/matches/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/matches/{id}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["review_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/origin-corrections": {
         parameters: {
             query?: never;
@@ -123,7 +219,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_3"];
+        get: operations["list_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -139,7 +235,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_3"];
+        get: operations["detail_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -155,7 +251,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -171,7 +267,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_2"];
+        get: operations["detail_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -283,7 +379,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -427,13 +523,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail"];
+        get: operations["detail_1"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch: operations["update"];
+        patch: operations["update_1"];
         trace?: never;
     };
     "/api/v1/reports/{id}/withdraw": {
@@ -475,7 +571,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_1"];
+        get: operations["detail_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -602,6 +698,69 @@ export interface components {
             schemeName?: string;
             sourceName?: string;
         };
+        DesignationAdminView: {
+            designation?: components["schemas"]["DesignationInput"];
+            history?: components["schemas"]["DesignationRevision"][];
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            reviewedAt?: string;
+            /** Format: int64 */
+            version?: number;
+        };
+        DesignationCreateRequest: {
+            designation: components["schemas"]["DesignationInput"];
+            reason: string;
+        };
+        DesignationInput: {
+            applicableItems: string;
+            /** Format: date */
+            cancelledOn?: string;
+            criteriaOriginal: string;
+            /** Format: date */
+            designatedOn?: string;
+            /** Format: date */
+            expiresOn?: string;
+            externalId: string;
+            publiclyVisible: boolean;
+            /** Format: uuid */
+            restaurantId: string;
+            schemeName: string;
+            /** Format: uuid */
+            sourceId: string;
+        };
+        DesignationListItem: {
+            /** Format: uuid */
+            id?: string;
+            publiclyVisible?: boolean;
+            /** Format: uuid */
+            restaurantId?: string;
+            restaurantName?: string;
+            schemeName?: string;
+            sourceAllowed?: boolean;
+            /** Format: int64 */
+            version?: number;
+        };
+        DesignationRevision: {
+            /** Format: date-time */
+            createdAt?: string;
+            reason?: string;
+            /** Format: int64 */
+            version?: number;
+        };
+        DesignationSource: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            officialUrl?: string;
+            termsReference?: string;
+        };
+        DesignationUpdateRequest: {
+            designation: components["schemas"]["DesignationInput"];
+            /** Format: int64 */
+            expectedVersion: number;
+            reason: string;
+        };
         IngestionEvent: {
             /** Format: date-time */
             createdAt?: string;
@@ -712,6 +871,61 @@ export interface components {
             longitude?: number;
             matchedScopes?: components["schemas"]["MatchedScope"][];
             name?: string;
+        };
+        MatchCandidate: {
+            address?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            name?: string;
+        };
+        MatchListItem: {
+            address?: string;
+            externalId?: string;
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            reviewable?: boolean;
+            /** Format: uuid */
+            sourceId?: string;
+            sourceName?: string;
+            state?: string;
+        };
+        MatchReviewDetail: {
+            address?: string;
+            candidates?: components["schemas"]["MatchCandidate"][];
+            coordinateStatus?: string;
+            externalId?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            name?: string;
+            /** Format: date-time */
+            observedAt?: string;
+            /** Format: uuid */
+            restaurantId?: string;
+            /** Format: uuid */
+            sourceId?: string;
+            sourceName?: string;
+            /** Format: date-time */
+            sourceUpdatedAt?: string;
+            state?: string;
+            /** Format: int64 */
+            version?: number;
+        };
+        MatchReviewRequest: {
+            decision: string;
+            /** Format: int64 */
+            expectedVersion: number;
+            reason: string;
+            /** Format: uuid */
+            restaurantId?: string;
         };
         MatchedScope: {
             /** Format: int32 */
@@ -960,6 +1174,120 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_1: {
+        parameters: {
+            query?: {
+                restaurantId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DesignationListItem"][];
+                };
+            };
+        };
+    };
+    create_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DesignationCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DesignationAdminView"];
+                };
+            };
+        };
+    };
+    sources_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DesignationSource"][];
+                };
+            };
+        };
+    };
+    detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DesignationAdminView"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DesignationUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DesignationAdminView"];
+                };
+            };
+        };
+    };
     jobs: {
         parameters: {
             query?: never;
@@ -980,7 +1308,7 @@ export interface operations {
             };
         };
     };
-    detail_4: {
+    detail_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -1100,6 +1428,74 @@ export interface operations {
             };
         };
     };
+    list_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MatchListItem"][];
+                };
+            };
+        };
+    };
+    detail_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MatchReviewDetail"];
+                };
+            };
+        };
+    };
+    review_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MatchReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MatchReviewDetail"];
+                };
+            };
+        };
+    };
     correct: {
         parameters: {
             query?: never;
@@ -1124,7 +1520,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_4: {
         parameters: {
             query?: {
                 status?: string;
@@ -1148,7 +1544,7 @@ export interface operations {
             };
         };
     };
-    detail_3: {
+    detail_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -1171,7 +1567,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: {
                 state?: string;
@@ -1195,7 +1591,7 @@ export interface operations {
             };
         };
     };
-    detail_2: {
+    detail_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1351,7 +1747,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_2: {
         parameters: {
             query?: {
                 cursor?: string;
@@ -1637,7 +2033,7 @@ export interface operations {
             };
         };
     };
-    detail: {
+    detail_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1659,7 +2055,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1735,7 +2131,7 @@ export interface operations {
             };
         };
     };
-    detail_1: {
+    detail_2: {
         parameters: {
             query?: never;
             header?: never;

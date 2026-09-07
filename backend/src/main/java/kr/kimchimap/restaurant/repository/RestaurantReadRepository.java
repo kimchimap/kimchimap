@@ -134,7 +134,7 @@ public class RestaurantReadRepository {
         SELECT d.id, d.scheme_name, d.applicable_items, d.criteria_original, s.name AS source_name,
                d.designated_on, d.expires_on, d.cancelled_on
         FROM app.designation d JOIN app.data_source s ON s.id = d.source_id
-        WHERE d.restaurant_id = :id AND d.publicly_visible AND s.republication_allowed
+        WHERE d.restaurant_id = :id AND d.publicly_visible AND s.republication_allowed AND s.designation_allowed
         ORDER BY d.id LIMIT 201
         """)
         .param("id", id)

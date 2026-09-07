@@ -32,3 +32,5 @@ P07b: ReportReviewIntegrationTest는 실제 PostgreSQL/Redis에서 멱등 제출
 관리자 수집 검증: AdminIngestionIntegrationTest는 관리자 인가·내부 필드 비노출·소스 허가·입력 상한·동시 요청 키·중복 예산을 실제 DB/Redis로 검사한다. 단위 검증은 키 미설정 시 작업 생성 차단, 별도 스레드 처리·정기 수집 비활성 유지, 회원 권한 명령의 변경 계획·명시적 적용을 포함한다.
 
 OriginCorrectionIntegrationTest는 실제 HTTP·PostGIS 검색으로 정정 전 분쟁 제외, 명시적 잘못된 기록 철회 후 국내산 매칭, 새 상충 기록 반영 후 재제외를 검사한다. 타 그룹·일반 사용자 거부와 stale version·불변 감사·전체 철회 상태도 확인한다. 혼합 옵션 생략의 false 기본값을 같은 실제 검색 요청으로 검증한다.
+
+DataReviewIntegrationTest는 실제 DB·Redis·HTTP로 지정 전용 허가, 지정 원문·날짜·불변 이력, 원산지 비생성, 공개 허가 철회, 매칭 동시 결정, 서로 다른 외부 ID의 동일 지점 경합, 수집 시각 보존, 식별자 충돌과 별도 지점 생성을 검증한다. 프론트는 허가 없는 등록 차단·날짜/버전 전달과 매칭 선택·충돌 입력 보존을 검사한다. 합성 소스 성공을 협회 실연동으로 취급하지 않는다.

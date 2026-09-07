@@ -19,6 +19,38 @@ public class RestaurantImportRepository {
     this.jdbc = jdbc;
   }
 
+  public void lockExternal(UUID source, String external) {
+    jdbc.sql("SELECT pg_advisory_xact_lock(hashtextextended(:key,0))")
+        .param("key", "restaurant-external:" + source + ":" + external)
+        .query(Object.class)
+        .optional();
+  }
+
+  public boolean canAttach(UUID target, UUID source) {
+    // 서로 다른 외부 식별자가 같은 지점에 동시에 연결되지 않도록 대상부터 잠근다.
+    if (jdbc.sql("SELECT id FROM app.restaurant WHERE id=:id FOR UPDATE")
+        .param("id", target)
+        .query(UUID.class)
+        .optional()
+        .isEmpty()) return false;
+    return jdbc.sql(
+            "SELECT EXISTS(SELECT 1 FROM app.restaurant WHERE id=:id AND published) AND NOT EXISTS(SELECT 1 FROM app.restaurant_external_id WHERE restaurant_id=:id AND source_id=:source)")
+        .param("id", target)
+        .param("source", source)
+        .query(Boolean.class)
+        .single();
+  }
+
+  public void attach(UUID target, UUID source, ImportedRestaurant row) {
+    jdbc.sql(
+            "INSERT INTO app.restaurant_external_id(source_id,external_id,restaurant_id,original_status) VALUES (:source,:external,:id,:status)")
+        .param("source", source)
+        .param("external", row.externalId())
+        .param("id", target)
+        .param("status", row.originalStatus())
+        .update();
+  }
+
   public Existing find(UUID source, String externalId) {
     return jdbc.sql(
             """
