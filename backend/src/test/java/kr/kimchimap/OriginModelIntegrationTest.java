@@ -139,6 +139,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
         "테스트 지정",
         "반찬 김치",
         "테스트 제도 원문 기준");
+    jdbc.update("UPDATE app.data_source SET designation_allowed=true WHERE id=?", pending.source());
     var response = get("/api/v1/restaurants/" + pending.restaurant());
     assertThat(response.body()).contains("테스트 지정", "반찬 김치").doesNotContain("DOMESTIC");
     assertThat(mapper.readTree(response.body()).path("scopes").get(0).path("origins").isEmpty())

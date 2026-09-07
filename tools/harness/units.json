@@ -223,5 +223,28 @@
     "notImplemented": [
       "smoke-external"
     ]
+  },
+  "admin-data-review": {
+    "plan": "docs/plans/active/admin-data-review.md",
+    "checks": [
+      "verify-harness",
+      "doctor",
+      "format-backend",
+      "format-frontend",
+      "lint",
+      "typecheck",
+      "test-backend",
+      "test-frontend",
+      "test-integration",
+      "test-performance",
+      "api-check",
+      "test-e2e",
+      "build-backend",
+      "build",
+      "test-contract"
+    ],
+    "notImplemented": [
+      "smoke-external"
+    ]
   }
 }

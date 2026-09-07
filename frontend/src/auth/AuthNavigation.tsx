@@ -37,11 +37,16 @@ export function AuthNavigation() {
         <>
           <Link to="/reports">내 제보</Link>
           {session.member?.role === "ADMIN" && (
-            <>
-              <Link to="/admin/reports">제보 검수</Link>
-              <Link to="/admin/ingestion">수집 관리</Link>
-              <Link to="/admin/origins">원산지 정정</Link>
-            </>
+            <details className="admin-menu">
+              <summary>관리</summary>
+              <div>
+                <Link to="/admin/reports">제보 검수</Link>
+                <Link to="/admin/ingestion">수집 관리</Link>
+                <Link to="/admin/origins">원산지 정정</Link>
+                <Link to="/admin/designations">지정 정보</Link>
+                <Link to="/admin/matches">업소 매칭</Link>
+              </div>
+            </details>
           )}
           <button onClick={() => void signOut()}>로그아웃</button>
         </>

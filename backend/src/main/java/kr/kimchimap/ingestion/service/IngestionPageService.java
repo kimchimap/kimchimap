@@ -75,6 +75,7 @@ public class IngestionPageService {
       for (var candidate : result.matchCandidates())
         issues.match(job.sourceId(), item.externalId(), candidate, job.id());
       if (!result.matchCandidates().isEmpty()) {
+        issues.observeMatch(job.sourceId(), item, job.id(), clock.instant());
         issues.quarantine(
             job.id(), page.number(), row.index(), item.externalId(), "MATCH_REVIEW_REQUIRED");
         quarantined++;

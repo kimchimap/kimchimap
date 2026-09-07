@@ -42,3 +42,5 @@ V6는 bookmark의 회원/업소 유일 키와 media의 소유자·무작위 저�
 여덟 번째 마이그레이션: ingestion_request는 관리자 요청 키·해시·작업·24시간 만료를 보관하며 ingestion_request_audit는 실행자·소스·사유·예산의 불변 감사를 남긴다. 제보·수집 요청의 만료 인덱스를 추가했다.
 
 아홉 번째 마이그레이션: origin_correction은 명시적 철회 대상 UUID 목록, 이전 공개 버전, 실행자·사유·시각의 불변 감사다. 기존 origin_record와 origin_component는 변경하지 않으며 origin_withdrawal과 공개 이력을 같은 트랜잭션에 추가한다.
+
+열 번째 마이그레이션은 data_source.designation_allowed(기본 false), designation.version/reviewed_at와 불변 designation_revision을 추가한다. restaurant_match_review는 source/external별 정규화 관찰본·원래 수집 시각·작업·버전·결정 상태를 보관한다. restaurant_match_audit는 결정 당시 관찰본과 관리자·사유를 불변 보존한다. 현재까지 실제 지정 소스를 활성화하지 않았다.

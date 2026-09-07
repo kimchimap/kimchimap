@@ -2,7 +2,7 @@
 
 업소 상세의 선택적 `contact`는 `display`(출처의 표시 번호), `number`(연결용 숫자와 선택적 국제전화 `+`), `sourceName`을 반환한다. 번호가 없거나 형식 검증을 통과하지 못하면 null이다. 출처의 재게시 허용이 철회되면 연락처를 공개하지 않는다.
 
-이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 업소 상세와 식재료·국가 카탈로그 GET도 구현한다. 공간 검색 POST도 구현한다. 서비스 세션과 카카오 로그인도 구현했으며 제보·관리자 endpoint는 후속 구현 계약이다.
+이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 업소 상세와 식재료·국가 카탈로그 GET도 구현한다. 공간 검색 POST도 구현한다. 서비스 세션과 카카오 로그인도 구현했으며 제보·관리자 검수·수집·원산지 정정·지정·매칭 endpoint도 구현했다.
 
 | 메서드·경로 (/api/v1 기준) | 권한·의미 |
 | --- | --- |
@@ -42,8 +42,12 @@ P06b 구현: GET /auth/login/kakao는 Security 인가 필터가 카카오로 red
 
 P07a 구현: GET /bookmarks는 cursor·limit(1~50)을 받으며 GET /bookmarks/{restaurantId}는 본인 저장 여부를 반환한다. PUT/DELETE는 멱등 204다. POST /media는 multipart file로 실제 사진을 검사해 201을 반환하고 GET /media/{id}?original=false는 소유자·관리자만 내려받는다. 원본은 original=true로 선택하며 둘 다 no-store이다. 사진 실패는 413/415/422/429/503으로 구분한다. 클라이언트의 ownerId·저장 경로·공개 여부는 받지 않는다.
 
-P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본문 24시간). 작성·보완 시 publicationConsent=true와 본인 사진 1~5개, 같은 품목의 식재료 1~10개를 받는다. 목록 limit은 1~50이며 state/cursor를 지원한다. 검수는 expectedVersion 필수이며 승인 시 approvedScopeId와 privacyReviewedMediaIds를 명시한다. GET /media/{id}/public은 개인정보 검토 후 공개된 정제본만 반환한다. 관리자 정정·지정·매칭 API는 후속 구현 항목이다.
+P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본문 24시간). 작성·보완 시 publicationConsent=true와 본인 사진 1~5개, 같은 품목의 식재료 1~10개를 받는다. 목록 limit은 1~50이며 state/cursor를 지원한다. 검수는 expectedVersion 필수이며 승인 시 approvedScopeId와 privacyReviewedMediaIds를 명시한다. GET /media/{id}/public은 개인정보 검토 후 공개된 정제본만 반환한다. 관리자 정정·지정·매칭 API는 아래 구현 계약을 따른다.
 
 관리자 수집 구현: GET /admin/ingestion/sources, /jobs(최근 50개), /jobs/{id}, /jobs/{id}/events, /jobs/{id}/quarantines, POST /sources/{id}/runs(202). 재실행은 Idempotency-Key와 mode/pageBudget/reason, 페이지 예산 1~100을 받는다. 처리 이력·격리는 cursor/limit(1~100), 동일 요청 키는 24시간 재사용한다. 내부 lease 정보·외부 인증키·원문 개인정보는 제외한다.
 
 원산지 정정 구현: GET /admin/origins(status/limit/offset), GET /admin/origins/{scope}/{ingredient}, POST /admin/origin-corrections(scopeId/ingredientId/expectedVersion/withdrawRecordIds/reason). 기록 선택은 같은 그룹의 승인·미철회 기록 1~20개이며 stale version은 409다. 원문은 보존하고 불변 철회·감사·공개 재판정을 원자 반영한다. 목록 상한은 truncated로 알린다. 검색 includeMixed 생략은 false로 처리한다.
+
+지정 관리 구현: GET /admin/designations/sources(지정 이용 범위 허가된 소스), GET /admin/designations(restaurantId 선택, 최근 50개), GET /admin/designations/{id}, POST /admin/designations, PUT /admin/designations/{id}. 생성·수정은 designation과 reason, 수정은 expectedVersion 필수다. 업소·출처·외부 식별자는 수정 불가이며 취소일과 이전 스냅샷을 보존한다. 공개 읽기도 현재 지정 재게시 허가를 확인한다.
+
+업소 매칭 구현: GET /admin/matches(대기 최대 50개), GET /admin/matches/{id}, POST /admin/matches/{id}/reviews. expectedVersion·reason과 MATCHED/대상 restaurantId 또는 DISTINCT/대상 없음으로 결정한다. 관찰본 없는 과거 후보는 reviewable=false이며 확정할 수 없다. 같은 출처의 다른 외부 식별자 연결·동시 결정·관찰본 변경은 409다. 외부 HTTP 요청은 이 경로에서 실행하지 않는다.

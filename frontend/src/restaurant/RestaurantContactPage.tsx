@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from "react";
+import { sessionSnapshot, subscribeSession } from "../auth/session";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 import { ApiError, getRestaurant } from "../api/client";
@@ -6,6 +8,7 @@ import { BookmarkToggle } from "../bookmark/BookmarkToggle";
 
 export function RestaurantContactPage() {
   const { id = "" } = useParams();
+  const session = useSyncExternalStore(subscribeSession, sessionSnapshot);
   const restaurant = useQuery({
     queryKey: ["restaurant", id],
     queryFn: ({ signal }) => getRestaurant(id, signal),
@@ -38,6 +41,13 @@ export function RestaurantContactPage() {
           <p>{restaurant.data.address}</p>
           <RestaurantContact contact={restaurant.data.contact} />
           <BookmarkToggle restaurantId={id} />
+          {session.member?.role === "ADMIN" && (
+            <Link
+              to={`/admin/designations?restaurantId=${encodeURIComponent(id)}`}
+            >
+              지정 정보 관리
+            </Link>
+          )}
           <Link to={`/reports/new?restaurantId=${encodeURIComponent(id)}`}>
             원산지 제보
           </Link>
