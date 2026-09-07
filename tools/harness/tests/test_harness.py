@@ -19,7 +19,7 @@ BODY = '\n\n'.join('## ' + section + '\n\n하네스 검증 결과를 기록했�
 
 class PolicyTests(unittest.TestCase):
     def test_messages_accept(self):
-        for title in ['feat: 식재료 원산지 조합 검색을 구현', 'fix!: JWT 갱신 경쟁 조건을 수정', 'docs: PostGIS 실행 방법을 정리', 'revert: 원산지 필터 변경을 되돌림', 'docs: Apple Silicon 실행 방법을 기록']:
+        for title in ['feat: 식재료 원산지 조합 검색을 구현', 'fix!: JWT 갱신 경쟁 조건을 수정', 'docs: PostGIS 실행 방법을 정리', 'revert: 원산지 필터 변경을 되돌림', 'docs: Apple Silicon 실행 방법을 기록', 'test: 모바일과 PC 화면 동작을 검증']:
             with self.subTest(title=title): message(title + '\n\n세션 경합 처리 결과를 기록했습니다.')
 
     def test_messages_reject(self):
