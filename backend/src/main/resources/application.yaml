@@ -54,6 +54,8 @@ app:
     jwt-audience: ${JWT_AUDIENCE:kimchimap-api}
     access-lifetime: ${ACCESS_TOKEN_LIFETIME:10m}
     session-lifetime: ${SESSION_MAX_LIFETIME:14d}
+  media:
+    root: ${MEDIA_ROOT:.local/media}
   search:
     cursor-secret: ${SEARCH_CURSOR_SECRET:}
   ingestion:

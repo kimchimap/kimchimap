@@ -21,7 +21,8 @@ public class ProductionConfiguration {
             "JWT_PRIVATE_KEY_PATH",
             "JWT_KEY_ID",
             "KAKAO_CLIENT_ID",
-            "KAKAO_CLIENT_SECRET"
+            "KAKAO_CLIENT_SECRET",
+            "MEDIA_ROOT"
           }) {
         if (environment.getProperty(property, "").isBlank()) {
           throw new IllegalStateException("운영 필수 설정 누락: " + property);

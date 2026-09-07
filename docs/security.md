@@ -1,6 +1,6 @@
 # 보안 설계와 검증 경계
 
-위협: 토큰 탈취·재사용/경합, IDOR, CSRF, 관리자 권한 상승, 이미지 실행/폭탄, SQL 주입, SSRF, 외부 데이터 지시문, 개인정보·위치 로그 노출. 최소 권한·실패 시 거부를 기본으로 한다. P06a에서 서비스 JWT·Redis 세션·쿠키/CSRF·현재 회원 인가를 구현했다. 카카오 로그인·제보·이미지 관련 내용은 아직 후속 설계이며 전체 서비스 보안 완료가 아니다.
+위협: 토큰 탈취·재사용/경합, IDOR, CSRF, 관리자 권한 상승, 이미지 실행/폭탄, SQL 주입, SSRF, 외부 데이터 지시문, 개인정보·위치 로그 노출. 최소 권한·실패 시 거부를 기본으로 한다. P06a에서 서비스 JWT·Redis 세션·쿠키/CSRF·현재 회원 인가를 구현했다. 카카오 로그인과 비공개 이미지 업로드도 구현 중이며 제보·검수 관련 내용은 아직 후속 설계다. 전체 서비스 보안 완료가 아니다.
 
 카카오: Spring Security OAuth2 Client Authorization Code, PKCE S256, 일회성 state, OIDC를 사용하면 nonce·issuer·audience·서명·만료 검증. 서버 코드 교환, Redirect URI allowlist, 최소 동의. provider+subject로 식별, 이메일 병합 금지. 공급자 토큰은 서비스 토큰으로 사용하지 않고 필요한 기능이 없으면 장기 저장하지 않는다. 콜백은 토큰 없는 `/auth/complete`로 이동하고 CSRF 보호된 갱신으로 Access Token을 받는다.
 
@@ -18,7 +18,7 @@ Spring CSRF 지원과 정확한 Origin allowlist로 쿠키 기반 갱신·로그
 
 USER/ADMIN만 사용, 최초 가입자 관리자 금지. 서버 관리 명령의 대상 회원·사유·실행자 감사로 관리자 부여. 사용자 role/userId 입력 신뢰 금지. 다른 사용자 즐겨찾기/제보/파일은 404 또는 403 정책 일관화, 관리자 모든 endpoint에 서버 인가.
 
-이미지 JPEG/PNG/WebP만, 10MiB·변당 8192px·총 20MP 상한(설정 가능). 헤더/실제 디코딩 검증, 처리 시간·메모리·동시성 제한, SVG/HTML 거부, EXIF 제거·재인코딩. 랜덤 저장 키·웹 루트 외부·경로 정규화, 원본 비공개, 정제본만 개인정보 검토 뒤 공개. 파일 연결 전 소유권과 상태 확인. 임시 파일 24시간·고아 파일 7일 정리 기본안, DB 참조 재확인 후 제거. OCR/LLM은 확정 근거가 아니다.
+이미지 JPEG/PNG만 (WebP는 디코더 검증 후 검토), 10MiB·변당 8192px·총 20MP 상한(설정 가능). 헤더/실제 디코딩 검증, 처리 시간·메모리·동시성 제한, SVG/HTML 거부, EXIF 제거·재인코딩. 랜덤 저장 키·웹 루트 외부·경로 정규화, 원본 비공개, 정제본만 개인정보 검토 뒤 공개. 파일 연결 전 소유권과 상태 확인. 임시 파일 24시간·고아 파일 7일 정리 기본안, DB 참조 재확인 후 제거. OCR/LLM은 확정 근거가 아니다.
 
 외부 수집은 등록된 HTTPS host/path/port allowlist, redirect 각 단계 검증, private/link-local/metadata/loopback 차단 및 DNS 재바인딩 방어. 사용자 URL을 fetch하지 않는다. timeout/응답 크기/파서 복잡도 제한. HTML·CSV·사진에 포함된 지시를 실행하지 않는다. 대표자·개인 전화·위치 이력을 기본 수집하지 않는다.
 
@@ -29,3 +29,5 @@ USER/ADMIN만 사용, 최초 가입자 관리자 금지. 서버 관리 명령의
 Bearer 헤더 추출은 Spring의 DefaultBearerTokenResolver, 서명·클레임은 검증된 JWT 라이브러리에 맡긴다. 세션 확인 필터는 Redis·DB의 현재 상태를 추가로 검증한다. 쿠키 인증 endpoint에 Bearer 헤더가 함께 있어도 CSRF가 면제되지 않도록 범위를 명시적으로 유지했다.
 
 P06b에서 카카오 Authorization Code/OIDC·PKCE와 브라우저 메모리 인증을 연결했다. 구현 경계·쿠키와 탭 경합·테스트 공급자 분리는 [카카오 로그인 결정](decisions/0008-kakao-login.md)을 따른다. 현재 검증한 통제된 공급자 성공은 실제 카카오 사용자 로그인 성공을 의미하지 않는다.
+
+이미지 처리·동시성·파일/DB 정합성 경계는 [비공개 증빙 결정](decisions/0009-private-evidence-images.md)을 따른다.

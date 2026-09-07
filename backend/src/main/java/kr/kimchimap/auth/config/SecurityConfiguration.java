@@ -91,6 +91,10 @@ public class SecurityConfiguration {
               .permitAll();
           requests.requestMatchers("/api/v1/members/me", "/api/v1/auth/logout-all").authenticated();
           requests.requestMatchers("/api/v1/admin/**").hasRole("ADMIN");
+          requests
+              .requestMatchers(
+                  "/api/v1/bookmarks", "/api/v1/bookmarks/**", "/api/v1/media", "/api/v1/media/**")
+              .authenticated();
           requests.requestMatchers(HttpMethod.POST, "/api/v1/restaurants/search").permitAll();
           requests
               .requestMatchers(

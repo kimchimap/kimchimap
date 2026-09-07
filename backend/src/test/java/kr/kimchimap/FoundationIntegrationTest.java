@@ -39,7 +39,7 @@ class FoundationIntegrationTest extends ApplicationIntegrationSupport {
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM app.flyway_schema_history WHERE success", Long.class))
-        .isEqualTo(5L);
+        .isEqualTo(6L);
     assertThat(
             jdbc.queryForObject(
                 "SELECT has_schema_privilege(current_user, 'app', 'CREATE')", Boolean.class))

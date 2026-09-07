@@ -22,12 +22,25 @@ public class ApiExceptionHandler {
   }
 
   @ExceptionHandler({
+    org.springframework.web.multipart.support.MissingServletRequestPartException.class,
+    org.springframework.web.bind.MissingServletRequestParameterException.class,
     org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
     org.springframework.http.converter.HttpMessageNotReadableException.class,
     org.springframework.web.bind.MethodArgumentNotValidException.class
   })
   ProblemDetail invalidRequest(Exception exception) {
     return problem(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "입력 형식과 필수 항목을 확인해 주세요.");
+  }
+
+  @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+  ProblemDetail uploadTooLarge(Exception exception) {
+    return problem(HttpStatus.CONTENT_TOO_LARGE, "IMAGE_SIZE_LIMIT", "사진은 10MB 이하로 첨부해 주세요.");
+  }
+
+  @ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+  ProblemDetail unsupportedType(Exception exception) {
+    return problem(
+        HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_CONTENT_TYPE", "지원되는 요청 형식으로 전송해 주세요.");
   }
 
   private ProblemDetail problem(HttpStatus status, String code, String message) {

@@ -4,6 +4,8 @@ import { getSystemStatus } from "./api/client";
 import { RestaurantContactPage } from "./restaurant/RestaurantContactPage";
 import { AuthNavigation } from "./auth/AuthNavigation";
 import { AuthCompletePage, LoginPage } from "./auth/LoginPage";
+import { BookmarksPage } from "./bookmark/BookmarksPage";
+import { PhotoUploadPage } from "./media/PhotoUploadPage";
 
 function Home() {
   const connection = useQuery({
@@ -53,6 +55,10 @@ function Home() {
           <p>정보를 가져온 날짜와 실제 원산지를 확인한 날짜는 다릅니다.</p>
         </article>
       </section>
+      <nav className="activity-links" aria-label="내 활동">
+        <Link to="/bookmarks">즐겨찾기</Link>
+        <Link to="/media/new">증빙 사진 첨부</Link>
+      </nav>
       <div className="connection" role="status">
         {connection.isPending
           ? "서버 연결을 확인하고 있습니다."
@@ -87,6 +93,8 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/complete" element={<AuthCompletePage />} />
+        <Route path="/bookmarks" element={<BookmarksPage />} />
+        <Route path="/media/new" element={<PhotoUploadPage />} />
         <Route
           path="/restaurants/:id/contact"
           element={<RestaurantContactPage />}
