@@ -13,3 +13,5 @@ SDK 로더는 모듈 경계의 단일 Promise, 실패 재시도 시 기존 scrip
 TanStack Query는 서버 상태만, 지도 객체는 adapter 내부. 사용자별 query key는 session scope를 포함하며 로그아웃 때 제거. API 타입은 backend OpenAPI에서 생성. 일반 전역 상태 라이브러리를 추가하지 않는다.
 
 필수 label·focus·대비·키보드·오류 aria-live 검증. 색상만 상태 구분 금지. 확인일/수집일, 표시판/지정, 미확인/수입을 각각 한국어로 안내한다. Vitest/RTL에서 SDK 경계 mock, Playwright 390x844 및 1440x900에서 동선 검증.
+
+P06b 구현 화면: `/login`, `/auth/complete`, 공통 회원 메뉴와 로그아웃. 토큰은 auth/session 모듈 메모리, private Query 접두사 캐시만 로그아웃에 제거한다. 공개 업소 캐시는 유지한다. Web Locks가 없으면 탭 간 회전 경합 시 재로그인이 필요할 수 있다. 인증 장애가 공개 조회를 막지 않는다.

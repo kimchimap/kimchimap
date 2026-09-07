@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, Route, Routes } from "react-router";
 import { getSystemStatus } from "./api/client";
 import { RestaurantContactPage } from "./restaurant/RestaurantContactPage";
+import { AuthNavigation } from "./auth/AuthNavigation";
+import { AuthCompletePage, LoginPage } from "./auth/LoginPage";
 
 function Home() {
   const connection = useQuery({
@@ -79,9 +81,12 @@ export function App() {
           국산김치맵
         </Link>
         <span className="preview-label">개발 중</span>
+        <AuthNavigation />
       </header>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/complete" element={<AuthCompletePage />} />
         <Route
           path="/restaurants/:id/contact"
           element={<RestaurantContactPage />}

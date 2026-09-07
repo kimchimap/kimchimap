@@ -2,7 +2,7 @@
 
 업소 상세의 선택적 `contact`는 `display`(출처의 표시 번호), `number`(연결용 숫자와 선택적 국제전화 `+`), `sourceName`을 반환한다. 번호가 없거나 형식 검증을 통과하지 못하면 null이다. 출처의 재게시 허용이 철회되면 연락처를 공개하지 않는다.
 
-이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 업소 상세와 식재료·국가 카탈로그 GET도 구현한다. 공간 검색 POST도 구현한다. 인증·제보·관리자 endpoint는 후속 구현 계약이다.
+이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 업소 상세와 식재료·국가 카탈로그 GET도 구현한다. 공간 검색 POST도 구현한다. 서비스 세션과 카카오 로그인도 구현했으며 제보·관리자 endpoint는 후속 구현 계약이다.
 
 | 메서드·경로 (/api/v1 기준) | 권한·의미 |
 | --- | --- |
@@ -37,3 +37,5 @@
 검색 구현 예: `groups: [{usage: "SIDE_DISH", ingredients: [{ingredientId: "…", mode: "DOMESTIC"}, {ingredientId: "…", mode: "DOMESTIC"}]}]`. 식재료 ID는 카탈로그에서 얻는다. OriginMode는 DOMESTIC/COUNTRIES/IMPORTED_UNSPECIFIED/UNKNOWN이며 COUNTRIES일 때 countries를 지정한다. includeMixed는 COUNTRIES에서만 허용한다. maxAgeDays는 실제 observedAt 기준, evidenceKinds는 대표 공개 근거 기준이다. 전체 속성·enum은 생성 OpenAPI를 따른다. [검색 결정](decisions/0006-spatial-search.md)을 참조한다.
 
 P06a 구현: GET /auth/csrf, POST /auth/refresh, POST /auth/logout, POST /auth/logout-all, GET/DELETE /members/me. 카카오 진입·콜백은 P06b에서 연결한다. refresh/logout은 Origin과 CSRF 헤더·쿠키가 필요하다. logout-all은 Bearer도 필요하며 회원 정보·탈퇴는 활성 Bearer를 요구한다. Access Token 응답은 no-store이고 Refresh Token은 응답 본문에 포함하지 않는다.
+
+P06b 구현: GET /auth/login/kakao는 Security 인가 필터가 카카오로 redirect하며, 키 미설정이면 503이다. GET /auth/callback/kakao는 Spring Security가 일회성 state와 브라우저 쿠키, PKCE·OIDC를 검증한다. 정상 callback은 서비스 Refresh 쿠키 설정 후 토큰 없는 /auth/complete로 이동한다.

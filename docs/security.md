@@ -27,3 +27,5 @@ USER/ADMIN만 사용, 최초 가입자 관리자 금지. 서버 관리 명령의
 세션 구현 상세와 검증 시계 통합·키 교체·실패 경계는 [결정 기록](decisions/0007-stateful-sessions.md)에 정리했다.
 
 Bearer 헤더 추출은 Spring의 DefaultBearerTokenResolver, 서명·클레임은 검증된 JWT 라이브러리에 맡긴다. 세션 확인 필터는 Redis·DB의 현재 상태를 추가로 검증한다. 쿠키 인증 endpoint에 Bearer 헤더가 함께 있어도 CSRF가 면제되지 않도록 범위를 명시적으로 유지했다.
+
+P06b에서 카카오 Authorization Code/OIDC·PKCE와 브라우저 메모리 인증을 연결했다. 구현 경계·쿠키와 탭 경합·테스트 공급자 분리는 [카카오 로그인 결정](decisions/0008-kakao-login.md)을 따른다. 현재 검증한 통제된 공급자 성공은 실제 카카오 사용자 로그인 성공을 의미하지 않는다.

@@ -68,3 +68,9 @@ P06a는 로그인 이후의 JWT·Refresh 세션 기반을 제공한다. 실제 �
 로컬에서 JWT_PRIVATE_KEY_PATH를 생략하면 메모리 RSA 키를 사용한다. 재시작 시 기존 Access Token은 무효가 되며 정상 Refresh 세션은 갱신으로 복구한다. 운영은 JWT_PRIVATE_KEY_PATH(RSA 개인 JWK JSON)와 JWT_KEY_ID가 필수다. 파일은 Git 제외된 안전한 위치에 두고 접근 권한을 제한한다. JWT_VERIFICATION_KEYS_PATH에는 교체 전 공개키만 JWK Set으로 지정할 수 있다. JWT_ISSUER/JWT_AUDIENCE, ACCESS_TOKEN_LIFETIME(기본10m·최대10분), SESSION_MAX_LIFETIME(기본14d·최대14일)을 설정할 수 있다.
 
 쿠키를 사용하는 갱신·로그아웃은 GET /api/v1/auth/csrf에서 받은 토큰을 X-CSRF-TOKEN 헤더로 보내고 PUBLIC_ORIGIN과 같은 Origin을 전송해야 한다. 브라우저에서는 같은 사이트 요청과 credentials를 사용한다. 우리 토큰과 카카오 토큰은 별개다.
+
+## 카카오 로그인 실행
+
+카카오 앱에서 지도·로그인·OIDC를 활성화하고 웹 도메인 `http://localhost:5173`, 로그인 Redirect URI `http://localhost:5173/api/v1/auth/callback/kakao`를 등록한다. 브라우저도 `localhost`로 접속한다. `127.0.0.1`은 서로 다른 Origin이라 인증 요청이 거부된다. 키는 공통 저장소의 `.local/integrations.env`에서 런타임이 읽는다. KAKAO_CLIENT_ID는 REST API 키, KAKAO_CLIENT_SECRET은 로그인 시크릿이며 VITE 변수로 전달하지 않는다.
+
+인프라와 백엔드·프론트엔드를 실행한 뒤 `/login`에서 카카오로 이동한다. 성공 후 `/auth/complete`가 CSRF 보호 요청으로 서비스 세션을 복구한다. 키 미설정이면 로그인 시작은 503이고 공개 조회는 계속 제공한다. 외부 계정 로그인이 필요한 실제 검증과 키 없이 실행되는 통제된 OIDC 통합 테스트를 구분한다.
