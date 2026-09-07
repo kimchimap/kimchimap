@@ -3,6 +3,7 @@ package kr.kimchimap.media.service;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.UUID;
 import kr.kimchimap.global.web.ApiException;
 import kr.kimchimap.media.dto.MediaItem;
@@ -11,6 +12,7 @@ import kr.kimchimap.media.repository.MediaRepository;
 import kr.kimchimap.media.repository.MediaRepository.Stored;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MediaService {
@@ -70,6 +72,32 @@ public class MediaService {
       throw missing();
     try {
       return new Download(storage.read(row.storageKey(), original), row.contentType());
+    } catch (IOException exception) {
+      throw unavailable();
+    }
+  }
+
+  @Transactional
+  public void attach(UUID owner, List<UUID> ids) {
+    var rows = media.lockOwned(owner, ids);
+    if (rows.size() != ids.size() || rows.stream().anyMatch(row -> row.state().equals("DELETING")))
+      throw missing();
+    rows.forEach(row -> media.attach(row.id()));
+  }
+
+  @Transactional
+  public void publishReviewed(UUID owner, List<UUID> ids, UUID administrator) {
+    var rows = media.lockOwned(owner, ids);
+    if (rows.size() != ids.size() || rows.stream().anyMatch(row -> !row.state().equals("ATTACHED")))
+      throw missing();
+    rows.forEach(row -> media.publish(row.id(), administrator));
+  }
+
+  public Download publicImage(UUID id) {
+    var row = media.find(id).orElseThrow(MediaService::missing);
+    if (!row.publiclyVisible() || !row.state().equals("ATTACHED")) throw missing();
+    try {
+      return new Download(storage.read(row.storageKey(), false), row.contentType());
     } catch (IOException exception) {
       throw unavailable();
     }

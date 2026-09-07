@@ -62,6 +62,31 @@ public class MediaRepository {
         .optional();
   }
 
+  public List<Stored> lockOwned(UUID owner, List<UUID> ids) {
+    if (ids.isEmpty()) return List.of();
+    return jdbc.sql(
+            "SELECT id,owner_id,storage_key,content_type,sanitized_size,width,height,state,publicly_visible,created_at FROM app.media WHERE owner_id=:owner AND id IN (:ids) ORDER BY id FOR UPDATE")
+        .param("owner", owner)
+        .param("ids", ids)
+        .query(Stored.class)
+        .list();
+  }
+
+  public void attach(UUID id) {
+    jdbc.sql(
+            "UPDATE app.media SET state='ATTACHED' WHERE id=:id AND state IN ('TEMPORARY','ATTACHED')")
+        .param("id", id)
+        .update();
+  }
+
+  public void publish(UUID id, UUID administrator) {
+    jdbc.sql(
+            "UPDATE app.media SET publicly_visible=true,privacy_reviewed_by=:actor,privacy_reviewed_at=CURRENT_TIMESTAMP WHERE id=:id AND state='ATTACHED'")
+        .param("id", id)
+        .param("actor", administrator)
+        .update();
+  }
+
   public boolean storageReferenced(UUID key) {
     return jdbc.sql("SELECT EXISTS(SELECT 1 FROM app.media WHERE storage_key=:key)")
         .param("key", key)
