@@ -40,58 +40,65 @@ public class OriginPublicationService {
     UUID evidence = origins.evidence(input);
     for (var assertion : input.assertions()) {
       origins.insert(input.restaurantId(), scope, evidence, assertion, input.observedAt(), now);
-      var revisions = origins.revisions(scope, assertion.ingredientId());
-      if (revisions.size() > 2000) {
-        throw new ApiException(
-            HttpStatus.UNPROCESSABLE_CONTENT,
-            "ORIGIN_HISTORY_LIMIT",
-            "원산지 이력이 많아 자동 공개 판정을 중단했습니다. 관리자의 이력 정리가 필요합니다.");
-      }
-      var components =
-          origins.components(scope, assertion.ingredientId()).stream()
-              .collect(Collectors.groupingBy(OriginWriteRepository.Part::recordId));
-      var candidates =
-          revisions.stream()
-              .map(
-                  row ->
-                      new OriginPublicationPolicy.Candidate(
-                          row.id(),
-                          row.scopeId(),
-                          row.ingredientId(),
-                          new OriginValue(
-                              OriginValue.Classification.valueOf(row.classification()),
-                              components.getOrDefault(row.id(), List.of()).stream()
-                                  .map(
-                                      part ->
-                                          new OriginValue.Component(
-                                              OriginValue.Classification.valueOf(part.originKind()),
-                                              part.countryCode(),
-                                              part.ratio()))
-                                  .toList()),
-                          row.observedAt(),
-                          row.sourceUpdatedAt(),
-                          row.reviewedAt(),
-                          row.validFrom(),
-                          row.validUntil(),
-                          true,
-                          row.withdrawn(),
-                          row.revision()))
-              .toList();
-      var decision = policy.decide(candidates, now);
-      String status =
-          decision.status() == OriginPublicationPolicy.Status.EXPIRED
-              ? "UNAVAILABLE"
-              : decision.status().name();
-      origins.publish(
-          scope,
-          assertion.ingredientId(),
-          decision.selectedRecordId(),
-          status,
-          decision.reason(),
-          OriginPublicationPolicy.VERSION,
-          actor,
-          now);
+      republish(scope, assertion.ingredientId(), actor);
     }
     return scope;
+  }
+
+  @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
+  public void republish(UUID scope, UUID ingredient, UUID actor) {
+    origins.lockPublicationScope(scope);
+    var now = clock.instant();
+    var revisions = origins.revisions(scope, ingredient);
+    if (revisions.size() > 2000) {
+      throw new ApiException(
+          HttpStatus.UNPROCESSABLE_CONTENT,
+          "ORIGIN_HISTORY_LIMIT",
+          "원산지 이력이 많아 자동 공개 판정을 중단했습니다. 관리자의 이력 정리가 필요합니다.");
+    }
+    var components =
+        origins.components(scope, ingredient).stream()
+            .collect(Collectors.groupingBy(OriginWriteRepository.Part::recordId));
+    var candidates =
+        revisions.stream()
+            .map(
+                row ->
+                    new OriginPublicationPolicy.Candidate(
+                        row.id(),
+                        row.scopeId(),
+                        row.ingredientId(),
+                        new OriginValue(
+                            OriginValue.Classification.valueOf(row.classification()),
+                            components.getOrDefault(row.id(), List.of()).stream()
+                                .map(
+                                    part ->
+                                        new OriginValue.Component(
+                                            OriginValue.Classification.valueOf(part.originKind()),
+                                            part.countryCode(),
+                                            part.ratio()))
+                                .toList()),
+                        row.observedAt(),
+                        row.sourceUpdatedAt(),
+                        row.reviewedAt(),
+                        row.validFrom(),
+                        row.validUntil(),
+                        true,
+                        row.withdrawn(),
+                        row.revision()))
+            .toList();
+    var decision = policy.decide(candidates, now);
+    String status =
+        decision.status() == OriginPublicationPolicy.Status.EXPIRED
+            ? "UNAVAILABLE"
+            : decision.status().name();
+    origins.publish(
+        scope,
+        ingredient,
+        decision.selectedRecordId(),
+        status,
+        decision.reason(),
+        OriginPublicationPolicy.VERSION,
+        actor,
+        now);
   }
 }

@@ -40,3 +40,5 @@ V6는 bookmark의 회원/업소 유일 키와 media의 소유자·무작위 저�
 제보 구현: 일곱 번째 마이그레이션은 report/current_revision, 불변 report_revision/report_media/report_review, 24시간 report_request를 추가한다. 검수 이력에는 공개 반영한 품목과 개인정보 검토한 사진 목록을 남긴다. 내부 USER_REPORT 출처는 제보별 공개 동의에 근거하며 외부 데이터 허가와 별개다. 상세 결정은 [제보 공개 반영](decisions/0010-report-publication.md)을 따른다.
 
 여덟 번째 마이그레이션: ingestion_request는 관리자 요청 키·해시·작업·24시간 만료를 보관하며 ingestion_request_audit는 실행자·소스·사유·예산의 불변 감사를 남긴다. 제보·수집 요청의 만료 인덱스를 추가했다.
+
+아홉 번째 마이그레이션: origin_correction은 명시적 철회 대상 UUID 목록, 이전 공개 버전, 실행자·사유·시각의 불변 감사다. 기존 origin_record와 origin_component는 변경하지 않으며 origin_withdrawal과 공개 이력을 같은 트랜잭션에 추가한다.
