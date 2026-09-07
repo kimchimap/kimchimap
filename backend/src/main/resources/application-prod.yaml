@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${APP_PASSWORD}
+  flyway:
+    user: ${MIGRATOR_USERNAME}
+    password: ${MIGRATOR_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
+app:
+  public-origin: ${PUBLIC_ORIGIN}

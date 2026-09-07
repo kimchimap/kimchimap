@@ -1,0 +1,49 @@
+{
+  "components": {
+    "schemas": {
+      "SystemStatus": {
+        "properties": {
+          "serviceName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "국산김치맵 API",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/system/status": {
+      "get": {
+        "operationId": "status",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "system-status-controller"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ]
+}

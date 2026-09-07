@@ -30,7 +30,7 @@ services:
       - "127.0.0.1:63799:6379"
     volumes:
       - redis-data:/data
-      - ../.local/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ${KIMCHIMAP_REDIS_CONFIG:-../.local/redis.conf}:/usr/local/etc/redis/redis.conf:ro
     healthcheck:
       test: ["CMD-SHELL", 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli PING | grep -q PONG']
       interval: 5s

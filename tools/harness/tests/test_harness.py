@@ -133,6 +133,28 @@ class PolicyTests(unittest.TestCase):
         self.assertFalse(cli.matches_policy(actual, expected))
 
 
+    def test_unit_failure_cannot_be_hidden(self):
+        with patch.object(cli, 'verify_harness'), patch.object(cli, 'doctor'), patch.object(cli, 'service', side_effect=ValueError('검증 실패')):
+            with self.assertRaisesRegex(ValueError, '검증 실패'):
+                cli.verify_unit('application-foundation')
+
+    def test_unregistered_unit_is_rejected(self):
+        with self.assertRaises(ValueError): cli.verify_unit('unknown')
+
+    def test_local_environment_is_data_not_shell(self):
+        import runtime
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {}, clear=True):
+            root = Path(folder)
+            local = root / '.local'
+            local.mkdir(mode=0o700)
+            env = local / 'integrations.env'
+            env.write_text('KAKAO_CLIENT_SECRET=$(touch should-not-exist)\n')
+            env.chmod(0o600)
+            runtime.load_local_environment(root)
+            self.assertEqual(os.environ['KAKAO_CLIENT_SECRET'], '$(touch should-not-exist)')
+            self.assertFalse((root / 'should-not-exist').exists())
+
+
 class GitHookTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -140,7 +162,7 @@ class GitHookTests(unittest.TestCase):
         self.path = Path(self.temp.name) / 'repo'
         self.path.mkdir()
         for name in ['tools', 'scripts', 'docs', 'frontend', 'backend', '.github']:
-            shutil.copytree(ROOT / name, self.path / name, ignore=shutil.ignore_patterns('__pycache__'))
+            shutil.copytree(ROOT / name, self.path / name, ignore=shutil.ignore_patterns('__pycache__', 'node_modules', 'dist', 'build', '.gradle', 'test-results', 'playwright-report'))
         for name in ['AGENTS.md', 'README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'pnpm-lock.yaml', '.gitignore']:
             shutil.copy(ROOT / name, self.path / name)
         self.env = {**os.environ, 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': os.devnull, 'GIT_TERMINAL_PROMPT': '0'}

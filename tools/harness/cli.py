@@ -12,6 +12,7 @@ import subprocess
 import sys
 
 from policy import PROTECTED, branch_name, message, pr, push_refs
+from runtime import configure, install, local_directory
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -114,7 +115,7 @@ def doctor():
         ok = shutil.which(cmd) is not None
         print(('[확인] ' if ok else '[누락] ') + cmd)
         failed |= not ok
-    for label, cmd in [('Docker engine', ['docker', 'info', '--format', '{{.Architecture}}']), ('Java 25', ['java', '-version']), ('Node >=22.22', ['node', '--version'])]:
+    for label, cmd in [('Docker engine', ['docker', 'info', '--format', '{{.Architecture}}']), ('Java 25', ['java', '-version']), ('Node 24.20.0', ['node', '--version']), ('pnpm 12.3.4', ['pnpm', '--version'])]:
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
             output = result.stdout + result.stderr
@@ -123,7 +124,9 @@ def doctor():
                 ok &= bool(re.search(r'version "25[.\"]', output))
             if label.startswith('Node'):
                 m = re.search(r'v(\d+)\.(\d+)', output)
-                ok &= bool(m and tuple(map(int, m.groups())) >= (22, 22))
+                ok &= output.strip() == 'v24.20.0'
+            if label.startswith('pnpm'):
+                ok &= output.strip() == '12.3.4'
             print(('[확인] ' if ok else '[조치 필요] ') + label)
             failed |= not ok
         except (OSError, subprocess.TimeoutExpired):
@@ -141,7 +144,7 @@ def doctor():
 
 
 def env_init():
-    path = ROOT / '.local/infra.env'
+    path = local_directory(ROOT) / 'infra.env'
     if path.parent.is_symlink() or path.is_symlink() or (path.parent / 'redis.conf').is_symlink():
         raise ValueError('로컬 비밀 설정의 심볼릭 링크를 허용하지 않습니다.')
     path.parent.mkdir(mode=0o700, exist_ok=True)
@@ -165,9 +168,11 @@ def env_init():
 
 
 def compose(*args):
-    if not (ROOT / '.local/infra.env').exists():
+    path = local_directory(ROOT) / 'infra.env'
+    if not path.exists():
         raise ValueError('env-init을 먼저 실행하세요.')
-    run(['docker', 'compose', '--env-file', str(ROOT / '.local/infra.env'), '-f', 'infra/compose.yaml', *args])
+    os.environ['KIMCHIMAP_REDIS_CONFIG'] = str(local_directory(ROOT) / 'redis.conf')
+    run(['docker', 'compose', '--env-file', str(path), '-f', 'infra/compose.yaml', *args])
 
 
 def service(name):
@@ -295,7 +300,11 @@ def pr_prepare(args):
         raise ValueError('PR 변경 커밋이 없습니다.')
     for sha in commits:
         message(git('show', '-s', '--format=%B', sha))
-    if args.harness_only:
+    if args.unit and args.harness_only:
+        raise ValueError('작업 단위와 하네스 전용 옵션을 동시에 지정할 수 없습니다.')
+    if args.unit:
+        verify_unit(args.unit)
+    elif args.harness_only:
         changed = git('diff', '--name-only', 'origin/' + args.base + '...HEAD').splitlines()
         if any(p.startswith(('frontend/', 'backend/')) and not p.endswith('.md') for p in changed):
             raise ValueError('서비스 변경은 harness-only 검증을 사용할 수 없습니다.')
@@ -334,6 +343,25 @@ def verify_harness():
     print('하네스 검증 통과. 서비스 테스트·실연동·운영 준비 완료를 뜻하지 않습니다.')
 
 
+def verify_unit(name):
+    units = json.loads((ROOT / 'tools/harness/units.json').read_text())
+    if name not in units:
+        raise ValueError('등록되지 않은 작업 단위입니다.')
+    unit = units[name]
+    if not (ROOT / unit['plan']).is_file():
+        raise ValueError('작업 수용 기준 문서가 없습니다.')
+    for check in unit['checks']:
+        if check == 'verify-harness':
+            verify_harness()
+        elif check == 'doctor':
+            doctor()
+        else:
+            service(check)
+    print('작업 단위 검증 통과: ' + name)
+    print('미구현 후속 기능: ' + ', '.join(unit['notImplemented']))
+    print('전체 서비스 완료 판정이 아닙니다. verify의 전체 검사는 유지됩니다.')
+
+
 def verify():
     failures = []
     for name in ['verify-harness', 'format-backend', 'format-frontend', 'lint', 'typecheck', 'test-backend', 'test-frontend', 'test-integration', 'test-contract', 'api-check', 'test-e2e', 'build-backend', 'build']:
@@ -349,7 +377,7 @@ def verify():
 def main():
     parser = argparse.ArgumentParser(description='국산김치맵 개발 하네스. 미구현은 exit 2, 성공은 exit 0.')
     sub = parser.add_subparsers(dest='command', required=True)
-    basic = ['doctor', 'env-init', 'hooks-install', 'format-check', 'lint-harness', 'test-harness', 'verify-harness', 'verify', 'infra-up', 'infra-down', 'infra-check', 'protection-check', 'pre-commit', 'pre-push']
+    basic = ['doctor', 'toolchain-install', 'env-init', 'hooks-install', 'format-check', 'lint-harness', 'test-harness', 'verify-harness', 'verify', 'infra-up', 'infra-down', 'infra-check', 'protection-check', 'pre-commit', 'pre-push']
     services = json.loads((ROOT / 'tools/harness/commands.json').read_text())
     for name in basic + list(services):
         sub.add_parser(name)
@@ -360,19 +388,23 @@ def main():
         p.add_argument('--title', required=True); p.add_argument('--body-file', required=True)
         p.add_argument('--base', default='dev'); p.add_argument('--head', default='chore/example')
         p.add_argument('--cross-repo', action='store_true'); p.add_argument('--harness-only', action='store_true')
+        p.add_argument('--unit')
     p = sub.add_parser('protection-plan'); p.add_argument('--apply', action='store_true'); p.add_argument('--approvals', type=int, choices=range(7), default=0)
+    p = sub.add_parser('verify-unit'); p.add_argument('name')
     p = sub.add_parser('branch-cleanup'); p.add_argument('branch'); p.add_argument('--pr', type=int, required=True); p.add_argument('--apply', action='store_true')
     args = parser.parse_args()
     cmd = args.command
     if cmd in services:
         service(cmd)
     elif cmd == 'doctor': doctor()
+    elif cmd == 'toolchain-install': install()
     elif cmd == 'env-init': env_init()
     elif cmd == 'format-check': format_check()
     elif cmd == 'lint-harness': lint_harness()
     elif cmd == 'test-harness': test_harness()
     elif cmd == 'verify-harness': verify_harness()
     elif cmd == 'verify': verify()
+    elif cmd == 'verify-unit': verify_unit(args.name)
     elif cmd == 'hooks-install':
         existing = subprocess.run(['git', 'config', '--get', 'core.hooksPath'], cwd=ROOT, capture_output=True, text=True).stdout.strip()
         if existing and existing != 'tools/harness/hooks':
@@ -403,6 +435,7 @@ def main():
 
 if __name__ == '__main__':
     try:
+        configure()
         main()
     except (ValueError, OSError, json.JSONDecodeError) as exc:
         print('오류: ' + str(exc), file=sys.stderr)

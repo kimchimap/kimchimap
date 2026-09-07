@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: kimchimap
+  profiles:
+    default: local
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://127.0.0.1:54329/kimchimap}
+    username: ${DB_USERNAME:kimchimap_app}
+    password: ${APP_PASSWORD:}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 3000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: app
+        jdbc:
+          time_zone: UTC
+  flyway:
+    user: ${MIGRATOR_USERNAME:kimchimap_migrator}
+    password: ${MIGRATOR_PASSWORD:}
+    default-schema: app
+    schemas: app
+    create-schemas: false
+    clean-disabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:63799}
+      password: ${REDIS_PASSWORD:}
+      connect-timeout: 2s
+      timeout: 2s
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+server:
+  address: 127.0.0.1
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+  forward-headers-strategy: none
+springdoc:
+  api-docs:
+    enabled: false
+app:
+  public-origin: ${PUBLIC_ORIGIN:http://localhost:5173}

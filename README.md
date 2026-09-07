@@ -1,39 +1,41 @@
 # 국산김치맵 · kimchimap
 
-음식점의 식재료 원산지를 메뉴·용도·출처·확인 날짜와 함께 검색하는 모바일 우선 웹 프로젝트입니다.
+식재료 원산지를 메뉴·용도·출처·확인 날짜와 함께 검색하는 모바일 우선 웹 프로젝트입니다.
 
-**현재는 서비스 구현 전 개발 하네스 단계입니다.** 실제 지도·로그인·제보·수집기는 아직 없으며 실제 원산지 데이터도 확보하지 않았습니다. 실행 가능한 하네스·로컬 인프라와 후속 개발 설계/수용 기준을 제공합니다. 운영 배포·CI/CD는 포함하지 않습니다.
+현재 **애플리케이션 기반 구현** 단계입니다. Spring MVC 서버, React 안내 화면, PostgreSQL/PostGIS·Redis 연결, Flyway 초기화, OpenAPI 타입 생성과 테스트가 동작합니다. 업소 검색·로그인·제보·수집은 후속 작업이며 실제 원산지 데이터는 아직 없습니다.
 
-## 시작
+## 로컬 실행
 
-Git과 Python3.9 이상으로 저장소 루트에서 실행합니다.
+Git·Python3.9 이상·Docker가 필요합니다. macOS/Linux ARM64·AMD64 런타임을 지원하며 선택한 PostGIS 이미지는 Apple Silicon에서 에뮬레이션을 사용합니다.
 
 ```sh
+./scripts/harness toolchain-install
 ./scripts/harness hooks-install
-./scripts/harness verify-harness
 ./scripts/harness doctor
-```
-
-진단은 Java25·호환 Node 등 미충족 환경을 실패로 알립니다. 하네스 테스트에는 Java·외부 키가 필요하지 않습니다.
-
-Docker가 준비되면 다음 명령으로 로컬 DB/Redis를 확인합니다.
-
-```sh
+./scripts/runtime pnpm install --frozen-lockfile --ignore-scripts
 ./scripts/harness env-init
 ./scripts/harness infra-up
-./scripts/harness infra-check
-./scripts/harness infra-down
 ```
 
-기존 .env와 데이터 볼륨을 보존합니다. PostGIS는 AMD64 이미지이므로 Apple Silicon에서 에뮬레이션을 사용합니다. 포트는 loopback에만 공개합니다.
+각 터미널에서 다음을 실행하고 브라우저로 http://localhost:5173 을 엽니다.
 
-`./scripts/harness verify`는 서비스 검사까지 포함하며 현재 미구현 단계에서는 실패합니다. `verify-harness` 성공을 전체 서비스 완료로 해석하지 않습니다. 실제 결과는 [검증 기록](docs/validation.md)을 확인하세요.
+```sh
+./scripts/harness dev-backend
+./scripts/harness dev-frontend
+```
 
-## 개발 진입점
+외부 키 없이 안내 화면과 서버 상태를 확인할 수 있습니다. 종료는 각 실행 터미널에서 Ctrl+C, 인프라는 `./scripts/harness infra-down`입니다. 기존 .env와 데이터 볼륨을 보존합니다. 로컬 DB/Redis 비밀값은 `.local/infra.env`, 외부 키는 `.local/integrations.env`에만 입력합니다. Git worktree에서도 같은 저장소의 로컬 설정을 안전하게 읽으며 값은 출력하지 않습니다.
 
-[AGENTS.md](AGENTS.md) → [문서 목차](docs/index.md) → [후속 구현 계획](docs/plans/active/service-implementation.md).
-[전체 명령](docs/local-development.md), [Git 규칙](docs/git-workflow.md), [기여 안내](CONTRIBUTING.md), [보안 제보](SECURITY.md).
+## 검증
 
-frontend/는 React, backend/는 Spring Boot를 위한 경계입니다. 현재는 지침만 있습니다. tools/harness/는 실행 검사기, infra/는 로컬 PostgreSQL/PostGIS·Redis, docs/는 설계·수용 기준·의사결정입니다.
+```sh
+./scripts/runtime pnpm --dir frontend exec playwright install chromium
+./scripts/harness verify-unit application-foundation
+```
 
-원격 dev와 main/dev GitHub ruleset 보호를 생성하고 유효 규칙을 확인했습니다. 작업별 구현·검증·dev PR 병합을 진행합니다. 오픈소스 라이선스는 미선택이며 공개 운영 전 명시적인 선택이 필요합니다. 코드·데이터·이미지의 이용 조건은 별도로 관리합니다.
+단위 검증은 하네스·환경·포맷·타입·실제 DB/Redis·API 타입·모바일/PC E2E·양쪽 빌드를 포함합니다. `./scripts/harness verify`는 전체 서비스의 후속 검사까지 포함하므로 외부 수집 계약 미구현 단계에서는 실패합니다. 이를 서비스 전체 완료로 해석하지 않습니다.
+
+[개발 지침](AGENTS.md) → [문서 목차](docs/index.md) → [후속 계획](docs/plans/active/service-implementation.md).
+[실행 명령](docs/local-development.md), [검증 기록](docs/validation.md), [기여 안내](CONTRIBUTING.md), [보안 제보](SECURITY.md).
+
+main/dev에 PR 필수·강제 push/삭제 금지 ruleset을 적용했습니다. 작업별 검증 후 dev PR 병합을 진행하며 main 릴리스·운영 배포·CI/CD는 범위 밖입니다. 오픈소스 라이선스는 미선택이며 코드·데이터·이미지 이용 조건은 별도로 관리합니다.

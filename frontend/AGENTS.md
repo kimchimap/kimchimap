@@ -1,6 +1,7 @@
 # 프론트엔드 작업 지침
 
 루트 지침과 [화면](../docs/frontend.md), [API](../docs/api.md), [보안](../docs/security.md)을 먼저 읽는다.
+
 - 기능별 UI·hooks, 공통 UI와 API 클라이언트 경계. 화면·오류·접근성 설명은 한국어.
 - TanStack Query는 서버 상태, 지도 객체는 SDK 어댑터, 선택 필터는 URL/화면 상태로 관리한다.
 - OpenAPI에서 생성한 타입 사용. 수동 복사 금지. `api-generate` 후 `api-check` 실행.
