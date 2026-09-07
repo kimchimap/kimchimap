@@ -36,6 +36,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/restaurants/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["search"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/restaurants/{id}": {
         parameters: {
             query?: never;
@@ -72,6 +88,22 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Bounds: {
+            /** Format: double */
+            east: number;
+            /** Format: double */
+            north: number;
+            /** Format: double */
+            south: number;
+            /** Format: double */
+            west: number;
+        };
+        Center: {
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+        };
         Claim: {
             classification?: string;
             /** Format: date-time */
@@ -124,12 +156,42 @@ export interface components {
             schemeName?: string;
             sourceName?: string;
         };
+        IngredientFilter: {
+            countries?: string[];
+            includeMixed?: boolean;
+            /** Format: uuid */
+            ingredientId?: string;
+            /** @enum {string} */
+            mode?: "DOMESTIC" | "COUNTRIES" | "IMPORTED_UNSPECIFIED" | "UNKNOWN";
+        };
         IngredientItem: {
             category?: string;
             code?: string;
             /** Format: uuid */
             id?: string;
             name?: string;
+        };
+        Item: {
+            address?: string;
+            businessStatus?: string;
+            /** Format: double */
+            distanceMeters?: number;
+            /** Format: uuid */
+            id?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            matchedScopes?: components["schemas"]["MatchedScope"][];
+            name?: string;
+        };
+        MatchedScope: {
+            /** Format: int32 */
+            groupIndex?: number;
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            usage?: string;
         };
         Origin: {
             claims?: components["schemas"]["Claim"][];
@@ -165,6 +227,33 @@ export interface components {
             origins?: components["schemas"]["Origin"][];
             precision?: string;
             usage?: string;
+        };
+        ScopeFilter: {
+            ingredients?: components["schemas"]["IngredientFilter"][];
+            /** @enum {string} */
+            usage?: "SIDE_DISH" | "STEW" | "MAIN_DISH" | "OTHER" | "UNKNOWN";
+        };
+        SearchRequest: {
+            bounds?: components["schemas"]["Bounds"];
+            center?: components["schemas"]["Center"];
+            cursor?: string;
+            evidenceKinds?: ("SIGNBOARD_OBSERVATION" | "USER_SUBMISSION" | "SUPPLY_VERIFICATION")[];
+            groups?: components["schemas"]["ScopeFilter"][];
+            /** Format: int32 */
+            limit?: number;
+            /** Format: int32 */
+            maxAgeDays?: number;
+            /** Format: double */
+            radiusMeters?: number;
+        };
+        SearchResponse: {
+            /** Format: date-time */
+            asOf?: string;
+            items?: components["schemas"]["Item"][];
+            nextCursor?: string;
+            notice?: string;
+            truncated?: boolean;
+            zoomRequired?: boolean;
         };
         SystemStatus: {
             serviceName?: string;
@@ -215,6 +304,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["IngredientItem"][];
+                };
+            };
+        };
+    };
+    search: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SearchResponse"];
                 };
             };
         };

@@ -13,8 +13,15 @@ public class SecurityConfiguration {
   @Bean
   SecurityFilterChain securityFilterChain(
       HttpSecurity http, Environment environment, ApiProblemWriter problems) throws Exception {
+    http.csrf(
+        csrf ->
+            csrf.ignoringRequestMatchers(
+                request ->
+                    request.getMethod().equals("POST")
+                        && request.getServletPath().equals("/api/v1/restaurants/search")));
     http.authorizeHttpRequests(
         requests -> {
+          requests.requestMatchers(HttpMethod.POST, "/api/v1/restaurants/search").permitAll();
           requests
               .requestMatchers(
                   HttpMethod.GET,

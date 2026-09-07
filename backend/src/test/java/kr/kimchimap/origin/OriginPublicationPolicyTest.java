@@ -96,6 +96,29 @@ class OriginPublicationPolicyTest {
         .isEqualTo(policy.decide(List.of(older, newer, unknown), NOW));
   }
 
+  @Test
+  void uuidTieBreakMatchesPostgresqlUnsignedOrdering() {
+    var low =
+        candidate(
+            UUID.fromString("00000000-0000-4000-8000-000000000001"),
+            SCOPE,
+            DOMESTIC_VALUE,
+            NOW.minusSeconds(10),
+            null,
+            true,
+            false);
+    var high =
+        candidate(
+            UUID.fromString("ffffffff-ffff-4fff-8fff-ffffffffffff"),
+            SCOPE,
+            DOMESTIC_VALUE,
+            NOW.minusSeconds(10),
+            null,
+            true,
+            false);
+    assertThat(policy.decide(List.of(low, high), NOW).selectedRecordId()).isEqualTo(high.id());
+  }
+
   private Candidate candidate(
       UUID id,
       UUID scope,

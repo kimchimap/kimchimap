@@ -1,6 +1,6 @@
 # API 구현 계약 초안
 
-이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 업소 상세와 식재료·국가 카탈로그 GET도 구현한다. 검색·인증·제보·관리자 endpoint는 후속 구현 계약이다.
+이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 업소 상세와 식재료·국가 카탈로그 GET도 구현한다. 공간 검색 POST도 구현한다. 인증·제보·관리자 endpoint는 후속 구현 계약이다.
 
 | 메서드·경로 (/api/v1 기준) | 권한·의미 |
 | --- | --- |
@@ -31,3 +31,5 @@
 수집 실행과 제보 생성은 Idempotency-Key를 구현하여 동일 사용자의 같은 키/본문 재전송을 재사용하고 다른 본문은 409. 보관 기본 24시간. 요청 제한 기본안: 공개 검색 IP 60/min, 갱신 세션 10/min, 업로드 사용자 10/hour, 관리자 수집 소스 동시 1개. 공유망 오탐·실측 후 조정하고 보호 기능 Redis 장애 시 거부한다.
 
 카카오 OAuth callback은 `/api/v1/auth/callback/kakao`, local redirect URI는 `http://localhost:5173/api/v1/auth/callback/kakao`로 고정했다. 로그인 구현 단계에서 Spring Security의 callback base URI와 일치시킨다.
+
+검색 구현 예: `groups: [{usage: "SIDE_DISH", ingredients: [{ingredientId: "…", mode: "DOMESTIC"}, {ingredientId: "…", mode: "DOMESTIC"}]}]`. 식재료 ID는 카탈로그에서 얻는다. OriginMode는 DOMESTIC/COUNTRIES/IMPORTED_UNSPECIFIED/UNKNOWN이며 COUNTRIES일 때 countries를 지정한다. includeMixed는 COUNTRIES에서만 허용한다. maxAgeDays는 실제 observedAt 기준, evidenceKinds는 대표 공개 근거 기준이다. 전체 속성·enum은 생성 OpenAPI를 따른다. [검색 결정](decisions/0006-spatial-search.md)을 참조한다.

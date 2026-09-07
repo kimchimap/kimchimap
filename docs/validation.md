@@ -49,3 +49,14 @@
 - 실행 기록: `/tmp/kimchimap-origin-final-domain.log`, `/tmp/kimchimap-origin-unit-gate.log`. 임시 로그가 없어도 위 명령과 커밋된 테스트로 재현할 수 있다.
 
 - `verify` 전체 서비스 검사도 실행했다. 현재 아직 등록되지 않은 외부 수집 계약 `contractTest`에서만 실패(exit 2)했고 나머지는 통과했다. P03 완료와 전체 서비스 미완료를 구분한다. 기록: `/tmp/kimchimap-origin-full-verify.log`.
+
+## P04 공간 검색 — 2026-09-07
+
+- `verify-unit spatial-search`: 성공. 하네스 28개, 단위/계층 18개, 실제 DB/Redis 통합 23개, 성능 1개, 프론트 2개, 모바일/PC E2E 2개. 실패·skip 0. API 생성 일치·포맷·린트·타입·양쪽 빌드 통과.
+- 반경 100미터 경계의 수치 오차를 발견해 1마이크로미터 허용치를 명시하고 경계 포함/1밀리미터 바깥 제외를 검증했다. 국가 OR·그룹 AND·같은 김치 scope·혼합/미확인/분쟁/만료·최신성·근거·동률 cursor·넓은 지도 확대 안내를 실제 DB에서 확인했다.
+- 실제 검색 쿼리로 가상 업소·원산지 각 20,000개에서 두 공간 인덱스를 확인했다. [측정 결과](performance.md). 처리량이나 운영 지연시간 보장은 하지 않는다.
+- V1/V2를 보존하고 V3 인덱스를 추가했다. 로컬 DB 볼륨은 유지했다.
+- 기록: `/tmp/kimchimap-search-unit-gate.log`, `/tmp/kimchimap-search-complete-tests.log`. 성능 상세 산출물은 `backend/build/reports/performance/spatial.json`으로 재현한다.
+- 공공 API 공식 명세를 확인하고 실제 키로 2개 레코드를 조회했다. HTTP 200, resultCode 0. 전화번호 등 불필요한 필드를 제외한 결과만 권한 600의 Git 제외 파일에 보관했다. 서비스 DB에 저장·공개 조회까지 완료한 상태가 아니며 실제 원산지 자료도 없다.
+
+- P04 `verify`도 실행했다. 성능을 포함한 전체 검사 중 아직 미구현인 외부 수집 계약 `test-contract`만 실패(exit 2), 나머지 통과. 다음 수집 작업에서 실제 계약 검사를 구현한다. 기록: `/tmp/kimchimap-search-full-verify.log`.

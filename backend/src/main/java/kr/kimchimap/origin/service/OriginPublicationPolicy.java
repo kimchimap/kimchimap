@@ -74,7 +74,7 @@ public class OriginPublicationPolicy {
             .thenComparing(
                 Candidate::sourceUpdatedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
             .thenComparingLong(Candidate::revision)
-            .thenComparing(Candidate::id);
+            .thenComparing(candidate -> candidate.id().toString());
     var selected = active.stream().max(latest).orElseThrow();
     return new Decision(Status.CURRENT, selected.id(), "동일 품목·용도의 유효한 승인 기록입니다.");
   }

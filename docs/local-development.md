@@ -52,3 +52,5 @@ dev-backend/dev-frontend, format-backend/format-frontend, lint/typecheck, test-b
 `toolchain-install` → `scripts/runtime pnpm install --frozen-lockfile --ignore-scripts` → `infra-up` 후 서버/UI를 실행한다. E2E 전 `scripts/runtime pnpm --dir frontend exec playwright install chromium`이 필요하다. E2E는 기존 서버를 재사용하지 않고 직접 실행·종료한다.
 
 `.local/integrations.env`에는 KAKAO_JAVASCRIPT_KEY/KAKAO_CLIENT_ID(REST API 키)/KAKAO_CLIENT_SECRET/PUBLIC_DATA_SERVICE_KEY(Decoding)를 입력한다. 카카오 도메인은 http://localhost:5173, 로그인 callback 계약은 http://localhost:5173/api/v1/auth/callback/kakao다. 파일 권한600, git-common-dir 기준 .local을 읽는다. env 파일은 shell로 실행하지 않고 허용 키만 파싱한다.
+
+공간 검색 검증: `./scripts/harness verify-unit spatial-search`. 실제 2만 건 검색 실행 계획은 `./scripts/harness test-performance`로 재현한다. SEARCH_CURSOR_SECRET은 운영에서 32바이트 이상으로 설정하며 로컬 미설정 시 프로세스 메모리에만 생성된다. 키 변경·로컬 재시작은 기존 검색 cursor를 무효화한다.

@@ -364,7 +364,7 @@ def verify_unit(name):
 
 def verify():
     failures = []
-    for name in ['verify-harness', 'format-backend', 'format-frontend', 'lint', 'typecheck', 'test-backend', 'test-frontend', 'test-integration', 'test-contract', 'api-check', 'test-e2e', 'build-backend', 'build']:
+    for name in ['verify-harness', 'format-backend', 'format-frontend', 'lint', 'typecheck', 'test-backend', 'test-frontend', 'test-integration', 'test-contract', 'test-performance', 'api-check', 'test-e2e', 'build-backend', 'build']:
         try:
             verify_harness() if name == 'verify-harness' else service(name)
         except ValueError as exc:
