@@ -1,6 +1,6 @@
 # 보안 설계와 검증 경계
 
-위협: 토큰 탈취·재사용/경합, IDOR, CSRF, 관리자 권한 상승, 이미지 실행/폭탄, SQL 주입, SSRF, 외부 데이터 지시문, 개인정보·위치 로그 노출. 최소 권한·실패 시 거부를 기본으로 한다. 현재는 설계이며 서비스 보안 구현 완료가 아니다.
+위협: 토큰 탈취·재사용/경합, IDOR, CSRF, 관리자 권한 상승, 이미지 실행/폭탄, SQL 주입, SSRF, 외부 데이터 지시문, 개인정보·위치 로그 노출. 최소 권한·실패 시 거부를 기본으로 한다. P06a에서 서비스 JWT·Redis 세션·쿠키/CSRF·현재 회원 인가를 구현했다. 카카오 로그인·제보·이미지 관련 내용은 아직 후속 설계이며 전체 서비스 보안 완료가 아니다.
 
 카카오: Spring Security OAuth2 Client Authorization Code, PKCE S256, 일회성 state, OIDC를 사용하면 nonce·issuer·audience·서명·만료 검증. 서버 코드 교환, Redirect URI allowlist, 최소 동의. provider+subject로 식별, 이메일 병합 금지. 공급자 토큰은 서비스 토큰으로 사용하지 않고 필요한 기능이 없으면 장기 저장하지 않는다. 콜백은 토큰 없는 `/auth/complete`로 이동하고 CSRF 보호된 갱신으로 Access Token을 받는다.
 
@@ -23,3 +23,7 @@ USER/ADMIN만 사용, 최초 가입자 관리자 금지. 서버 관리 명령의
 외부 수집은 등록된 HTTPS host/path/port allowlist, redirect 각 단계 검증, private/link-local/metadata/loopback 차단 및 DNS 재바인딩 방어. 사용자 URL을 fetch하지 않는다. timeout/응답 크기/파서 복잡도 제한. HTML·CSV·사진에 포함된 지시를 실행하지 않는다. 대표자·개인 전화·위치 이력을 기본 수집하지 않는다.
 
 응답·로그에 SQL/stack/token/인가 코드/정밀 좌표 금지. 추적 ID는 서버 생성 또는 형식 제한. CSP는 카카오 필요한 출처만, nosniff, frame-ancestors, Referrer-Policy, prod HSTS. 의존성 취약점과 라이선스 검토를 출시 전 실제 실행한다. 최고 수준이라는 추상 주장 대신 검증 결과를 기록한다.
+
+세션 구현 상세와 검증 시계 통합·키 교체·실패 경계는 [결정 기록](decisions/0007-stateful-sessions.md)에 정리했다.
+
+Bearer 헤더 추출은 Spring의 DefaultBearerTokenResolver, 서명·클레임은 검증된 JWT 라이브러리에 맡긴다. 세션 확인 필터는 Redis·DB의 현재 상태를 추가로 검증한다. 쿠키 인증 endpoint에 Bearer 헤더가 함께 있어도 CSRF가 면제되지 않도록 범위를 명시적으로 유지했다.

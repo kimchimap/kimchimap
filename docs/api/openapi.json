@@ -1,6 +1,17 @@
 {
   "components": {
     "schemas": {
+      "AccessTokenResponse": {
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Bounds": {
         "properties": {
           "east": {
@@ -157,6 +168,17 @@
         },
         "type": "object"
       },
+      "CsrfResponse": {
+        "properties": {
+          "headerName": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Designation": {
         "properties": {
           "applicableItems": {
@@ -286,6 +308,18 @@
             "type": "string"
           },
           "usage": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MemberResponse": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "role": {
             "type": "string"
           }
         },
@@ -497,6 +531,13 @@
         },
         "type": "object"
       }
+    },
+    "securitySchemes": {
+      "serviceBearer": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
     }
   },
   "info": {
@@ -505,6 +546,77 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/auth/csrf": {
+      "get": {
+        "operationId": "csrf",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsrfResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auth-controller"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "tags": [
+          "auth-controller"
+        ]
+      }
+    },
+    "/api/v1/auth/logout-all": {
+      "post": {
+        "operationId": "logoutAll",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "auth-controller"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "refresh",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "auth-controller"
+        ]
+      }
+    },
     "/api/v1/catalogs/countries": {
       "get": {
         "operationId": "countries",
@@ -548,6 +660,47 @@
         },
         "tags": [
           "catalog-controller"
+        ]
+      }
+    },
+    "/api/v1/members/me": {
+      "delete": {
+        "operationId": "withdraw",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "auth-controller"
+        ]
+      },
+      "get": {
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "auth-controller"
         ]
       }
     },

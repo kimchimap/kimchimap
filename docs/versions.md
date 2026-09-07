@@ -27,3 +27,5 @@ Wrapper JAR SHA256: `7a9ce74cff467ca1bf60a4fcd9f05185acceda4d0f382434d393e178642
 플랫폼별 Java/Node URL·checksum은 tools/harness/toolchains.json에 고정한다. pnpm12 네이티브 실행 파일 연결을 위해 공식 pnpm install.js만 명시 실행하며 앱 의존 lifecycle script는 자동 허용하지 않는다.
 
 PostGIS 자체는 ARM64를 지원하지만 선택한 공식 Docker 태그의 manifest는 AMD64만 제공한다. [ADR0003](decisions/0003-local-platform.md)과 이미지 digest를 참조한다. ARM64 네이티브 PostGIS로 실행했다고 보고하지 않는다.
+
+인증 추가 확인(2026-09-07): Spring Boot 4.1.1 BOM이 선택한 Spring Security OAuth2 JOSE/Resource Server 7.1.1, Nimbus JOSE JWT 10.9.1을 사용한다. Gradle 실제 의존성 트리를 확인했으며 직접 버전을 덮어쓰지 않았다. 근거: [Spring Security JWT 공식 문서](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html). PKCE S256·issuer·JWKS·client_secret_post는 [카카오 OIDC 공식 명세](https://developers.kakao.com/docs/ko/kakaologin/rest-api)에서 확인했고 OAuth 연결은 다음 작업이다.

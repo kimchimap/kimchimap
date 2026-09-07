@@ -60,3 +60,11 @@ dev-backend/dev-frontend, format-backend/format-frontend, lint/typecheck, test-b
 `./scripts/harness ingest-run`은 등록된 Decoding 키로 최근 7일 범위의 업소를 최대 2페이지 수집한다. 재실행하면 이전 PARTIAL의 다음 페이지부터 같은 창을 이어간다. `./scripts/harness ingest-status`로 상태·페이지·반영/격리 건수를 조회한다. 키는 `.local/integrations.env`에만 두며 조회 결과는 로컬 DB에 저장한다.
 
 기본값을 바꿀 때는 실행 환경의 `INGEST_MODE=FULL` 또는 `INGEST_MAX_PAGES=5`를 지정한다. FULL도 페이지 예산만큼 처리하며 전국 수집 완료로 간주하지 않는다. 예약 수집은 `INGEST_SCHEDULING_ENABLED=true`와 DB source.enabled 설정을 함께 사용한다. [실행 정책](ingestion.md)을 먼저 확인한다. 예약 활성화 시 새 비용이나 이용 허가를 대신 승인하지 않는다.
+
+## 서비스 세션 설정
+
+P06a는 로그인 이후의 JWT·Refresh 세션 기반을 제공한다. 실제 카카오 로그인 화면은 P06b에서 연결하며 개발용 로그인 우회 주소는 없다. 자동 검증은 합성 회원을 내부 Service로 생성한다.
+
+로컬에서 JWT_PRIVATE_KEY_PATH를 생략하면 메모리 RSA 키를 사용한다. 재시작 시 기존 Access Token은 무효가 되며 정상 Refresh 세션은 갱신으로 복구한다. 운영은 JWT_PRIVATE_KEY_PATH(RSA 개인 JWK JSON)와 JWT_KEY_ID가 필수다. 파일은 Git 제외된 안전한 위치에 두고 접근 권한을 제한한다. JWT_VERIFICATION_KEYS_PATH에는 교체 전 공개키만 JWK Set으로 지정할 수 있다. JWT_ISSUER/JWT_AUDIENCE, ACCESS_TOKEN_LIFETIME(기본10m·최대10분), SESSION_MAX_LIFETIME(기본14d·최대14일)을 설정할 수 있다.
+
+쿠키를 사용하는 갱신·로그아웃은 GET /api/v1/auth/csrf에서 받은 토큰을 X-CSRF-TOKEN 헤더로 보내고 PUBLIC_ORIGIN과 같은 Origin을 전송해야 한다. 브라우저에서는 같은 사이트 요청과 credentials를 사용한다. 우리 토큰과 카카오 토큰은 별개다.

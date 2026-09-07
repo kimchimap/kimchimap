@@ -8,6 +8,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+  @ExceptionHandler(org.springframework.dao.DataAccessException.class)
+  ProblemDetail dependencyFailure(org.springframework.dao.DataAccessException exception) {
+    return problem(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        "DEPENDENCY_UNAVAILABLE",
+        "필요한 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+  }
+
   @ExceptionHandler(ApiException.class)
   ProblemDetail businessFailure(ApiException exception) {
     return problem(exception.status(), exception.code(), exception.getMessage());
