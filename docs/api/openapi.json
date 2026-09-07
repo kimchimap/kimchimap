@@ -1,6 +1,255 @@
 {
   "components": {
     "schemas": {
+      "Claim": {
+        "properties": {
+          "classification": {
+            "type": "string"
+          },
+          "collectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/Component"
+            },
+            "type": "array"
+          },
+          "evidenceKind": {
+            "type": "string"
+          },
+          "freshness": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastFetchSucceededAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "observedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "observedPrecision": {
+            "type": "string"
+          },
+          "originalExpression": {
+            "type": "string"
+          },
+          "publicReference": {
+            "type": "string"
+          },
+          "publicSummary": {
+            "type": "string"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          },
+          "sourceUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sourceUpdatedPrecision": {
+            "type": "string"
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validUntil": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Component": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "countryName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "ratio": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "CountryItem": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Designation": {
+        "properties": {
+          "applicableItems": {
+            "type": "string"
+          },
+          "cancelledOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "criteriaOriginal": {
+            "type": "string"
+          },
+          "designatedOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "expiresOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "schemeName": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IngredientItem": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Origin": {
+        "properties": {
+          "claims": {
+            "items": {
+              "$ref": "#/components/schemas/Claim"
+            },
+            "type": "array"
+          },
+          "ingredientId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ingredientName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "selectedRecordId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RestaurantDetail": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "businessStatus": {
+            "type": "string"
+          },
+          "coordinateStatus": {
+            "type": "string"
+          },
+          "designations": {
+            "items": {
+              "$ref": "#/components/schemas/Designation"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "informationNotice": {
+            "type": "string"
+          },
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/Scope"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Scope": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "origins": {
+            "items": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "type": "array"
+          },
+          "precision": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SystemStatus": {
         "properties": {
           "serviceName": {
@@ -20,6 +269,83 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/catalogs/countries": {
+      "get": {
+        "operationId": "countries",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CountryItem"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "catalog-controller"
+        ]
+      }
+    },
+    "/api/v1/catalogs/ingredients": {
+      "get": {
+        "operationId": "ingredients",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IngredientItem"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "catalog-controller"
+        ]
+      }
+    },
+    "/api/v1/restaurants/{id}": {
+      "get": {
+        "operationId": "detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "restaurant-controller"
+        ]
+      }
+    },
     "/api/v1/system/status": {
       "get": {
         "operationId": "status",

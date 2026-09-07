@@ -1,6 +1,6 @@
 # API 구현 계약 초안
 
-이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 아래 도메인 endpoint는 후속 구현 계약이다.
+이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 업소 상세와 식재료·국가 카탈로그 GET도 구현한다. 검색·인증·제보·관리자 endpoint는 후속 구현 계약이다.
 
 | 메서드·경로 (/api/v1 기준) | 권한·의미 |
 | --- | --- |

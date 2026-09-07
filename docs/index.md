@@ -10,3 +10,5 @@
 - [하네스 완료 기록](plans/completed/harness-bootstrap.md), [계획 양식](plans/template.md), [범위 결정](decisions/0001-harness-scope.md), [Git 기준점](decisions/0002-git-baseline.md), [CPU 지원 결정](decisions/0003-local-platform.md)
 
 Codex는 루트 AGENTS.md와 작업 디렉터리의 지침을 함께 읽는다. [공식 AGENTS.md 안내](https://learn.chatgpt.com/docs/agent-configuration/agents-md)에 따라 짧은 실행 지침과 상세 문서를 분리한다. 외부 키·권한·데이터 허가를 지침만으로 획득했다고 해석하지 않는다.
+
+현재 작업: [업소와 원산지 모델](plans/active/origin-model.md), [불변 기록 결정](decisions/0005-origin-revisions.md).

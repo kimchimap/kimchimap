@@ -23,5 +23,30 @@
       "ingest-status",
       "smoke-external"
     ]
+  },
+  "origin-model": {
+    "plan": "docs/plans/active/origin-model.md",
+    "checks": [
+      "verify-harness",
+      "doctor",
+      "format-backend",
+      "format-frontend",
+      "lint",
+      "typecheck",
+      "test-backend",
+      "test-frontend",
+      "test-integration",
+      "api-check",
+      "test-e2e",
+      "build-backend",
+      "build"
+    ],
+    "notImplemented": [
+      "test-contract",
+      "test-performance",
+      "ingest-run",
+      "ingest-status",
+      "smoke-external"
+    ]
   }
 }

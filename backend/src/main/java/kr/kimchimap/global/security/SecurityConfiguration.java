@@ -4,6 +4,7 @@ import kr.kimchimap.global.web.ApiProblemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -14,7 +15,14 @@ public class SecurityConfiguration {
       HttpSecurity http, Environment environment, ApiProblemWriter problems) throws Exception {
     http.authorizeHttpRequests(
         requests -> {
-          requests.requestMatchers("/api/v1/system/status").permitAll();
+          requests
+              .requestMatchers(
+                  HttpMethod.GET,
+                  "/api/v1/system/status",
+                  "/api/v1/catalogs/ingredients",
+                  "/api/v1/catalogs/countries",
+                  "/api/v1/restaurants/{id}")
+              .permitAll();
           if (environment.matchesProfiles("local", "test")
               && !environment.matchesProfiles("prod")) {
             requests.requestMatchers("/v3/api-docs/**").permitAll();
