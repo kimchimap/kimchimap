@@ -2,7 +2,7 @@
 
 PostGIS 자체는 ARM64에서 사용할 수 있다. 여기서 AMD64 한정은 선택한 `postgis/postgis:18-3.6` 이미지의 manifest에 대한 설명이다. PostGIS 소프트웨어 전체의 아키텍처 제한이 아니다.
 
-하네스는 macOS/Linux의 Git과 Python3.9+로 실행한다. pnpm 명령은 선택적인 루트 별칭이다. 현재 앱은 없으며 Java25·호환 Node 설치/Gradle Wrapper 생성은 후속 P01/P02다. macOS 기본 Java17과 Node22.13.1은 현재 후보 앱 버전의 요구를 충족하지 않는다.
+하네스는 macOS/Linux의 Git과 Python3.9+로 실행한다. pnpm 명령은 선택적인 루트 별칭이다. toolchain-install은 Java25·Node24·pnpm12를 사용자 캐시에 준비하고 scripts/runtime과 하네스가 해당 버전을 선택한다. 시스템 Java/Node는 변경하지 않는다. Gradle Wrapper는 공식 checksum과 함께 고정됐다.
 
 ```sh
 ./scripts/harness doctor
@@ -24,22 +24,31 @@ PostGIS upstream 초기화 후 init-roles.sh가 앱 schema와 migrator/app 역�
 | env-init / infra-up / infra-down / infra-check | 안전한 로컬 설정·Compose 시작/종료·실제 DB/Redis 확인 |
 | hooks-install | 저장소 로컬 훅 설치, 다른 설정 덮어쓰기 금지 |
 | format-check / lint-harness / test-harness / verify-harness | 텍스트 형식·Python AST/JSON/문서 링크/금지파일·하네스 회귀 테스트 |
-| dev-backend / dev-frontend | 실제 gradlew bootRun / frontend dev 필요 |
-| format-backend / format-frontend | 실제 Spotless/프론트 formatter 검사 필요 |
-| lint / typecheck | frontend lint/typecheck task 필요 |
-| test-backend / test-frontend | 실제 단위·UI 테스트 task 필요 |
-| test-integration / test-contract | 실제 DB/Redis 및 외부 API 계약 task 필요 |
-| test-e2e / test-performance | Playwright 및 공간 실행계획 task 필요 |
-| api-generate / api-check | OpenAPI 생성 및 프론트 생성 타입/계약 비교 task 필요 |
-| build / build-backend | 프론트 build / 백엔드 bootJar 필요 |
+| dev-backend / dev-frontend | gradlew bootRun / frontend dev 실행 |
+| format-backend / format-frontend | Spotless/프론트 formatter 검사 |
+| lint / typecheck | frontend lint/typecheck 실행 |
+| test-backend / test-frontend | 실제 단위·UI 테스트 실행 |
+| test-integration / test-contract | DB/Redis 통합 실행, 외부 API 계약은 후속 구현 |
+| test-e2e / test-performance | Playwright 실행, 공간 실행계획은 후속 구현 |
+| api-generate / api-check | OpenAPI 생성 및 프론트 생성 타입/계약 비교 |
+| build / build-backend | 프론트 build / 백엔드 bootJar 실행 |
 | ingest-run / ingest-status | 허용 소스 수집 관리 task 필요, 사용자 입력 URL 금지 |
 | smoke-external | 키·허가 있는 실제 연동 별도 task 필요 |
 | verify | 하네스+서비스 모든 핵심 검사, 현재 미구현이면 실패 |
 | branch-start / commit-check / pr-check / pr-prepare | Git 절차 문서 참조 |
 | branch-cleanup / protection-check / protection-plan | 기본 조회/dry-run, 명시 apply 분리 |
 
-서비스 연결 명세는 tools/harness/commands.json이다. requires 파일만 만들면 성공하는 구조가 아니며 해당 task의 실제 종료 코드가 반영된다. 없는 task·누락 앱·실패 검사는 exit2로 보고한다. ingest task는 backend 단계에서 source allowlist와 관리자 권한을 확인하는 구현을 연결하며 현재는 네트워크 실행하지 않는다.
+서비스 연결 명세는 tools/harness/commands.json이다. requires 파일만 만들면 성공하는 구조가 아니며 해당 task의 실제 종료 코드가 반영된다. 없는 task·누락 앱·실패 검사는 exit2로 보고한다. ingest task는 backend 단계에서 source allowlist와 관리자 권한을 확인하는 구현을 연결하며 현재 수집 task는 미구현으로 거부한다.
 
 후속 로컬 frontend는 localhost:5173, backend는 localhost:8080으로 고정하고 Vite /api 프록시를 구성한다. 카카오 JS 키는 브라우저 공개 키로 취급하되 REST/Client Secret은 VITE_*에 넣지 않는다. OAuth redirect/도메인 등록·쿼터·실제 smoke는 별도 문서 결과로 남긴다.
 
-전체 하네스 검사에는 앱 formatter/정적 타입 검사를 수행했다고 주장하지 않는다. 앱 구현 후 서비스 formatter와 linter를 제거하거나 verify-harness만으로 완료 처리하면 안 된다.
+verify-harness는 하네스 전용이다. 현재 앱 기반 검증은 verify-unit application-foundation으로 실행하고 실제 formatter·linter·타입·단위·DB/Redis·API·E2E·build를 모두 확인한다. 전체 verify는 미구현 수집 계약으로 실패한다.
+
+
+## 현재 실행 가능한 앱 명령
+
+dev-backend/dev-frontend, format-backend/format-frontend, lint/typecheck, test-backend/test-frontend/test-integration/test-e2e, api-generate/api-check, build/build-backend를 구현했다. 위 표의 연결 계약은 실제 이 작업에 연결됐다. test-contract/test-performance/ingest-run/ingest-status/smoke-external은 해당 후속 기능 전까지 미구현 실패를 유지한다.
+
+`toolchain-install` → `scripts/runtime pnpm install --frozen-lockfile --ignore-scripts` → `infra-up` 후 서버/UI를 실행한다. E2E 전 `scripts/runtime pnpm --dir frontend exec playwright install chromium`이 필요하다. E2E는 기존 서버를 재사용하지 않고 직접 실행·종료한다.
+
+`.local/integrations.env`에는 KAKAO_JAVASCRIPT_KEY/KAKAO_CLIENT_ID(REST API 키)/KAKAO_CLIENT_SECRET/PUBLIC_DATA_SERVICE_KEY(Decoding)를 입력한다. 카카오 도메인은 http://localhost:5173, 로그인 callback 계약은 http://localhost:5173/api/v1/auth/callback/kakao다. 파일 권한600, git-common-dir 기준 .local을 읽는다. env 파일은 shell로 실행하지 않고 허용 키만 파싱한다.

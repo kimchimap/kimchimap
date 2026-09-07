@@ -29,3 +29,12 @@
 ## 구현 착수 후 추가 검증
 
 보호 응답 기본 필드·순서의 의미 비교 회귀를 포함해 하네스 25개 테스트 통과. protection-plan --apply 재실행 성공, protection-check exit0으로 main/dev 유효 규칙 확인. 초기 하네스 시점의 미적용 기록과 구분한다. 사용자 지시로 작업별 dev PR 병합이 승인됐다.
+
+## P01/P02 애플리케이션 기반
+
+- verify-unit application-foundation: exit0. 하네스28개, 환경·형식·린트·타입, 백엔드 단위/실제 DB·Redis 통합, API 문서/타입 재생성 비교, UI2개, 모바일/PC E2E2개, 양쪽 build 통과.
+- Spring Boot4.1.1/Java25.0.4.1+1/Gradle9.7.1과 React19.2.8/Vite8.2.2/Node24.20.0 실행 확인. pnpm12.3.4 frozen lockfile 설치와 peer 검사 통과.
+- 최초 E2E의 스크린샷 인자 누락을 수정하고 타입 검사·두 레이아웃 재실행 통과. 테스트를 삭제하지 않았으며 화면도 직접 확인했다.
+- pnpm audit --prod: 보고된 취약점 0개. 이 결과는 모든 종류의 취약점이 없다는 보장이 아니다.
+- JWT·로그인·검색·원산지·제보·외부 수집은 아직 미구현. 상태 API는 앱 생존 상태이며 모든 의존 서비스의 상시 readiness 보장은 아니다.
+- Gradle Wrapper와 Java/Node 배포 SHA256 검증. 시스템 런타임과 개인 메모·로컬 비밀 파일을 보존했다.

@@ -5,3 +5,5 @@
 PostGIS/PostgreSQL/Redis 컨테이너는 개발 환경에서 upstream 이미지로 실행하며 이미지 내용을 저장소에 재배포하지 않는다. Redis 8 계열의 라이선스 선택지와 구성 배포의 의무는 출시 전 공식 LICENSE를 확인한다. 컨테이너 사용이 우리 코드의 라이선스를 확정하지 않는다.
 
 추가 시 항목: 이름/버전/공식 URL/라이선스/저작권자 원문/사용 방식/재배포 여부/표시 의무/확인일/검토자/증거. 지도 로고를 제거하지 않는다. 데이터의 저장·재게시·재배포는 코드 라이선스와 별도로 data-sources.md에서 관리한다.
+
+기반 구현 추가: Gradle9.7.1 공식 Wrapper(배포 프로젝트 Apache-2.0) 생성 파일과 원래 헤더를 유지한다. Temurin은 GPLv2+Classpath Exception, Node와 React는 MIT, Spring Boot는 Apache-2.0. 개별 transitive dependency의 조건은 lockfile/BOM 기준 출시 전 전수 확인한다. 외부 글꼴/이미지를 반입하지 않고 OS 한국어 글꼴을 사용한다.

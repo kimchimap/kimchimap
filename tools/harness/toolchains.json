@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-09-07",
+  "java": "25.0.4.1+1",
+  "node": "24.20.0",
+  "platforms": {
+    "darwin-arm64": {
+      "java": {
+        "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_aarch64_mac_hotspot_25.0.4.1_1.tar.gz",
+        "sha256": "61979887f7506a24a57439ff99adb8b3a7fc89977d9cfe3b8984f58a981b7b9d",
+        "directory": "jdk-25.0.4.1+1",
+        "home": "Contents/Home"
+      },
+      "node": {
+        "url": "https://nodejs.org/dist/v24.20.0/node-v24.20.0-darwin-arm64.tar.gz",
+        "sha256": "40e5607e5ecb3db9192723776da2d75d966260fc74a7a9e731c1bd67dda96bc8",
+        "directory": "node-v24.20.0-darwin-arm64"
+      }
+    },
+    "darwin-x64": {
+      "java": {
+        "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_mac_hotspot_25.0.4.1_1.tar.gz",
+        "sha256": "e6229d9504f7922053ab31821b9e6bee8761daf7b026a3476d1a027563009880",
+        "directory": "jdk-25.0.4.1+1",
+        "home": "Contents/Home"
+      },
+      "node": {
+        "url": "https://nodejs.org/dist/v24.20.0/node-v24.20.0-darwin-x64.tar.gz",
+        "sha256": "9e5b2644cf107befb6aefca676b96d3296bc10138096f022ed378d6233ed81f4",
+        "directory": "node-v24.20.0-darwin-x64"
+      }
+    },
+    "linux-arm64": {
+      "java": {
+        "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_aarch64_linux_hotspot_25.0.4.1_1.tar.gz",
+        "sha256": "69df11a02cfa3ef7d7ca645e03edce6778ec090e100f6ae2b42097865730ac52",
+        "directory": "jdk-25.0.4.1+1",
+        "home": "."
+      },
+      "node": {
+        "url": "https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-arm64.tar.gz",
+        "sha256": "3515603e2487879a39bc75716f1a2affd027500c64ba50e845cf72cb33219013",
+        "directory": "node-v24.20.0-linux-arm64"
+      }
+    },
+    "linux-x64": {
+      "java": {
+        "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz",
+        "sha256": "dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e",
+        "directory": "jdk-25.0.4.1+1",
+        "home": "."
+      },
+      "node": {
+        "url": "https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.gz",
+        "sha256": "855d581f8a4eb1a8117e3426de25fe02770592febcfb31369aee1ffbfee9e8ec",
+        "directory": "node-v24.20.0-linux-x64"
+      }
+    }
+  }
+}

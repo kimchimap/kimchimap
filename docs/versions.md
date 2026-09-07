@@ -1,26 +1,29 @@
 # 버전 확인 기록
 
-PostGIS 자체는 ARM64에서 사용할 수 있다. 여기서 AMD64 한정은 선택한 `postgis/postgis:18-3.6` 이미지의 manifest에 대한 설명이다. PostGIS 소프트웨어 전체의 아키텍처 제한이 아니다.
+2026-09-07 공식 배포 메타데이터·호환 범위 조회 후 실제 설치·컴파일·테스트한 기반 버전이다. Preview·latest 태그·JDK preview는 사용하지 않는다. 세부 패키지는 pnpm lockfile과 Gradle BOM이 기준이다.
 
-확인일: 2026-09-07. 하네스 실행 버전과 향후 앱 선택 후보를 구분한다. 공식 웹 문서와 배포 registry에서 존재를 조회했다. 실제 앱 build 호환성은 미검증이며 P01/P02에서 재확인·고정한다. RC/Beta/Milestone/SNAPSHOT/Preview와 JDK preview 기능은 금지한다.
-
-| 구성 | 선택/후보 | 공식 출처·이유·검증 상태 |
+| 구성 | 고정 버전 | 공식 근거·선택 이유 |
 | --- | --- | --- |
-| 하네스 Python | 3.9 이상, 현재 3.9.6 | 표준 라이브러리만 사용, macOS 기본 실행 가능. 앱 Python 의존 없음 |
-| pnpm | 12.3.4 고정 | [공식 배포 registry](https://registry.npmjs.org/pnpm/latest) 조회. packageManager·lockfile 고정, lifecycle script 자동 실행 안 함 |
-| Java | OpenJDK Temurin 25 LTS 후보 | [Adoptium](https://adoptium.net/temurin/releases/), 패치 API 조회는 403으로 미확정. 현재 설치는 Oracle Java 17.0.16이므로 앱 준비 불충족 |
-| Spring Boot | 4.1.1 후보 | [공식 요구사항](https://docs.spring.io/spring-boot/system-requirements.html), Java17~26/Gradle9 지원. 4.2 milestone 제외 |
-| Gradle | 9.7.1 후보 | [배포 API](https://services.gradle.org/versions/current), [Java25 호환](https://docs.gradle.org/current/userguide/compatibility.html). Java25 실행은 9.1 이상. Wrapper binary·distribution SHA256는 P02에서 실제 생성·검증 |
-| springdoc | 3.1.1 후보 | [공식 문서](https://springdoc.org/), Boot4 계열용 3.x. 정확한 Boot4.1 build·생성 검증 전 설치 확정하지 않음 |
-| React | 19.2.8 후보 | [공식 버전](https://react.dev/versions), [배포](https://registry.npmjs.org/react/latest) |
-| Vite | 8.2.2 후보 | [공식 가이드](https://vite.dev/guide/), [배포](https://registry.npmjs.org/vite/latest), Node20.19+ 또는22.12+ |
-| TypeScript | 7.0.2 후보 | [배포](https://registry.npmjs.org/typescript/latest), Vite/린트/타입 생성 호환은 P02에서 확인 |
-| React Router | 8.3.1 후보 | [배포](https://registry.npmjs.org/react-router/latest), Node>=22.22 필요. 현재 Node22.13.1 불충족 |
-| TanStack Query | 5.102.8 후보 | [배포](https://registry.npmjs.org/@tanstack/react-query/latest), React 호환 실제 테스트는 P02 |
-| Node | 지원 LTS, 최소22.22 | 최신 LTS 패치 재조회·고정은 P01. 현재 하네스는 Python으로 실행되므로 앱 요구 불충족과 분리 |
-| PostgreSQL/PostGIS | postgis/postgis:18-3.6 + digest | [공식 이미지](https://github.com/postgis/docker-postgis). manifest AMD64만 확인. Apple Silicon은 명시 에뮬레이션. 내부 실제 패치는 infra-check 기록 |
-| Redis | 8.10.1-alpine + digest | [공식 릴리스](https://github.com/redis/redis/releases/latest), manifest ARM64/AMD64 확인. 실제 실행은 검증 기록 참조 |
+| Temurin OpenJDK | 25.0.4.1+1 LTS | [공식 릴리스](https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4.1%2B1), 플랫폼별 SHA256 검증, 시스템 Java 변경 없음 |
+| Node | 24.20.0 LTS | [공식 배포](https://nodejs.org/dist/v24.20.0/), SHASUMS 검증, 지원 LTS 선택 |
+| pnpm | 12.3.4 | [공식 배포](https://registry.npmjs.org/pnpm/12.3.4), packageManager 고정, 실행 버전 확인 |
+| Spring Boot | 4.1.1 | [공식 호환](https://docs.spring.io/spring-boot/system-requirements.html), Java25/Gradle9 지원, 실제 서버·통합 테스트 |
+| Gradle Wrapper | 9.7.1 | [공식 배포](https://services.gradle.org/versions/current), distribution과 Wrapper JAR SHA256 모두 확인 |
+| springdoc | 3.1.1 | [공식 문서](https://springdoc.org/), Boot4.1.1 실제 OpenAPI 생성·타입 비교 |
+| React / React DOM | 19.2.8 | [공식 버전](https://react.dev/versions), 실제 UI/Vitest/E2E |
+| Vite / React plugin | 8.2.2 / 6.1.1 | [공식 가이드](https://vite.dev/guide/), 서로의 peer 범위 확인 |
+| TypeScript | 5.9.3 | [공식 배포](https://registry.npmjs.org/typescript/5.9.3), openapi-typescript7.13.0의 ^5.x와 typescript-eslint8.69.0의 <6.1 공통 범위. 최신7/6을 비호환 조합으로 사용하지 않음 |
+| React Router / TanStack Query | 8.3.1 / 5.102.8 | registry peer·Node 요구 확인, 실제 build |
+| PostgreSQL / PostGIS | 18.6 / 3.6.4 | postgis/postgis18-3.6 digest 고정, 실제 DB 확인 |
+| Redis | 8.10.1 | digest 고정, 실제 인증·데이터 왕복 테스트 |
+| Spotless / Java format / ktfmt | 8.10.2 / 1.36.1 / 0.64 | Maven/플러그인 배포 확인, 실제 포맷 실행 |
+| ArchUnit | 1.5.0 | Maven 배포 확인, 실제 계층 검사 |
+| Vitest / Playwright | 5.0.0 / 1.63.0 | 실제 단위·모바일/PC E2E |
 
-PostGIS digest: `sha256:60f6ad1d21ea86a67d47780b9a0d1e1d200500f62b19293fa834d0dea80b8677`. container 태그를 latest로 바꾸지 않는다. PostgreSQL18 볼륨 경로는 `/var/lib/postgresql`이다.
+Flyway12.4.0·JUnit6.0.3·Testcontainers2.0.5는 Boot BOM을 따른다. 버전을 불필요하게 덮어쓰지 않는다. PostgreSQL 드라이버와 Spring Security도 BOM 관리다.
 
-Spring의 Security/JPA/Flyway/Validation/JDBC/Testcontainers 관리 범위는 실제 BOM을 확인하고 불필요하게 버전을 덮어쓰지 않는다. 프론트 패키지는 후보 숫자를 복사해 설치 완료로 취급하지 않는다. 하네스 단계에 의미 없는 앱 package/Gradle 파일은 만들지 않는다. 선택 변경 시 보안 패치·호환성 근거·확인일과 실제 build 결과를 함께 갱신한다.
+Gradle distribution SHA256: `acd53f1edaf02f1a8ff99879f8a34b302661a057d9b063ae9e35b552f804d20a`.
+Wrapper JAR SHA256: `7a9ce74cff467ca1bf60a4fcd9f05185acceda4d0f382434d393e17864262c5d`.
+플랫폼별 Java/Node URL·checksum은 tools/harness/toolchains.json에 고정한다. pnpm12 네이티브 실행 파일 연결을 위해 공식 pnpm install.js만 명시 실행하며 앱 의존 lifecycle script는 자동 허용하지 않는다.
+
+PostGIS 자체는 ARM64를 지원하지만 선택한 공식 Docker 태그의 manifest는 AMD64만 제공한다. [ADR0003](decisions/0003-local-platform.md)과 이미지 digest를 참조한다. ARM64 네이티브 PostGIS로 실행했다고 보고하지 않는다.
