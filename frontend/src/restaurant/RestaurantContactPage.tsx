@@ -38,6 +38,9 @@ export function RestaurantContactPage() {
           <p>{restaurant.data.address}</p>
           <RestaurantContact contact={restaurant.data.contact} />
           <BookmarkToggle restaurantId={id} />
+          <Link to={`/reports/new?restaurantId=${encodeURIComponent(id)}`}>
+            원산지 제보
+          </Link>
         </>
       )}
     </main>

@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/media")
-@SecurityRequirement(name = "serviceBearer")
 public class MediaController {
   private final MediaService media;
 
@@ -22,6 +21,7 @@ public class MediaController {
     this.media = media;
   }
 
+  @SecurityRequirement(name = "serviceBearer")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   public MediaItem upload(
@@ -36,6 +36,7 @@ public class MediaController {
     }
   }
 
+  @SecurityRequirement(name = "serviceBearer")
   @GetMapping("/{id}")
   public ResponseEntity<byte[]> download(
       @AuthenticationPrincipal AuthenticatedMember member,
@@ -50,6 +51,17 @@ public class MediaController {
             "attachment; filename=\"evidence"
                 + (file.contentType().equals("image/png") ? ".png" : ".jpg")
                 + "\"")
+        .header("X-Content-Type-Options", "nosniff")
+        .body(file.bytes());
+  }
+
+  @GetMapping("/{id}/public")
+  @io.swagger.v3.oas.annotations.Operation(security = {})
+  public ResponseEntity<byte[]> publicImage(@PathVariable UUID id) {
+    var file = media.publicImage(id);
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(file.contentType()))
+        .cacheControl(CacheControl.noStore())
         .header("X-Content-Type-Options", "nosniff")
         .body(file.bytes());
   }

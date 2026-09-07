@@ -48,7 +48,9 @@ public abstract class ApplicationIntegrationSupport {
               MountableFile.forHostPath(Path.of("../infra/init-roles.sh")),
               "/docker-entrypoint-initdb.d/20-roles.sh")
           .withExposedPorts(5432)
-          .waitingFor(Wait.forListeningPort())
+          .waitingFor(
+              Wait.forSuccessfulCommand(
+                  "PGPASSWORD=test-app psql -h 127.0.0.1 -U kimchimap_app -d kimchimap -v ON_ERROR_STOP=1 -c 'SELECT 1'"))
           .withStartupTimeout(Duration.ofMinutes(2));
 
   @Container

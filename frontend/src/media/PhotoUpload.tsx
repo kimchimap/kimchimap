@@ -36,6 +36,7 @@ export function PhotoUpload({
         body: form,
       });
       const media = (await response.json()) as MediaItem;
+      if (!media.id) throw new Error("사진 응답 식별자 누락");
       onUploaded?.(media);
       setUploaded(true);
       setFile(null);

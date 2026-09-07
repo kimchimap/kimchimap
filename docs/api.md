@@ -41,3 +41,5 @@ P06a 구현: GET /auth/csrf, POST /auth/refresh, POST /auth/logout, POST /auth/l
 P06b 구현: GET /auth/login/kakao는 Security 인가 필터가 카카오로 redirect하며, 키 미설정이면 503이다. GET /auth/callback/kakao는 Spring Security가 일회성 state와 브라우저 쿠키, PKCE·OIDC를 검증한다. 정상 callback은 서비스 Refresh 쿠키 설정 후 토큰 없는 /auth/complete로 이동한다.
 
 P07a 구현: GET /bookmarks는 cursor·limit(1~50)을 받으며 GET /bookmarks/{restaurantId}는 본인 저장 여부를 반환한다. PUT/DELETE는 멱등 204다. POST /media는 multipart file로 실제 사진을 검사해 201을 반환하고 GET /media/{id}?original=false는 소유자·관리자만 내려받는다. 원본은 original=true로 선택하며 둘 다 no-store이다. 사진 실패는 413/415/422/429/503으로 구분한다. 클라이언트의 ownerId·저장 경로·공개 여부는 받지 않는다.
+
+P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본문 24시간). 작성·보완 시 publicationConsent=true와 본인 사진 1~5개, 같은 품목의 식재료 1~10개를 받는다. 목록 limit은 1~50이며 state/cursor를 지원한다. 검수는 expectedVersion 필수이며 승인 시 approvedScopeId와 privacyReviewedMediaIds를 명시한다. GET /media/{id}/public은 개인정보 검토 후 공개된 정제본만 반환한다. 관리자 정정·지정·매칭 API는 후속 구현 항목이다.

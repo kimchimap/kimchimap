@@ -7,6 +7,12 @@ import { AuthCompletePage, LoginPage } from "./auth/LoginPage";
 import { BookmarksPage } from "./bookmark/BookmarksPage";
 import { PhotoUploadPage } from "./media/PhotoUploadPage";
 
+import {
+  NewReportPage,
+  ReportsPage,
+  ReportDetailPage,
+} from "./report/ReportPages";
+
 function Home() {
   const connection = useQuery({
     queryKey: ["system-status"],
@@ -57,7 +63,7 @@ function Home() {
       </section>
       <nav className="activity-links" aria-label="내 활동">
         <Link to="/bookmarks">즐겨찾기</Link>
-        <Link to="/media/new">증빙 사진 첨부</Link>
+        <Link to="/reports">내 제보</Link>
       </nav>
       <div className="connection" role="status">
         {connection.isPending
@@ -95,6 +101,11 @@ export function App() {
         <Route path="/auth/complete" element={<AuthCompletePage />} />
         <Route path="/bookmarks" element={<BookmarksPage />} />
         <Route path="/media/new" element={<PhotoUploadPage />} />
+        <Route path="/reports/new" element={<NewReportPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/reports/:id" element={<ReportDetailPage />} />
+        <Route path="/admin/reports" element={<ReportsPage admin />} />
+        <Route path="/admin/reports/:id" element={<ReportDetailPage admin />} />
         <Route
           path="/restaurants/:id/contact"
           element={<RestaurantContactPage />}

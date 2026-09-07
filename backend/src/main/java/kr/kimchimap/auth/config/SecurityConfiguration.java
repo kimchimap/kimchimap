@@ -91,6 +91,8 @@ public class SecurityConfiguration {
               .permitAll();
           requests.requestMatchers("/api/v1/members/me", "/api/v1/auth/logout-all").authenticated();
           requests.requestMatchers("/api/v1/admin/**").hasRole("ADMIN");
+          requests.requestMatchers(HttpMethod.GET, "/api/v1/media/{id}/public").permitAll();
+          requests.requestMatchers("/api/v1/reports", "/api/v1/reports/**").authenticated();
           requests
               .requestMatchers(
                   "/api/v1/bookmarks", "/api/v1/bookmarks/**", "/api/v1/media", "/api/v1/media/**")

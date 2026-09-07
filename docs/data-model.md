@@ -36,3 +36,5 @@ origin_record 날짜는 observed_at(실제 관찰), source_updated_at(원문 갱
 `restaurant.phone_display`는 공식 업소 연락처의 표시 원문, `phone_number`는 구분자를 제거한 연결용 번호, `phone_source_id`는 출처다. 세 값은 함께 존재하거나 모두 null이다. 출처의 재게시 허용 여부를 상세 조회에서도 확인한다. 원천 기록에는 제공된 `TELNO`를 보존하며 잘못된 형식은 품질 문제로 기록하고 전화 링크로 공개하지 않는다. 수집기가 관리자 전화번호 정정을 무조건 덮어쓰지 않도록 필드별 정정 보호를 적용한다. 업소 연락처 제공은 식재료 원산지 확인이나 실제 통화 성공을 뜻하지 않는다.
 
 V6는 bookmark의 회원/업소 유일 키와 media의 소유자·무작위 저장 키·크기/해상도·해시·TEMPORARY/ATTACHED/DELETING 상태를 추가한다. 공개 플래그는 ATTACHED와 관리자 개인정보 검토 시각/행위자 없이는 켤 수 없다. 현재 API는 공개 플래그를 변경하지 않으며 제보 검수 연결은 후속 작업이다.
+
+제보 구현: 일곱 번째 마이그레이션은 report/current_revision, 불변 report_revision/report_media/report_review, 24시간 report_request를 추가한다. 검수 이력에는 공개 반영한 품목과 개인정보 검토한 사진 목록을 남긴다. 내부 USER_REPORT 출처는 제보별 공개 동의에 근거하며 외부 데이터 허가와 별개다. 상세 결정은 [제보 공개 반영](decisions/0010-report-publication.md)을 따른다.

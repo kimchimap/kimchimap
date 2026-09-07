@@ -34,7 +34,13 @@ export function AuthNavigation() {
   return (
     <nav aria-label="회원 메뉴">
       {session.status === "authenticated" ? (
-        <button onClick={() => void signOut()}>로그아웃</button>
+        <>
+          <Link to="/reports">내 제보</Link>
+          {session.member?.role === "ADMIN" && (
+            <Link to="/admin/reports">제보 검수</Link>
+          )}
+          <button onClick={() => void signOut()}>로그아웃</button>
+        </>
       ) : (
         <Link to="/login">로그인</Link>
       )}
