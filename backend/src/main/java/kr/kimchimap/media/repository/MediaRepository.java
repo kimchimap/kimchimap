@@ -62,6 +62,20 @@ public class MediaRepository {
         .optional();
   }
 
+  public boolean hasPublicRestaurant(UUID id) {
+    return jdbc.sql(
+            """
+        SELECT EXISTS(SELECT 1 FROM app.report_review review
+          JOIN app.report report ON report.id=review.report_id
+          JOIN app.restaurant restaurant ON restaurant.id=report.restaurant_id
+          WHERE :id=ANY(review.public_media_ids) AND review.decision='APPROVED'
+            AND restaurant.published AND app.has_domestic_origin(restaurant.id,CURRENT_TIMESTAMP))
+        """)
+        .param("id", id)
+        .query(Boolean.class)
+        .single();
+  }
+
   public List<Stored> lockOwned(UUID owner, List<UUID> ids) {
     if (ids.isEmpty()) return List.of();
     return jdbc.sql(

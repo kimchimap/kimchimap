@@ -14,10 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class IngestionJobService {
   private final IngestionJobRepository repository;
   private final Clock clock;
+  private final OriginCollectionPolicy collectionPolicy;
 
-  public IngestionJobService(IngestionJobRepository repository, Clock clock) {
+  public IngestionJobService(
+      IngestionJobRepository repository, Clock clock, OriginCollectionPolicy collectionPolicy) {
     this.repository = repository;
     this.clock = clock;
+    this.collectionPolicy = collectionPolicy;
   }
 
   @Transactional
@@ -29,6 +32,7 @@ public class IngestionJobService {
         || pageBudget > 5000) {
       throw new IllegalArgumentException("수집 실행 범위를 확인해 주세요.");
     }
+    collectionPolicy.requireQualifiedSource();
     repository.lockSource();
     var active = repository.resumable();
     if (active.isPresent()) {
@@ -49,6 +53,7 @@ public class IngestionJobService {
 
   @Transactional
   public void scheduleDue() {
+    if (!collectionPolicy.supportsDomesticQualification()) return;
     repository.lockSource();
     if (!repository.scheduledDue()) return;
     var active = repository.resumable();

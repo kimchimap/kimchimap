@@ -66,7 +66,7 @@ public class RestaurantReadRepository {
     this.jdbc = jdbc;
   }
 
-  public Optional<RestaurantRow> findPublished(UUID id) {
+  public Optional<RestaurantRow> findPublished(UUID id, Instant asOf) {
     return jdbc.sql(
             """
         SELECT r.id, r.name, r.address, r.business_status, public.ST_Y(r.location) AS latitude,
@@ -74,9 +74,10 @@ public class RestaurantReadRepository {
                CASE WHEN s.republication_allowed THEN r.phone_display END AS phone_display,
                CASE WHEN s.republication_allowed THEN r.phone_number END AS phone_number,
                CASE WHEN s.republication_allowed THEN s.name END AS phone_source_name
-        FROM app.restaurant r LEFT JOIN app.data_source s ON s.id=r.phone_source_id WHERE r.id = :id AND r.published
+        FROM app.restaurant r LEFT JOIN app.data_source s ON s.id=r.phone_source_id WHERE r.id = :id AND r.published AND app.has_domestic_origin(r.id,:asOf)
         """)
         .param("id", id)
+        .param("asOf", asOf.atOffset(java.time.ZoneOffset.UTC))
         .query(RestaurantRow.class)
         .optional();
   }

@@ -26,6 +26,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import tools.jackson.databind.json.JsonMapper;
 
 class BookmarksMediaIntegrationTest extends ApplicationIntegrationSupport {
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
   private static final Path MEDIA_ROOT;
 
   static {
@@ -177,6 +178,7 @@ class BookmarksMediaIntegrationTest extends ApplicationIntegrationSupport {
         id,
         "가상 테스트 즐겨찾기 " + id,
         published);
+    DomesticOriginFixture.addRice(jdbc, transactions, id);
     return id;
   }
 

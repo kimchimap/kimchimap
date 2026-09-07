@@ -63,7 +63,8 @@ public class ReportRepository {
   }
 
   public boolean publishedRestaurant(UUID id) {
-    return jdbc.sql("SELECT EXISTS(SELECT 1 FROM app.restaurant WHERE id=:id AND published)")
+    return jdbc.sql(
+            "SELECT EXISTS(SELECT 1 FROM app.restaurant WHERE id=:id AND published AND app.has_domestic_origin(id,CURRENT_TIMESTAMP))")
         .param("id", id)
         .query(Boolean.class)
         .single();

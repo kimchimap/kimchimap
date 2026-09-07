@@ -18,21 +18,25 @@ public class IngestionAdminService {
   private final IngestionJobService jobs;
   private final boolean credentialConfigured;
   private final boolean scheduling;
+  private final OriginCollectionPolicy collectionPolicy;
 
   public IngestionAdminService(
       IngestionAdminRepository repository,
       IngestionJobService jobs,
+      OriginCollectionPolicy collectionPolicy,
       @Value("${app.ingestion.public-data-key:}") String key,
       @Value("${app.ingestion.scheduling-enabled:false}") boolean scheduling) {
     this.repository = repository;
     this.jobs = jobs;
+    this.collectionPolicy = collectionPolicy;
     this.credentialConfigured = !key.isBlank();
     this.scheduling = scheduling;
   }
 
   @Transactional(readOnly = true)
   public List<IngestionAdmin.Source> sources() {
-    return repository.sources(credentialConfigured, scheduling);
+    return repository.sources(
+        credentialConfigured, scheduling, collectionPolicy.supportsDomesticQualification());
   }
 
   @Transactional(readOnly = true)

@@ -21,6 +21,7 @@ public final class IngestionAdmin {
       String name,
       boolean collectionAllowed,
       boolean republicationAllowed,
+      boolean domesticQualificationSupported,
       boolean scheduled,
       boolean credentialConfigured,
       int intervalSeconds,

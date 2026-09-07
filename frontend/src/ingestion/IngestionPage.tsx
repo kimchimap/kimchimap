@@ -45,8 +45,9 @@ function Dashboard({ memberId }: { memberId: string }) {
   return (
     <>
       <p>
-        업소 기본정보 수집으로 식재료 원산지를 추정하지 않습니다. 협회 데이터는
-        이용 허락이 없어 수집하지 않습니다.
+        국내산 사용 항목이 확인된 업소만 수집 대상으로 삼습니다. 원산지 정보가
+        없는 일반 음식점 전체 수집은 중단했습니다. 협회 데이터도 이용 허락
+        전에는 수집하지 않습니다.
       </p>
       <h2>수집 소스</h2>
       {sources.isPending ? (
@@ -74,7 +75,14 @@ function Dashboard({ memberId }: { memberId: string }) {
                 : "미확인"}
               일
             </p>
-            {source.id && <RunForm source={source} />}
+            {source.domesticQualificationSupported && source.id ? (
+              <RunForm source={source} />
+            ) : (
+              <p>
+                국내산 사용 여부를 선별할 수 없는 소스입니다. 신규 수집과 기존
+                작업 재개를 차단했습니다.
+              </p>
+            )}
           </section>
         ))
       )}

@@ -619,6 +619,9 @@
           "credentialConfigured": {
             "type": "boolean"
           },
+          "domesticQualificationSupported": {
+            "type": "boolean"
+          },
           "id": {
             "format": "uuid",
             "type": "string"
