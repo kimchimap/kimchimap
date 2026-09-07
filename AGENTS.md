@@ -1,7 +1,7 @@
 # 국산김치맵 개발 지침
 
 국내 음식점의 식재료 원산지를 메뉴·용도·출처와 함께 검색하는 모바일 우선 서비스다.
-현재 단계는 **하네스만 구성**이며 서비스 구현은 별도 작업이다. 상세 진입점은 [문서 목차](docs/index.md)다.
+현재 단계는 **작업 단위별 서비스 구현**이다. 사용자가 검증 후 dev PR 병합과 임시 브랜치 삭제, 다음 작업 진행을 승인했다. main 릴리스·배포 승인은 포함하지 않는다. 상세 진입점은 [문서 목차](docs/index.md)다.
 
 - `frontend/`: React UI, `backend/`: 단일 Spring Boot, `infra/`: 로컬 DB·Redis, `tools/harness/`: 검증·Git 도구.
 - 시작 시 `git status --short --branch`, 루트와 작업 경로의 AGENTS.md, 관련 설계·코드·테스트를 읽는다.

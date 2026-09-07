@@ -210,6 +210,14 @@ def rules_payload(branch, approvals):
                 'required_review_thread_resolution': True, 'allowed_merge_methods': ['merge' if branch == 'main' else 'squash']}}]}
 
 
+def matches_policy(actual, expected):
+    if isinstance(expected, dict):
+        return isinstance(actual, dict) and all(k in actual and matches_policy(actual[k], v) for k, v in expected.items())
+    if isinstance(expected, list):
+        return isinstance(actual, list) and len(actual) == len(expected) and all(any(matches_policy(a, e) for a in actual) for e in expected)
+    return actual == expected
+
+
 def protection(apply=False, approvals=0):
     repo = repo_name()
     meta = gh_json('api', 'repos/' + repo)
@@ -223,14 +231,21 @@ def protection(apply=False, approvals=0):
         raise ValueError('관리 권한이 없습니다.')
     for branch in ['main', 'dev']:
         gh_json('api', 'repos/' + repo + '/branches/' + branch)
+    pending = []
     for plan in plans:
         found = [x for x in existing if x['name'] == plan['name']]
         if found:
-            raise ValueError('같은 이름의 규칙이 있어 자동 변경하지 않습니다. 현재 규칙을 검토하세요.')
-    for plan in plans:
+            if len(found) != 1 or 'id' not in found[0]:
+                raise ValueError('같은 이름의 규칙을 확인할 수 없습니다.')
+            actual = gh_json('api', 'repos/' + repo + '/rulesets/' + str(found[0]['id']))
+            if not matches_policy(actual, plan):
+                raise ValueError('같은 이름의 다른 규칙은 자동 변경하지 않습니다.')
+        else:
+            pending.append(plan)
+    for plan in pending:
         created = json.loads(run(['gh', 'api', '--method', 'POST', 'repos/' + repo + '/rulesets', '--input', '-'], capture=True, input=json.dumps(plan)))
         actual = gh_json('api', 'repos/' + repo + '/rulesets/' + str(created['id']))
-        if any(actual.get(k) != plan[k] for k in ['enforcement', 'conditions', 'rules', 'bypass_actors']):
+        if not matches_policy(actual, plan):
             raise ValueError('적용 후 일치 검증 실패. 부분 적용 가능: 현재 설정을 재조회하세요.')
     print('추가 규칙 재조회 일치. 서버에서 PR head=dev와 한국어 의미까지 보장하지 않습니다.')
 

@@ -122,6 +122,17 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(data['rulesets'], [cli.rules_payload('main', 0), cli.rules_payload('dev', 0)])
 
 
+    def test_rules_accept_api_defaults_but_reject_weakened_policy(self):
+        expected = cli.rules_payload('main', 0)
+        actual = json.loads(json.dumps(expected))
+        actual['id'] = 10
+        actual['rules'][2]['parameters']['required_reviewers'] = []
+        actual['rules'].reverse()
+        self.assertTrue(cli.matches_policy(actual, expected))
+        actual['bypass_actors'] = [{'actor_id': 1}]
+        self.assertFalse(cli.matches_policy(actual, expected))
+
+
 class GitHookTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
