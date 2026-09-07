@@ -8,16 +8,26 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(name = "app.ingestion.scheduling-enabled", havingValue = "true")
+@ConditionalOnProperty(
+    name = "app.ingestion.worker-enabled",
+    havingValue = "true",
+    matchIfMissing = true)
 public class IngestionDispatcher {
   private final IngestionJobService jobs;
   private final IngestionWorker worker;
+  private final boolean scheduling;
   private final java.util.concurrent.ExecutorService executor = Executors.newSingleThreadExecutor();
   private final Semaphore capacity = new Semaphore(1);
 
-  public IngestionDispatcher(IngestionJobService jobs, IngestionWorker worker) {
+  public IngestionDispatcher(
+      IngestionJobService jobs,
+      IngestionWorker worker,
+      @org.springframework.beans.factory.annotation.Value(
+              "${app.ingestion.scheduling-enabled:false}")
+          boolean scheduling) {
     this.jobs = jobs;
     this.worker = worker;
+    this.scheduling = scheduling;
   }
 
   @Scheduled(fixedDelay = 1000)
@@ -26,7 +36,7 @@ public class IngestionDispatcher {
     executor.execute(
         () -> {
           try {
-            jobs.scheduleDue();
+            if (scheduling) jobs.scheduleDue();
             worker.processOne(null);
           } catch (RuntimeException exception) {
             org.slf4j.LoggerFactory.getLogger(IngestionDispatcher.class)

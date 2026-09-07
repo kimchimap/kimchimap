@@ -31,3 +31,5 @@ Bearer 헤더 추출은 Spring의 DefaultBearerTokenResolver, 서명·클레임�
 P06b에서 카카오 Authorization Code/OIDC·PKCE와 브라우저 메모리 인증을 연결했다. 구현 경계·쿠키와 탭 경합·테스트 공급자 분리는 [카카오 로그인 결정](decisions/0008-kakao-login.md)을 따른다. 현재 검증한 통제된 공급자 성공은 실제 카카오 사용자 로그인 성공을 의미하지 않는다.
 
 이미지 처리·동시성·파일/DB 정합성 경계는 [비공개 증빙 결정](decisions/0009-private-evidence-images.md)을 따른다.
+
+서버 관리자 권한 지정은 memberAdmin 명령의 기본 변경 계획과 명시적 적용을 사용한다. 현재 권한·회원 활성 상태를 검사하고 OS 실행자·사유를 감사에 남긴다. 자동 승격과 HTTP 우회 경로는 없다. 실제 사용자의 권한은 이번 도구 구현만으로 변경하지 않는다.
