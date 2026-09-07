@@ -74,3 +74,7 @@ P06a는 로그인 이후의 JWT·Refresh 세션 기반을 제공한다. 실제 �
 카카오 앱에서 지도·로그인·OIDC를 활성화하고 웹 도메인 `http://localhost:5173`, 로그인 Redirect URI `http://localhost:5173/api/v1/auth/callback/kakao`를 등록한다. 브라우저도 `localhost`로 접속한다. `127.0.0.1`은 서로 다른 Origin이라 인증 요청이 거부된다. 키는 공통 저장소의 `.local/integrations.env`에서 런타임이 읽는다. KAKAO_CLIENT_ID는 REST API 키, KAKAO_CLIENT_SECRET은 로그인 시크릿이며 VITE 변수로 전달하지 않는다.
 
 인프라와 백엔드·프론트엔드를 실행한 뒤 `/login`에서 카카오로 이동한다. 성공 후 `/auth/complete`가 CSRF 보호 요청으로 서비스 세션을 복구한다. 키 미설정이면 로그인 시작은 503이고 공개 조회는 계속 제공한다. 외부 계정 로그인이 필요한 실제 검증과 키 없이 실행되는 통제된 OIDC 통합 테스트를 구분한다.
+
+## 증빙 사진 저장
+
+기본 경로는 백엔드 실행 디렉터리의 `.local/media`다. 작업 디렉터리가 바뀌어도 같은 파일을 쓰려면 Git 제외 설정의 `MEDIA_ROOT`에 웹 루트 밖 절대 경로를 지정한다. 기존 경로와 파일을 자동 초기화하지 않는다. 운영에서는 MEDIA_ROOT를 명시해야 한다. JPEG/PNG만 지원하며 첨부·원본 다운로드에는 활성 서비스 인증이 필요하다. `/media/new`에서 사진을 첨부하고 `/bookmarks`에서 본인 즐겨찾기를 확인한다. 사진만 첨부하면 제보 접수로 처리되지 않으며 24시간 후 미연결 정리 대상이다.
