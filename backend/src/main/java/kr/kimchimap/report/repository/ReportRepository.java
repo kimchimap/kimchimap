@@ -131,6 +131,22 @@ public class ReportRepository {
         .optional();
   }
 
+  public void linkRestaurant(UUID id, UUID restaurant) {
+    jdbc.sql(
+            "UPDATE app.report SET restaurant_id=:restaurant WHERE id=:id AND restaurant_id IS NULL")
+        .param("id", id)
+        .param("restaurant", restaurant)
+        .update();
+  }
+
+  public boolean domesticKimchiIngredient(UUID ingredient) {
+    return jdbc.sql(
+            "SELECT EXISTS(SELECT 1 FROM app.ingredient WHERE id=:id AND code IN ('napa-cabbage','red-pepper-powder') AND active)")
+        .param("id", ingredient)
+        .query(Boolean.class)
+        .single();
+  }
+
   public void update(UUID id, UUID revision, String state) {
     jdbc.sql(
             "UPDATE app.report SET current_revision_id=:revision,state=:state,version=version+1,updated_at=CURRENT_TIMESTAMP WHERE id=:id")
@@ -190,8 +206,8 @@ public class ReportRepository {
   public List<Item> list(UUID owner, String state, UUID cursor, int limit) {
     return jdbc.sql(
             """
-        SELECT r.id,r.restaurant_id,p.name restaurant_name,r.state,r.version,r.created_at
-        FROM app.report r JOIN app.restaurant p ON p.id=r.restaurant_id
+        SELECT r.id,r.restaurant_id,COALESCE(p.name,v.body->'newRestaurant'->>'name') restaurant_name,r.state,r.version,r.created_at
+        FROM app.report r LEFT JOIN app.restaurant p ON p.id=r.restaurant_id JOIN app.report_revision v ON v.id=r.current_revision_id
         WHERE (:owner::uuid IS NULL OR r.owner_id=:owner) AND (:state::text IS NULL OR r.state=:state)
           AND (:cursor::uuid IS NULL OR r.created_at < (SELECT created_at FROM app.report WHERE id=:cursor)
             OR (r.created_at=(SELECT created_at FROM app.report WHERE id=:cursor) AND r.id > :cursor))

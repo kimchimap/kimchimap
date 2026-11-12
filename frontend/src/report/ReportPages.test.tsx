@@ -5,8 +5,8 @@ import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../api/client";
 import { sessionSnapshot } from "../auth/session";
-import { getReports, reportError } from "./api";
-import { ReportsPage } from "./ReportPages";
+import { getCatalogs, getReports, reportError } from "./api";
+import { NewReportPage, ReportsPage } from "./ReportPages";
 import { ClaimEditor } from "./ClaimEditor";
 vi.mock("../auth/session", () => ({
   sessionSnapshot: vi.fn(),
@@ -16,6 +16,7 @@ vi.mock("../auth/session", () => ({
 vi.mock("./api", async (original) => ({
   ...(await original<typeof import("./api")>()),
   getReports: vi.fn(),
+  getCatalogs: vi.fn(),
 }));
 beforeEach(() => {
   vi.mocked(sessionSnapshot).mockReturnValue({
@@ -104,4 +105,46 @@ describe("제보 접근과 원산지 입력", () => {
     expect(reportError(new ApiError(409))).toContain("최신 내용");
     expect(reportError(new Error())).toContain("목록을 확인");
   });
+});
+
+it("새 위치 제보는 기존 업소 조회 없이 가게 정보와 사진 입력을 제공한다", async () => {
+  vi.mocked(sessionSnapshot).mockReturnValue({
+    status: "authenticated",
+    member: { id: "test-member", role: "USER" },
+  });
+  vi.mocked(getCatalogs).mockResolvedValue({ ingredients: [], countries: [] });
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <MemoryRouter
+        initialEntries={["/reports/new?latitude=37.5665&longitude=126.978"]}
+      >
+        <NewReportPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  expect(await screen.findByLabelText("가게 이름")).toBeInTheDocument();
+  expect(screen.getByLabelText("가게 주소")).toBeInTheDocument();
+  expect(screen.getByText(/선택 위치: 37.5665, 126.978/)).toBeInTheDocument();
+  expect(screen.getByLabelText("사진 선택")).toBeInTheDocument();
+});
+it("범위 밖 제보 좌표는 새 가게 양식을 열지 않는다", () => {
+  vi.mocked(sessionSnapshot).mockReturnValue({
+    status: "authenticated",
+    member: { id: "test-member", role: "USER" },
+  });
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter
+        initialEntries={["/reports/new?latitude=126.978&longitude=37.5665"]}
+      >
+        <NewReportPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  expect(screen.queryByLabelText("가게 이름")).not.toBeInTheDocument();
+  expect(screen.getByText(/지도에서 가게 위치를 선택/)).toBeInTheDocument();
 });

@@ -6,9 +6,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import kr.kimchimap.restaurant.dto.ProposedRestaurant;
 
 public record ReportSubmission(
-    @NotNull UUID restaurantId,
+    UUID restaurantId,
+    @Valid ProposedRestaurant newRestaurant,
     UUID scopeId,
     @NotBlank @Size(max = 200) String scopeName,
     @NotBlank @Pattern(regexp = "SIDE_DISH|STEW|MAIN_DISH|OTHER|UNKNOWN") String usage,

@@ -27,14 +27,29 @@ import type { components } from "../api/generated";
 export function NewReportPage() {
   const [params] = useSearchParams();
   const restaurantId = params.get("restaurantId");
+  const latitude = Number(params.get("latitude")),
+    longitude = Number(params.get("longitude"));
+  const location =
+    params.has("latitude") &&
+    params.has("longitude") &&
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= 32 &&
+    latitude <= 39.5 &&
+    longitude >= 124 &&
+    longitude <= 132
+      ? { latitude, longitude }
+      : undefined;
   return (
     <main id="main-content">
       <h1>원산지 제보</h1>
       <Access>
         {restaurantId ? (
           <ReportForm restaurantId={restaurantId} />
+        ) : location ? (
+          <ReportForm location={location} />
         ) : (
-          <p>업소 상세 화면에서 제보할 업소를 선택해 주세요.</p>
+          <p>지도에서 가게 위치를 선택한 뒤 제보하기를 눌러 주세요.</p>
         )}
       </Access>
     </main>
@@ -152,10 +167,24 @@ function ReportDetail({ id, admin }: { id: string; admin: boolean }) {
     );
   const report = query.data,
     submission = query.data.submission;
+  const approvedAt = report.reviews?.find(
+    (review) => review.decision === "APPROVED",
+  )?.createdAt;
   const editable = ["PENDING", "NEEDS_MORE_INFO"].includes(report.state ?? "");
   return (
     <>
       <p>상태: {states[report.state ?? ""]}</p>
+      {submission.newRestaurant && (
+        <section aria-label="신규 업소 정보">
+          <h2>{submission.newRestaurant.name}</h2>
+          <p>{submission.newRestaurant.address}</p>
+          <p>
+            선택 위치: {submission.newRestaurant.latitude},{" "}
+            {submission.newRestaurant.longitude}
+          </p>
+          <p>{submission.newRestaurant.phone}</p>
+        </section>
+      )}
       <h2>
         {submission.scopeName} · {usages[submission.usage]}
       </h2>
@@ -188,6 +217,21 @@ function ReportDetail({ id, admin }: { id: string; admin: boolean }) {
       <p>
         승인은 표시판 제보에 대한 검수이며 실제 납품 원산지 검증이 아닙니다.
       </p>
+      {report.state === "APPROVED" && (
+        <p>
+          인증 날짜 (국산김치맵 제보 승인):{" "}
+          {approvedAt
+            ? new Date(approvedAt).toLocaleDateString("ko-KR", {
+                timeZone: "Asia/Seoul",
+              })
+            : "확인 중"}
+        </p>
+      )}
+      {report.state === "APPROVED" && report.restaurantId && (
+        <Link to={`/restaurants/${report.restaurantId}/contact`}>
+          등록된 가게 보기
+        </Link>
+      )}
       <h2>검토 이력</h2>
       {!report.reviews?.length && <p>아직 검토 이력이 없습니다.</p>}
       <ol>
@@ -212,7 +256,9 @@ function ReportDetail({ id, admin }: { id: string; admin: boolean }) {
           {editing && (
             <ReportForm
               key={report.version}
-              restaurantId={submission.restaurantId}
+              {...(submission.restaurantId
+                ? { restaurantId: submission.restaurantId }
+                : {})}
               existing={report}
             />
           )}
@@ -242,14 +288,15 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
   const [decision, setDecision] = useState("NEEDS_MORE_INFO");
   const [reason, setReason] = useState("");
   const [scope, setScope] = useState(report.submission?.scopeId ?? "");
+  const [locationReviewed, setLocationReviewed] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const restaurant = useQuery({
     queryKey: ["restaurant", report.submission?.restaurantId],
     queryFn: ({ signal }) =>
-      getRestaurant(report.submission!.restaurantId, signal),
-    enabled: admin,
+      getRestaurant(report.submission!.restaurantId!, signal),
+    enabled: admin && !!report.submission?.restaurantId,
     retry: false,
   });
   async function submit() {
@@ -264,6 +311,7 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
             expectedVersion: report.version,
             decision,
             reason,
+            locationReviewed,
             privacyReviewedMediaIds: decision === "APPROVED" ? photos : [],
             ...(decision === "APPROVED" && scope
               ? { approvedScopeId: scope }
@@ -309,6 +357,16 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
             </select>
             {decision === "APPROVED" && (
               <>
+                {report.submission?.newRestaurant && (
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={locationReviewed}
+                      onChange={(e) => setLocationReviewed(e.target.checked)}
+                    />
+                    위치·주소·김치 표시판이 같은 가게인지 확인했습니다.
+                  </label>
+                )}
                 <label htmlFor="review-scope">공개 반영할 메뉴·용도</label>
                 <select
                   id="review-scope"
@@ -369,7 +427,13 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
         />
         <button
           type="submit"
-          disabled={admin && decision === "APPROVED" && !restaurant.isSuccess}
+          disabled={
+            admin &&
+            decision === "APPROVED" &&
+            (report.submission?.newRestaurant
+              ? !locationReviewed
+              : !restaurant.isSuccess)
+          }
         >
           {busy ? "처리 중…" : admin ? "검수 결과 반영" : "제보 철회"}
         </button>

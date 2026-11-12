@@ -57,3 +57,9 @@ P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본�
 ## 좋아요 공개 합계
 
 `GET /api/v1/restaurants/{id}/likes`는 공개 자격이 있는 업소의 `count`만 반환한다. 회원 식별자·개인 목록은 공개하지 않는다. `PUT/DELETE /api/v1/likes/{id}`는 현재 인증 회원에게만 적용되며 멱등적이다. 기존 bookmarks 경로는 제거한다.
+
+## 신규 위치 제보
+
+`POST /api/v1/reports`는 기존 `restaurantId` 또는 `newRestaurant` 중 하나만 받는다. 신규 정보는 이름·주소·선택 좌표와 선택 전화번호다. 승인 전 업소는 생성하지 않으며 본인/관리자 제보 목록에는 제출한 이름을 표시한다. 새 업소에는 기존 품목 ID를 연결할 수 없다.
+
+관리자 승인 요청은 신규 업소일 때 `locationReviewed: true`가 필요하다. 국내산 배추·고춧가루 중 하나의 근거가 있어야 등록한다. 동일 이름·주소의 기존 업소가 있으면 `RESTAURANT_MATCH_REQUIRED` 충돌로 되돌리고 임의 병합하지 않는다. 생성·연결·원산지·검수 이력을 함께 커밋한다. 제보 응답의 `restaurantId`는 승인 후 생성된 가게를 가리킨다. 제보 인증일은 승인 검토 이력의 서버 시각이다.

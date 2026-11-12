@@ -17,8 +17,10 @@ import {
 export function ReportForm({
   restaurantId,
   existing,
+  location,
 }: {
-  restaurantId: string;
+  restaurantId?: string;
+  location?: { latitude: number; longitude: number };
   existing?: Report;
 }) {
   const navigate = useNavigate();
@@ -26,7 +28,16 @@ export function ReportForm({
   const [draft, setDraft] = useState<Submission>(
     () =>
       existing?.submission ?? {
-        restaurantId,
+        ...(restaurantId
+          ? { restaurantId }
+          : {
+              newRestaurant: {
+                name: "",
+                address: "",
+                latitude: location?.latitude ?? 0,
+                longitude: location?.longitude ?? 0,
+              },
+            }),
         scopeName: "",
         usage: "SIDE_DISH",
         observedOn: "",
@@ -52,7 +63,8 @@ export function ReportForm({
   });
   const restaurant = useQuery({
     queryKey: ["restaurant", restaurantId],
-    queryFn: ({ signal }) => getRestaurant(restaurantId, signal),
+    enabled: !!restaurantId,
+    queryFn: ({ signal }) => getRestaurant(restaurantId!, signal),
     retry: false,
   });
   async function submit() {
@@ -96,9 +108,9 @@ export function ReportForm({
       setBusy(false);
     }
   }
-  if (catalogs.isPending || restaurant.isPending)
+  if (catalogs.isPending || (!!restaurantId && restaurant.isPending))
     return <p role="status">제보 양식을 불러오고 있습니다.</p>;
-  if (catalogs.isError || restaurant.isError)
+  if (catalogs.isError || (!!restaurantId && restaurant.isError))
     return (
       <div role="alert">
         업소와 식재료 정보를 불러오지 못했습니다.
@@ -120,8 +132,69 @@ export function ReportForm({
         void submit();
       }}
     >
-      <h2>{restaurant.data.name}</h2>
-      <p>{restaurant.data.address}</p>
+      {draft.newRestaurant ? (
+        <fieldset disabled={busy}>
+          <legend>새 가게 정보</legend>
+          <p>
+            선택 위치: {draft.newRestaurant.latitude},{" "}
+            {draft.newRestaurant.longitude}
+          </p>
+          <p>관리자가 위치와 표시판을 확인하고 승인한 뒤 지도에 등록됩니다.</p>
+          <label htmlFor="new-restaurant-name">가게 이름</label>
+          <input
+            id="new-restaurant-name"
+            required
+            maxLength={200}
+            value={draft.newRestaurant.name}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                newRestaurant: {
+                  ...draft.newRestaurant!,
+                  name: e.target.value,
+                },
+              })
+            }
+          />
+          <label htmlFor="new-restaurant-address">가게 주소</label>
+          <input
+            id="new-restaurant-address"
+            required
+            maxLength={500}
+            value={draft.newRestaurant.address}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                newRestaurant: {
+                  ...draft.newRestaurant!,
+                  address: e.target.value,
+                },
+              })
+            }
+          />
+          <label htmlFor="new-restaurant-phone">가게 전화번호 (선택)</label>
+          <input
+            id="new-restaurant-phone"
+            type="tel"
+            maxLength={64}
+            value={draft.newRestaurant.phone ?? ""}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                newRestaurant: {
+                  ...draft.newRestaurant!,
+                  phone: e.target.value,
+                },
+              })
+            }
+          />
+        </fieldset>
+      ) : (
+        <>
+          <h2>{restaurant.data?.name}</h2>
+          <p>{restaurant.data?.address}</p>
+        </>
+      )}
       <p>
         표시판에서 실제 확인한 내용만 적어 주세요. 제보 승인은 식재료 납품이나
         위생·안전성 인증이 아닙니다.
@@ -133,7 +206,7 @@ export function ReportForm({
           id="report-scope"
           value={draft.scopeId ?? ""}
           onChange={(e) => {
-            const scope = restaurant.data.scopes?.find(
+            const scope = restaurant.data?.scopes?.find(
               (item) => item.id === e.target.value,
             );
             const { scopeId: ignored, ...rest } = draft;
@@ -151,7 +224,7 @@ export function ReportForm({
           }}
         >
           <option value="">새 품목 제보</option>
-          {restaurant.data.scopes?.map((scope) => (
+          {restaurant.data?.scopes?.map((scope) => (
             <option key={scope.id} value={scope.id}>
               {scope.name} · {usages[scope.usage ?? ""]}
             </option>

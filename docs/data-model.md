@@ -48,3 +48,5 @@ V6는 bookmark의 회원/업소 유일 키와 media의 소유자·무작위 저�
 열 번째 마이그레이션은 data_source.designation_allowed(기본 false), designation.version/reviewed_at와 불변 designation_revision을 추가한다. restaurant_match_review는 source/external별 정규화 관찰본·원래 수집 시각·작업·버전·결정 상태를 보관한다. restaurant_match_audit는 결정 당시 관찰본과 관리자·사유를 불변 보존한다. 현재까지 실제 지정 소스를 활성화하지 않았다.
 
 V12는 기존 bookmark를 restaurant_like로 이름 변경하고 업소별 합계 조회 인덱스를 추가한다. 회원·업소 유일성과 기존 데이터는 보존한다. 새로운 별도 즐겨찾기 저장소를 두지 않는다.
+
+V13은 미등록 위치 제보를 위해 report.restaurant_id를 승인 전까지 비워 둘 수 있게 한다. 승인 상태에는 업소 연결을 강제하는 CHECK 제약을 둔다. 신규 이름·주소·좌표는 불변 report_revision JSON에 보관하며 수정은 새 revision이다. 관리자 승인 시 restaurant Service에서 생성하고 report·origin·검토 기록과 같은 트랜잭션을 사용한다. 같은 이름·주소의 승인 경합은 DB 트랜잭션 advisory lock 후 중복 확인으로 차단한다. 유사한 이름·주소를 자동 병합하지 않는다.
