@@ -87,3 +87,7 @@ API_PROXY_TARGET=http://127.0.0.1:18080 ./scripts/harness dev-frontend
 로컬 JWT_PRIVATE_KEY_PATH 미설정 시 메모리 RSA 키를 사용한다. 재시작 후 Access Token은 무효이며 유효한 Refresh 세션으로 갱신한다. 운영은 RSA 개인 JWK 경로·JWT_KEY_ID가 필요하고 이전 공개키는 JWT_VERIFICATION_KEYS_PATH에 JWK Set으로 제공한다. 기본 Access Token은 10분, 세션 절대 수명은 14일이며 운영 안전 검증을 적용한다. SEARCH_CURSOR_SECRET은 운영에서 32바이트 이상이다.
 
 갱신·로그아웃은 `/api/v1/auth/csrf`의 토큰과 동일 Origin을 요구한다. 토큰은 브라우저 메모리·HttpOnly 쿠키를 분리하며 사용자 캐시는 로그아웃 때 제거한다. 자세한 키 교체·장애 정책은 [보안](security.md)을 따른다.
+
+## 카카오 로그인 KOE205 해결
+
+`openid`를 요청하는 현재 구성에서는 카카오 개발자 콘솔의 OpenID Connect가 ON이어야 한다. 카카오 로그인 사용 설정과 별도 항목이므로 둘 다 확인한다. OFF일 때는 KOE205가 발생할 수 있다. 앱 관리자의 승인을 받아 활성화한 뒤 서비스 로그인 화면에서 새 요청으로 재시도한다. 오류를 피하려고 ID 토큰·nonce 검증을 제거하지 않는다. [공식 오류 문서](https://developers.kakao.com/docs/en/kakaologin/trouble-shooting)를 참고한다.
