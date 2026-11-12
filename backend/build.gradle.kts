@@ -124,3 +124,11 @@ tasks.register<JavaExec>("memberAdmin") {
       "--server.port=0",
   )
 }
+
+tasks.register<JavaExec>("browserTestServer") {
+  group = "verification"
+  description = "임시 DB·Redis와 통제된 OIDC 공급자를 사용하는 브라우저 테스트 서버"
+  dependsOn(tasks.testClasses)
+  classpath = sourceSets.test.get().runtimeClasspath
+  mainClass = "kr.kimchimap.BrowserTestServer"
+}

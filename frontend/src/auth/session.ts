@@ -125,6 +125,11 @@ export async function authenticatedFetch(
 ): Promise<Response> {
   if (!path.startsWith("/api/v1/") || path.includes("\\"))
     throw new Error("허용되지 않은 요청 주소입니다.");
+  if (
+    !accessToken &&
+    ["anonymous", "expired", "unavailable"].includes(state.status)
+  )
+    throw new ApiError(401);
   if (!accessToken) await refreshSession();
   const send = () => {
     const headers = new Headers(options.headers);
