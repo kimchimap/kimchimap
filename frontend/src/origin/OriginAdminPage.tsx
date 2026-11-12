@@ -175,7 +175,7 @@ function CorrectionForm({ detail }: { detail: Detail }) {
       });
       await client.invalidateQueries({ queryKey: ["private"] });
       await client.invalidateQueries({ queryKey: ["restaurant"] });
-      await client.invalidateQueries({ queryKey: ["search"] });
+      await client.invalidateQueries({ queryKey: ["restaurant-search"] });
     } catch (cause) {
       setError(reportError(cause));
     } finally {

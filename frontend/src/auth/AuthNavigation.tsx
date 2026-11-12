@@ -36,11 +36,13 @@ export function AuthNavigation() {
       {session.status === "authenticated" ? (
         <>
           <Link to="/reports">내 제보</Link>
+          <Link to="/information-reports">내 신고</Link>
           {session.member?.role === "ADMIN" && (
             <details className="admin-menu">
               <summary>관리</summary>
               <div>
                 <Link to="/admin/reports">제보 검수</Link>
+                <Link to="/admin/information-reports">오류 신고</Link>
                 <Link to="/admin/ingestion">수집 관리</Link>
                 <Link to="/admin/origins">원산지 정정</Link>
                 <Link to="/admin/designations">지정 정보</Link>

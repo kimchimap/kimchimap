@@ -11,9 +11,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
-        post: operations["create_1"];
+        post: operations["create_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -52,6 +52,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/information-reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_7"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/information-reports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail_8"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/information-reports/{id}/resolution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/ingestion/jobs": {
         parameters: {
             query?: never;
@@ -75,7 +123,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_6"];
+        get: operations["detail_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -155,7 +203,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_5"];
+        get: operations["list_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -171,7 +219,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_5"];
+        get: operations["detail_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -219,7 +267,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_4"];
+        get: operations["list_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -235,7 +283,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_4"];
+        get: operations["detail_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -251,7 +299,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_3"];
+        get: operations["list_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -267,7 +315,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_3"];
+        get: operations["detail_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -404,6 +452,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/information-reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_1"];
+        put?: never;
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/information-reports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/likes": {
         parameters: {
             query?: never;
@@ -411,7 +491,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -761,6 +841,54 @@ export interface components {
             /** Format: int64 */
             expectedVersion: number;
             reason: string;
+        };
+        InformationReportItem: {
+            category?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            restaurantId?: string;
+            restaurantName?: string;
+            state?: string;
+        };
+        InformationReportPage: {
+            items?: components["schemas"]["InformationReportItem"][];
+            /** Format: uuid */
+            nextCursor?: string;
+        };
+        InformationReportResolution: {
+            correction?: components["schemas"]["OriginCorrectionRequest"];
+            decision: string;
+            /** Format: int64 */
+            expectedVersion: number;
+            reason: string;
+        };
+        InformationReportSubmission: {
+            category: string;
+            description: string;
+            mediaIds: string[];
+            /** Format: uuid */
+            restaurantId: string;
+        };
+        InformationReportView: {
+            category?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            description?: string;
+            /** Format: uuid */
+            id?: string;
+            mediaIds?: string[];
+            resolutionReason?: string;
+            /** Format: date-time */
+            resolvedAt?: string;
+            /** Format: uuid */
+            restaurantId?: string;
+            restaurantName?: string;
+            state?: string;
+            /** Format: int64 */
+            version?: number;
         };
         IngestionEvent: {
             /** Format: date-time */
@@ -1210,7 +1338,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    list_1: {
+    list_2: {
         parameters: {
             query?: {
                 restaurantId?: string;
@@ -1232,7 +1360,7 @@ export interface operations {
             };
         };
     };
-    create_1: {
+    create_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1324,6 +1452,78 @@ export interface operations {
             };
         };
     };
+    list_7: {
+        parameters: {
+            query?: {
+                state?: string;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InformationReportPage"];
+                };
+            };
+        };
+    };
+    detail_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InformationReportView"];
+                };
+            };
+        };
+    };
+    resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InformationReportResolution"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InformationReportView"];
+                };
+            };
+        };
+    };
     jobs: {
         parameters: {
             query?: never;
@@ -1344,7 +1544,7 @@ export interface operations {
             };
         };
     };
-    detail_6: {
+    detail_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -1464,7 +1664,7 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    list_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -1484,7 +1684,7 @@ export interface operations {
             };
         };
     };
-    detail_5: {
+    detail_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -1556,7 +1756,7 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    list_5: {
         parameters: {
             query?: {
                 status?: string;
@@ -1580,7 +1780,7 @@ export interface operations {
             };
         };
     };
-    detail_4: {
+    detail_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -1603,7 +1803,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_4: {
         parameters: {
             query?: {
                 state?: string;
@@ -1627,7 +1827,7 @@ export interface operations {
             };
         };
     };
-    detail_3: {
+    detail_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -1823,7 +2023,79 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_1: {
+        parameters: {
+            query?: {
+                state?: string;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InformationReportPage"];
+                };
+            };
+        };
+    };
+    create_1: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InformationReportSubmission"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InformationReportView"];
+                };
+            };
+        };
+    };
+    detail_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InformationReportView"];
+                };
+            };
+        };
+    };
+    list_3: {
         parameters: {
             query?: {
                 cursor?: string;

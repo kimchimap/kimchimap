@@ -52,3 +52,5 @@ V12는 기존 bookmark를 restaurant_like로 이름 변경하고 업소별 합�
 V13은 미등록 위치 제보를 위해 report.restaurant_id를 승인 전까지 비워 둘 수 있게 한다. 승인 상태에는 업소 연결을 강제하는 CHECK 제약을 둔다. 신규 이름·주소·좌표는 불변 report_revision JSON에 보관하며 수정은 새 revision이다. 관리자 승인 시 restaurant Service에서 생성하고 report·origin·검토 기록과 같은 트랜잭션을 사용한다. 같은 이름·주소의 승인 경합은 DB 트랜잭션 advisory lock 후 중복 확인으로 차단한다. 유사한 이름·주소를 자동 병합하지 않는다.
 
 V14는 실제 승인 인증일 조회를 위한 report_review의 승인 revision 식별자·시각 부분 인덱스를 추가한다. 기존 origin.reviewed_at은 별도로 보존하고 report_review.created_at과 혼동하지 않는다.
+
+V15는 information_report·information_report_media·information_report_review를 추가한다. 원산지 제보와 별개로 오류 신고 본문·첨부 연결·처리 감사를 불변 보존한다. 회원별 요청 키 유일성과 본문 해시로 동일 요청 재전송을 처리하며, PENDING에서 RESOLVED/DISMISSED로 한 번만 전이한다. 관리자 처리에는 버전·사유·행위자·시각을 남긴다.

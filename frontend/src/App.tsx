@@ -1,3 +1,8 @@
+import {
+  NewInformationReportPage,
+  InformationReportsPage,
+  InformationReportDetailPage,
+} from "./feedback/InformationReportPages";
 import { MapPage } from "./map/MapPage";
 import { DataGuidePage } from "./map/DataGuidePage";
 import { RestaurantDetailPage } from "./restaurant/RestaurantDetail";
@@ -48,6 +53,26 @@ export function App() {
         <Route path="/admin/matches" element={<MatchesPage />} />
         <Route path="/admin/origins" element={<OriginAdminPage />} />
         <Route path="/admin/ingestion" element={<IngestionPage />} />
+        <Route
+          path="/information-reports/new"
+          element={<NewInformationReportPage />}
+        />
+        <Route
+          path="/information-reports"
+          element={<InformationReportsPage />}
+        />
+        <Route
+          path="/information-reports/:id"
+          element={<InformationReportDetailPage />}
+        />
+        <Route
+          path="/admin/information-reports"
+          element={<InformationReportsPage admin />}
+        />
+        <Route
+          path="/admin/information-reports/:id"
+          element={<InformationReportDetailPage admin />}
+        />
         <Route path="/reports/new" element={<NewReportPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/reports/:id" element={<ReportDetailPage />} />
