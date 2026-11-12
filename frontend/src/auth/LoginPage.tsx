@@ -8,7 +8,7 @@ export function LoginPage() {
     <main id="main-content">
       <h1>국산김치맵 로그인</h1>
       <p>
-        카카오 계정으로 로그인하면 즐겨찾기와 원산지 제보를 이용할 수 있습니다.
+        카카오 계정으로 로그인하면 좋아요와 원산지 제보를 이용할 수 있습니다.
       </p>
       {parameters.has("error") && (
         <p role="alert">로그인을 완료하지 못했습니다. 다시 시도해 주세요.</p>

@@ -95,7 +95,7 @@ public class SecurityConfiguration {
           requests.requestMatchers("/api/v1/reports", "/api/v1/reports/**").authenticated();
           requests
               .requestMatchers(
-                  "/api/v1/bookmarks", "/api/v1/bookmarks/**", "/api/v1/media", "/api/v1/media/**")
+                  "/api/v1/likes", "/api/v1/likes/**", "/api/v1/media", "/api/v1/media/**")
               .authenticated();
           requests.requestMatchers(HttpMethod.POST, "/api/v1/restaurants/search").permitAll();
           requests
@@ -104,7 +104,8 @@ public class SecurityConfiguration {
                   "/api/v1/system/status",
                   "/api/v1/catalogs/ingredients",
                   "/api/v1/catalogs/countries",
-                  "/api/v1/restaurants/{id}")
+                  "/api/v1/restaurants/{id}",
+                  "/api/v1/restaurants/{id}/likes")
               .permitAll();
           if (environment.matchesProfiles("local", "test")
               && !environment.matchesProfiles("prod")) {

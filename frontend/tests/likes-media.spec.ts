@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("통제된 회원 화면에서 즐겨찾기와 비공개 사진 첨부를 사용한다", async ({
+test("통제된 회원 화면에서 좋아요와 비공개 사진 첨부를 사용한다", async ({
   page,
 }) => {
   await page.route("**/api/v1/auth/csrf", (route) =>
@@ -15,14 +15,14 @@ test("통제된 회원 화면에서 즐겨찾기와 비공개 사진 첨부를 �
     route.fulfill({ json: { id: "test-member", role: "USER" } }),
   );
   let saved = true;
-  await page.route("**/api/v1/bookmarks?*", (route) =>
+  await page.route("**/api/v1/likes?*", (route) =>
     route.fulfill({
       json: {
         items: saved
           ? [
               {
                 restaurantId: "test-restaurant",
-                name: "가상 테스트 즐겨찾기 업소",
+                name: "가상 테스트 좋아요 업소",
                 address: "테스트 주소",
               },
             ]
@@ -30,19 +30,22 @@ test("통제된 회원 화면에서 즐겨찾기와 비공개 사진 첨부를 �
       },
     }),
   );
-  await page.route("**/api/v1/bookmarks/test-restaurant", (route) => {
+  await page.route("**/api/v1/likes/test-restaurant", (route) => {
     if (route.request().method() === "DELETE") {
       saved = false;
       return route.fulfill({ status: 204 });
     }
     return route.fulfill({ json: { saved } });
   });
-  await page.goto("/bookmarks");
+  await page.route("**/api/v1/restaurants/test-restaurant/likes", (route) =>
+    route.fulfill({ json: { count: saved ? 1 : 0 } }),
+  );
+  await page.goto("/likes");
   await expect(
-    page.getByRole("link", { name: "가상 테스트 즐겨찾기 업소" }),
+    page.getByRole("link", { name: "가상 테스트 좋아요 업소" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "즐겨찾기 해제" }).click();
-  await expect(page.getByText(/아직 저장한 업소가 없습니다/)).toBeVisible();
+  await page.getByRole("button", { name: "좋아요 해제" }).click();
+  await expect(page.getByText(/아직 좋아요한 가게가 없습니다/)).toBeVisible();
   await page.route("**/api/v1/media", (route) => {
     expect(route.request().headers().authorization).toBe("Bearer test-access");
     expect(route.request().headers()["content-type"]).toContain(

@@ -4,7 +4,7 @@ import { getSystemStatus } from "./api/client";
 import { RestaurantContactPage } from "./restaurant/RestaurantContactPage";
 import { AuthNavigation } from "./auth/AuthNavigation";
 import { AuthCompletePage, LoginPage } from "./auth/LoginPage";
-import { BookmarksPage } from "./bookmark/BookmarksPage";
+import { LikesPage } from "./like/LikesPage";
 import { PhotoUploadPage } from "./media/PhotoUploadPage";
 
 import {
@@ -69,7 +69,7 @@ function Home() {
         </article>
       </section>
       <nav className="activity-links" aria-label="내 활동">
-        <Link to="/bookmarks">즐겨찾기</Link>
+        <Link to="/likes">좋아요</Link>
         <Link to="/reports">내 제보</Link>
       </nav>
       <div className="connection" role="status">
@@ -106,7 +106,7 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/complete" element={<AuthCompletePage />} />
-        <Route path="/bookmarks" element={<BookmarksPage />} />
+        <Route path="/likes" element={<LikesPage />} />
         <Route path="/media/new" element={<PhotoUploadPage />} />
         <Route path="/admin/designations" element={<DesignationsPage />} />
         <Route path="/admin/matches" element={<MatchesPage />} />

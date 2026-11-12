@@ -372,38 +372,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/bookmarks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["list_2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/bookmarks/{restaurantId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["status"];
-        put: operations["add"];
-        post?: never;
-        delete: operations["remove"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/catalogs/countries": {
         parameters: {
             query?: never;
@@ -431,6 +399,38 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/likes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/likes/{restaurantId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["status"];
+        put: operations["add"];
+        post?: never;
+        delete: operations["remove"];
         options?: never;
         head?: never;
         patch?: never;
@@ -580,6 +580,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/restaurants/{restaurantId}/likes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["count"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/status": {
         parameters: {
             query?: never;
@@ -603,23 +619,6 @@ export interface components {
         AccessTokenResponse: {
             accessToken?: string;
             tokenType?: string;
-        };
-        BookmarkItem: {
-            address?: string;
-            businessStatus?: string;
-            name?: string;
-            /** Format: uuid */
-            restaurantId?: string;
-            /** Format: date-time */
-            savedAt?: string;
-        };
-        BookmarkPage: {
-            items?: components["schemas"]["BookmarkItem"][];
-            /** Format: uuid */
-            nextCursor?: string;
-        };
-        BookmarkStatus: {
-            saved?: boolean;
         };
         Bounds: {
             /** Format: double */
@@ -872,6 +871,27 @@ export interface components {
             longitude?: number;
             matchedScopes?: components["schemas"]["MatchedScope"][];
             name?: string;
+        };
+        LikeCount: {
+            /** Format: int64 */
+            count?: number;
+        };
+        LikeItem: {
+            address?: string;
+            businessStatus?: string;
+            name?: string;
+            /** Format: uuid */
+            restaurantId?: string;
+            /** Format: date-time */
+            savedAt?: string;
+        };
+        LikePage: {
+            items?: components["schemas"]["LikeItem"][];
+            /** Format: uuid */
+            nextCursor?: string;
+        };
+        LikeStatus: {
+            saved?: boolean;
         };
         MatchCandidate: {
             address?: string;
@@ -1748,6 +1768,46 @@ export interface operations {
             };
         };
     };
+    countries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CountryItem"][];
+                };
+            };
+        };
+    };
+    ingredients: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IngredientItem"][];
+                };
+            };
+        };
+    };
     list_2: {
         parameters: {
             query?: {
@@ -1766,7 +1826,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BookmarkPage"];
+                    "*/*": components["schemas"]["LikePage"];
                 };
             };
         };
@@ -1788,7 +1848,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BookmarkStatus"];
+                    "*/*": components["schemas"]["LikeStatus"];
                 };
             };
         };
@@ -1830,46 +1890,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    countries: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["CountryItem"][];
-                };
-            };
-        };
-    };
-    ingredients: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["IngredientItem"][];
-                };
             };
         };
     };
@@ -2150,6 +2170,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RestaurantDetail"];
+                };
+            };
+        };
+    };
+    count: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LikeCount"];
                 };
             };
         };

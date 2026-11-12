@@ -39,7 +39,7 @@ class DomesticPublicationIntegrationTest extends ApplicationIntegrationSupport {
   @MockitoBean PublicDataRestaurantClient external;
 
   @Test
-  void publicReadAndBookmarkRequireDomesticEvidenceAndRespectWithdrawal() throws Exception {
+  void publicReadAndLikeRequireDomesticEvidenceAndRespectWithdrawal() throws Exception {
     UUID id = UUID.randomUUID();
     jdbc.update(
         """
@@ -54,18 +54,18 @@ class DomesticPublicationIntegrationTest extends ApplicationIntegrationSupport {
     String token = token(false);
     assertThat(search.search(request).items()).isEmpty();
     assertThat(get("/api/v1/restaurants/" + id).statusCode()).isEqualTo(404);
-    assertThat(call("PUT", "/api/v1/bookmarks/" + id, token, null).statusCode()).isEqualTo(404);
+    assertThat(call("PUT", "/api/v1/likes/" + id, token, null).statusCode()).isEqualTo(404);
     UUID record = DomesticOriginFixture.addRice(jdbc, transactions, id);
     assertThat(search.search(request).items()).extracting(item -> item.id()).containsExactly(id);
     assertThat(get("/api/v1/restaurants/" + id).statusCode()).isEqualTo(200);
-    assertThat(call("PUT", "/api/v1/bookmarks/" + id, token, null).statusCode()).isEqualTo(204);
-    assertThat(call("GET", "/api/v1/bookmarks", token, null).body()).contains(id.toString());
+    assertThat(call("PUT", "/api/v1/likes/" + id, token, null).statusCode()).isEqualTo(204);
+    assertThat(call("GET", "/api/v1/likes", token, null).body()).contains(id.toString());
     jdbc.update(
         "INSERT INTO app.origin_withdrawal(record_id,reason,actor_reference,withdrawn_at) VALUES (?,'테스트 마지막 국내산 근거 철회','test-admin',CURRENT_TIMESTAMP)",
         record);
     assertThat(search.search(request).items()).isEmpty();
     assertThat(get("/api/v1/restaurants/" + id).statusCode()).isEqualTo(404);
-    assertThat(call("GET", "/api/v1/bookmarks", token, null).body()).doesNotContain(id.toString());
+    assertThat(call("GET", "/api/v1/likes", token, null).body()).doesNotContain(id.toString());
   }
 
   @Test

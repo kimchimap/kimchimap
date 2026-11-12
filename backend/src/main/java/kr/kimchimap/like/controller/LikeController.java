@@ -1,51 +1,51 @@
-package kr.kimchimap.bookmark.controller;
+package kr.kimchimap.like.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.UUID;
 import kr.kimchimap.auth.dto.AuthenticatedMember;
-import kr.kimchimap.bookmark.dto.BookmarkPage;
-import kr.kimchimap.bookmark.service.BookmarkService;
+import kr.kimchimap.like.dto.LikePage;
+import kr.kimchimap.like.service.LikeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/bookmarks")
+@RequestMapping("/api/v1/likes")
 @SecurityRequirement(name = "serviceBearer")
-public class BookmarkController {
-  public record BookmarkStatus(boolean saved) {}
+public class LikeController {
+  public record LikeStatus(boolean saved) {}
 
-  private final BookmarkService bookmarks;
+  private final LikeService likes;
 
-  public BookmarkController(BookmarkService bookmarks) {
-    this.bookmarks = bookmarks;
+  public LikeController(LikeService likes) {
+    this.likes = likes;
   }
 
   @GetMapping
-  public BookmarkPage list(
+  public LikePage list(
       @AuthenticationPrincipal AuthenticatedMember member,
       @RequestParam(required = false) UUID cursor,
       @RequestParam(defaultValue = "20") int limit) {
-    return bookmarks.list(member.memberId(), cursor, limit);
+    return likes.list(member.memberId(), cursor, limit);
   }
 
   @PutMapping("/{restaurantId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void add(
       @AuthenticationPrincipal AuthenticatedMember member, @PathVariable UUID restaurantId) {
-    bookmarks.add(member.memberId(), restaurantId);
+    likes.add(member.memberId(), restaurantId);
   }
 
   @GetMapping("/{restaurantId}")
-  public BookmarkStatus status(
+  public LikeStatus status(
       @AuthenticationPrincipal AuthenticatedMember member, @PathVariable UUID restaurantId) {
-    return new BookmarkStatus(bookmarks.contains(member.memberId(), restaurantId));
+    return new LikeStatus(likes.contains(member.memberId(), restaurantId));
   }
 
   @DeleteMapping("/{restaurantId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void remove(
       @AuthenticationPrincipal AuthenticatedMember member, @PathVariable UUID restaurantId) {
-    bookmarks.remove(member.memberId(), restaurantId);
+    likes.remove(member.memberId(), restaurantId);
   }
 }

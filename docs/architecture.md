@@ -4,7 +4,7 @@
 
 React/Vite → 동일 사이트 `/api/v1` → 단일 Spring Boot MVC → PostgreSQL/PostGIS 및 Redis. 파일 저장은 웹 루트 밖의 로컬 저장소 어댑터. Spring scheduler는 별도 제한된 executor에서 소스 어댑터를 실행한다. 메시지 브로커는 도입하지 않는다.
 
-기능 패키지: restaurant, origin, certification, search, auth, member, bookmark, report, media, ingestion, global. 각 패키지는 controller/service/repository/entity/dto 중 필요한 계층만 둔다. global은 설정·예외·보안 기반만 포함한다.
+기능 패키지: restaurant, origin, certification, search, auth, member, like, report, media, ingestion, global. 각 패키지는 controller/service/repository/entity/dto 중 필요한 계층만 둔다. global은 설정·예외·보안 기반만 포함한다.
 
 허용 호출은 Controller→Service→Repository다. Entity는 DTO로 변환하고 API에 노출하지 않는다. 타 기능 쓰기는 해당 Service를 통해야 한다. search는 여러 기능 테이블을 읽는 전용 Repository를 둘 수 있다. ArchUnit으로 Controller→Repository, Service→Controller, repository→service, 기능 순환을 차단한다. 거대한 공통 유틸·불필요한 BaseEntity/Service/Controller·Service/Impl 쌍 금지.
 

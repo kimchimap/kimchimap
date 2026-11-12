@@ -16,7 +16,7 @@ Refresh Token은 32바이트 이상 CSPRNG 불투명 난수, 서버에는 SHA-25
 
 Spring CSRF 지원과 정확한 Origin allowlist로 쿠키 기반 갱신·로그아웃 보호. 초기 CSRF 획득 GET은 토큰과 session 연결을 제공하며 외부 Origin 거부. OAuth 콜백은 state/nonce로 보호하는 좁은 예외만 둔다. Bearer API에 대한 면제는 쿠키 인증을 사용하지 않음이 검증된 matcher에만 적용. 전역 disable 금지. CORS credentials+wildcard 금지. Vite /api 프록시와 prod 동일 사이트가 기본이다.
 
-USER/ADMIN만 사용, 최초 가입자 관리자 금지. 서버 관리 명령의 대상 회원·사유·실행자 감사로 관리자 부여. 사용자 role/userId 입력 신뢰 금지. 다른 사용자 즐겨찾기/제보/파일은 404 또는 403 정책 일관화, 관리자 모든 endpoint에 서버 인가.
+USER/ADMIN만 사용, 최초 가입자 관리자 금지. 서버 관리 명령의 대상 회원·사유·실행자 감사로 관리자 부여. 사용자 role/userId 입력 신뢰 금지. 다른 사용자 좋아요/제보/파일은 404 또는 403 정책 일관화, 관리자 모든 endpoint에 서버 인가.
 
 이미지 JPEG/PNG만 (WebP는 디코더 검증 후 검토), 10MiB·변당 8192px·총 20MP 상한(설정 가능). 헤더/실제 디코딩 검증, 처리 시간·메모리·동시성 제한, SVG/HTML 거부, EXIF 제거·재인코딩. 랜덤 저장 키·웹 루트 외부·경로 정규화, 원본 비공개, 정제본만 개인정보 검토 뒤 공개. 파일 연결 전 소유권과 상태 확인. 임시 파일 24시간·고아 파일 7일 정리 기본안, DB 참조 재확인 후 제거. OCR/LLM은 확정 근거가 아니다.
 
