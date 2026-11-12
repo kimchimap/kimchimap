@@ -171,3 +171,7 @@
 ## 2026-11-12 김치 공개 자격
 
 첫 verify에서 포맷·지정 회귀 집계가 실패했다. 일반 쌀 fixture를 김치로 바꾼 영향이며, 지정 추가 후 기존 원산지 기록 수가 유지되는지로 수정했다. 포맷 수정과 지정·공개 자격 통합 재검증 통과(`/tmp/kimchimap-kimchi-targeted-3.log`). 프론트 55건·E2E 20건 통과. 최종 PR 준비에서 전체를 다시 검증한다. 기존 UNKNOWN 품목은 자동 공개하지 않는다.
+
+## 2026-11-12 원산지 없는 과거 자료 제거
+
+PostGIS/Redis 통합에서 삭제 대상과 좋아요·품목·제보·정정·감사·다른 출처·대기 매칭 검토의 보존을 확인했다. 첫 전체 verify는 포맷만 실패했고 서비스 검사는 통과했다. spotlessApply/spotlessCheck로 수정했다. 로컬 V17 적용 후 restaurant/restaurant_source_record/restaurant_external_id/연결 ingestion_issue/매칭 후보/원산지 수는 모두 0이다. 삭제 전 업소·원천·외부 ID 각각 199건이었다. 실제 원산지 데이터 확보를 뜻하지 않는다.
