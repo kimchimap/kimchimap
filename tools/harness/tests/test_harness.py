@@ -154,6 +154,21 @@ class PolicyTests(unittest.TestCase):
             self.assertEqual(os.environ['KAKAO_CLIENT_SECRET'], '$(touch should-not-exist)')
             self.assertFalse((root / 'should-not-exist').exists())
 
+    def test_retired_source_key_is_preserved_on_disk_but_not_exported(self):
+        import runtime
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {'PUBLIC_DATA_SERVICE_KEY': 'test-inherited'}, clear=True):
+            root = Path(folder)
+            local = root / '.local'
+            local.mkdir(mode=0o700)
+            env = local / 'integrations.env'
+            content = 'PUBLIC_DATA_SERVICE_KEY=test-retired\nKAKAO_CLIENT_ID=test-current\n'
+            env.write_text(content)
+            env.chmod(0o600)
+            runtime.load_local_environment(root)
+            self.assertNotIn('PUBLIC_DATA_SERVICE_KEY', os.environ)
+            self.assertEqual(os.environ['KAKAO_CLIENT_ID'], 'test-current')
+            self.assertEqual(env.read_text(), content)
+
 
 class GitHookTests(unittest.TestCase):
     def setUp(self):

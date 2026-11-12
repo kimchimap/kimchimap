@@ -11,3 +11,5 @@
 - 다음: 참조가 있는 자료는 제외하고 나머지만 제거한다.
 
 검증: 초기 임시 테이블 접근이 권한 정책에서 거부되어 권한 확대 없이 단일 SQL 방식으로 수정했다. 삭제/보존 통합·빈 DB 초기화 통과. 전체 verify에서 서비스 검사는 통과했으며 추가 테스트 포맷 오류를 spotlessApply/spotlessCheck로 수정했다. 로컬 적용 후 업소/원천 자료/외부 ID/연결 오류/후보/원산지 모두 0건. .local/publicdata-smoke-minimized.json도 제거했고 비밀 설정은 보존했다. 최종 PR 준비에서 전체 검사를 재실행한다.
+
+최종 PR 준비 전체 통과: 단위 37·통합 77·계약 5·성능 1·프론트 55·E2E 20. PR #19는 e210b503fb80ae53811cc5a15e1c7002eb9721d8로 dev 병합했고 임시 브랜치를 정리했다. 다음 작업은 retire-general-restaurant-adapter.md.

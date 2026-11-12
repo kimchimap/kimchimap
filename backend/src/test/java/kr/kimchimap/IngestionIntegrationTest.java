@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import kr.kimchimap.ingestion.client.PublicDataRestaurantClient;
-import kr.kimchimap.ingestion.client.PublicDataRestaurantClient.Page;
+import kr.kimchimap.ingestion.client.SourceAdapter.Page;
+import kr.kimchimap.ingestion.client.SourceAdapters;
 import kr.kimchimap.ingestion.client.SourceFailure;
 import kr.kimchimap.ingestion.dto.SourceRestaurant;
 import kr.kimchimap.ingestion.repository.IngestionJobRepository;
@@ -38,7 +38,7 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
   @Autowired IngestionJobRepository repository;
   @Autowired IngestionWorker worker;
   @Autowired IngestionPageService pages;
-  @MockitoBean PublicDataRestaurantClient source;
+  @MockitoBean SourceAdapters source;
 
   @BeforeEach
   void isolateJobLifecycle() {
@@ -52,9 +52,10 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
     var first = row("가상 테스트 첫 업소");
     var second = row("가상 테스트 둘째 업소");
     var third = row("가상 테스트 셋째 업소");
-    when(source.fetch(eq(1), eq(2), any(), any()))
+    when(source.fetch(any(), eq(1), eq(2), any(), any()))
         .thenReturn(new Page(1, 2, 3, List.of(first, second)));
-    when(source.fetch(eq(2), eq(2), any(), any())).thenReturn(new Page(2, 2, 3, List.of(third)));
+    when(source.fetch(any(), eq(2), eq(2), any(), any()))
+        .thenReturn(new Page(2, 2, 3, List.of(third)));
     UUID id = jobs.request("INCREMENTAL", 2, 1);
     assertThat(worker.processOne(id)).isTrue();
     assertThat(jobs.get(id).status()).isEqualTo("PARTIAL");
@@ -90,12 +91,39 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
   }
 
   @Test
-  void invalidRecordsAreQuarantinedAndInvalidPhoneIsNeverPublished() throws Exception {
-    var invalid = changed(row("가상 테스트 오류 업소"), "DAT_UPDT_PNT", "not-a-date");
-    var usable =
+  void standardSourceCoordinatesPreserveDeclaredSridInsteadOfAssumingLegacyProjection() {
+    var row =
         changed(
-            changed(row("가상 테스트 좌표 누락"), "CRD_INFO_X", "invalid"), "TELNO", "javascript:alert(1)");
-    when(source.fetch(anyInt(), anyInt(), any(), any()))
+            changed(changed(row("가상 테스트 표준 좌표"), "coordinateSrid", "4326"), "x", "127"), "y", "37");
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
+        .thenReturn(new Page(1, 2, 1, List.of(row)));
+    worker.processOne(jobs.request("INCREMENTAL", 2, 1));
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT original_srid FROM app.restaurant_source_record WHERE external_id=?",
+                Integer.class,
+                externalId(row)))
+        .isEqualTo(4326);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT public.ST_X(location) FROM app.restaurant WHERE id=?",
+                Double.class,
+                restaurantId(row)))
+        .isEqualTo(127d);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT public.ST_Y(location) FROM app.restaurant WHERE id=?",
+                Double.class,
+                restaurantId(row)))
+        .isEqualTo(37d);
+  }
+
+  @Test
+  void invalidRecordsAreQuarantinedAndInvalidPhoneIsNeverPublished() throws Exception {
+    var invalid = changed(row("가상 테스트 오류 업소"), "sourceUpdatedAt", "not-a-date");
+    var usable =
+        changed(changed(row("가상 테스트 좌표 누락"), "x", "invalid"), "phone", "javascript:alert(1)");
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
         .thenReturn(new Page(1, 2, 2, List.of(invalid, usable)));
     UUID id = jobs.request("INCREMENTAL", 2, 1);
     worker.processOne(id);
@@ -121,7 +149,7 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
 
   @Test
   void rateLimitPreservesCheckpointAndHonorsRetryAfter() {
-    when(source.fetch(anyInt(), anyInt(), any(), any()))
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
         .thenThrow(new SourceFailure("SOURCE_RATE_LIMITED", true, Duration.ofSeconds(120)));
     UUID id = jobs.request("INCREMENTAL", 2, 1);
     Instant before = Instant.now();
@@ -170,7 +198,7 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
   @Test
   void manualPhoneCorrectionSurvivesChangesAndStaleVersions() {
     var original = row("가상 테스트 정정 업소");
-    when(source.fetch(anyInt(), anyInt(), any(), any()))
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
         .thenReturn(new Page(1, 2, 1, List.of(original)));
     worker.processOne(jobs.request("INCREMENTAL", 2, 1));
     UUID restaurant = restaurantId(original);
@@ -182,10 +210,10 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
         restaurant);
     var updated =
         changed(
-            changed(changed(original, "TELNO", "02-0000-0002"), "BPLC_NM", "가상 테스트 변경된 업소"),
-            "DAT_UPDT_PNT",
-            "2026-09-06 12:00:00");
-    when(source.fetch(anyInt(), anyInt(), any(), any()))
+            changed(changed(original, "phone", "02-0000-0002"), "name", "가상 테스트 변경된 업소"),
+            "sourceUpdatedAt",
+            "2026-09-06T03:00:00Z");
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
         .thenReturn(new Page(1, 2, 1, List.of(updated)));
     UUID job = jobs.request("INCREMENTAL", 2, 1);
     worker.processOne(job);
@@ -202,7 +230,7 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
             jdbc.queryForList(
                 "SELECT code FROM app.ingestion_issue WHERE job_id=?", String.class, job))
         .contains("MANUAL_OVERRIDE_PRESERVED");
-    when(source.fetch(anyInt(), anyInt(), any(), any()))
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
         .thenReturn(new Page(1, 2, 1, List.of(original)));
     UUID stale = jobs.request("INCREMENTAL", 2, 1);
     worker.processOne(stale);
@@ -216,12 +244,12 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
   @Test
   void ambiguousIdentifiersRequireReviewAndCompletedFullListingDoesNotCloseMissingBusiness() {
     var original = row("가상 테스트 대조 업소");
-    when(source.fetch(anyInt(), anyInt(), any(), any()))
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
         .thenReturn(new Page(1, 2, 1, List.of(original)));
     worker.processOne(jobs.request("INCREMENTAL", 2, 1));
     UUID restaurant = restaurantId(original);
-    var ambiguous = changed(original, "MNG_NO", UUID.randomUUID().toString());
-    when(source.fetch(anyInt(), anyInt(), any(), any()))
+    var ambiguous = changed(original, "externalId", UUID.randomUUID().toString());
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
         .thenReturn(new Page(1, 2, 1, List.of(ambiguous)));
     UUID review = jobs.request("INCREMENTAL", 2, 1);
     worker.processOne(review);
@@ -233,7 +261,7 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
                 Integer.class,
                 review))
         .isEqualTo(1);
-    when(source.fetch(anyInt(), anyInt(), nullable(Instant.class), any()))
+    when(source.fetch(any(), anyInt(), anyInt(), nullable(Instant.class), any()))
         .thenReturn(new Page(1, 2, 0, List.of()));
     UUID full = jobs.request("FULL", 2, 1);
     worker.processOne(full);
@@ -270,6 +298,7 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
             bad.coordinate(),
             bad.originalX(),
             bad.originalY(),
+            bad.originalSrid(),
             bad.phone(),
             bad.originalPhone(),
             bad.sourceUpdatedAt(),
@@ -290,9 +319,9 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
 
   @Test
   void changedSourceTotalDoesNotAdvanceCheckpoint() {
-    when(source.fetch(eq(1), eq(2), any(), any()))
+    when(source.fetch(any(), eq(1), eq(2), any(), any()))
         .thenReturn(new Page(1, 2, 3, List.of(row("가상 테스트 페이지 하나"), row("가상 테스트 페이지 둘"))));
-    when(source.fetch(eq(2), eq(2), any(), any()))
+    when(source.fetch(any(), eq(2), eq(2), any(), any()))
         .thenReturn(new Page(2, 2, 4, List.of(row("가상 테스트 변경 페이지"), row("가상 테스트 변경 페이지 둘"))));
     UUID id = jobs.request("INCREMENTAL", 2, 2);
     worker.processOne(id);
@@ -308,23 +337,23 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
   private SourceRestaurant row(String name) {
     return new SourceRestaurant(
         Map.of(
-            "OPN_ATMY_GRP_CD",
-            "TEST",
-            "MNG_NO",
+            "coordinateSrid",
+            "5174",
+            "externalId",
             UUID.randomUUID().toString(),
-            "BPLC_NM",
+            "name",
             name + " " + UUID.randomUUID(),
-            "ROAD_NM_ADDR",
+            "address",
             "가상 테스트 주소",
-            "SALS_STTS_NM",
-            "영업/정상",
-            "CRD_INFO_X",
+            "businessStatus",
+            "OPEN",
+            "x",
             "200000",
-            "CRD_INFO_Y",
+            "y",
             "450000",
-            "DAT_UPDT_PNT",
-            "2026-09-05 12:00:00",
-            "TELNO",
+            "sourceUpdatedAt",
+            "2026-09-05T03:00:00Z",
+            "phone",
             "02-0000-0000"));
   }
 
@@ -335,7 +364,7 @@ class IngestionIntegrationTest extends ApplicationIntegrationSupport {
   }
 
   private String externalId(SourceRestaurant row) {
-    return row.get("OPN_ATMY_GRP_CD") + ":" + row.get("MNG_NO");
+    return row.get("externalId");
   }
 
   private UUID restaurantId(SourceRestaurant row) {

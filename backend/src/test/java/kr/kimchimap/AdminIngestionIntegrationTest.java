@@ -19,18 +19,18 @@ import kr.kimchimap.member.service.MemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tools.jackson.databind.json.JsonMapper;
 
-@TestPropertySource(properties = "app.ingestion.public-data-key=test-contract-key")
 class AdminIngestionIntegrationTest extends ApplicationIntegrationSupport {
   @MockitoBean OriginCollectionPolicy collectionPolicy;
+  @MockitoBean kr.kimchimap.ingestion.client.SourceAdapters adapters;
 
   @BeforeEach
   void allowSyntheticPipelineContract() {
     // 실서비스의 수집 차단은 DomesticPublicationIntegrationTest에서 실제 정책으로 검증한다.
     when(collectionPolicy.supportsDomesticQualification()).thenReturn(true);
+    when(adapters.available(org.mockito.ArgumentMatchers.any())).thenReturn(true);
   }
 
   @Autowired MemberService members;
@@ -48,9 +48,7 @@ class AdminIngestionIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo(403);
     var response = request("GET", "/api/v1/admin/ingestion/sources", admin, null, null);
     assertThat(response.statusCode()).isEqualTo(200);
-    assertThat(response.body())
-        .contains("credentialConfigured")
-        .doesNotContain("test-contract-key");
+    assertThat(response.body()).contains("adapterAvailable").doesNotContain("test-contract-key");
     assertThat(
             request("GET", "/api/v1/admin/ingestion/jobs/" + UUID.randomUUID(), admin, null, null)
                 .statusCode())

@@ -722,10 +722,10 @@
       },
       "IngestionSourceStatus": {
         "properties": {
-          "collectionAllowed": {
+          "adapterAvailable": {
             "type": "boolean"
           },
-          "credentialConfigured": {
+          "collectionAllowed": {
             "type": "boolean"
           },
           "domesticQualificationSupported": {

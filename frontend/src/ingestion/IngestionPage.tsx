@@ -66,7 +66,7 @@ function Dashboard({ memberId }: { memberId: string }) {
               {source.collectionAllowed && source.republicationAllowed
                 ? "확인됨"
                 : "허가 확인 필요"}{" "}
-              · 인증키: {source.credentialConfigured ? "설정됨" : "미설정"}
+              · 수집기: {source.adapterAvailable ? "등록됨" : "미구현"}
             </p>
             <p>
               정기 수집: {source.scheduled ? "활성" : "꺼짐"} · 원천 기준 주기:{" "}
@@ -174,7 +174,7 @@ function RunForm({ source }: { source: Source }) {
           busy ||
           !source.collectionAllowed ||
           !source.republicationAllowed ||
-          !source.credentialConfigured
+          !source.adapterAvailable
         }
       >
         <legend>제한된 수집 재실행</legend>

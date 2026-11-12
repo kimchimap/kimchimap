@@ -3,7 +3,7 @@ package kr.kimchimap.ingestion.service;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
-import kr.kimchimap.ingestion.client.PublicDataRestaurantClient.Page;
+import kr.kimchimap.ingestion.client.SourceAdapter.Page;
 import kr.kimchimap.ingestion.client.SourceFailure;
 import kr.kimchimap.ingestion.dto.IngestionJob;
 import kr.kimchimap.ingestion.repository.IngestionIssueRepository;

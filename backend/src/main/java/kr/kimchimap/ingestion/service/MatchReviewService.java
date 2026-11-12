@@ -17,12 +17,17 @@ public class MatchReviewService {
   private final MatchReviewRepository repository;
   private final RestaurantImportService restaurants;
   private final ObjectMapper json;
+  private final OriginCollectionPolicy policy;
 
   public MatchReviewService(
-      MatchReviewRepository repository, RestaurantImportService restaurants, ObjectMapper json) {
+      MatchReviewRepository repository,
+      RestaurantImportService restaurants,
+      ObjectMapper json,
+      OriginCollectionPolicy policy) {
     this.repository = repository;
     this.restaurants = restaurants;
     this.json = json;
+    this.policy = policy;
   }
 
   @Transactional(readOnly = true)
@@ -37,6 +42,7 @@ public class MatchReviewService {
 
   @Transactional
   public MatchAdministration.Detail review(UUID actor, UUID id, MatchAdministration.Review input) {
+    policy.requireQualifiedSource();
     var before = repository.find(id, false).orElseThrow(MatchReviewService::missing);
     repository.lockJob(before.jobId());
     restaurants.lockExternal(before.sourceId(), before.externalId());
@@ -57,7 +63,7 @@ public class MatchReviewService {
         || !matched && input.restaurantId() != null)
       throw new ApiException(
           HttpStatus.BAD_REQUEST, "INVALID_MATCH_TARGET", "확인한 후보 업소 또는 별도 업소 생성을 선택해 주세요.");
-    var observation = json.readValue(row.observation(), ImportedRestaurant.class);
+    var observation = observation(row.observation());
     UUID target =
         restaurants.resolveMatch(
             row.sourceId(), observation, input.restaurantId(), row.jobId(), row.observedAt());
@@ -66,7 +72,7 @@ public class MatchReviewService {
   }
 
   private MatchAdministration.Detail view(MatchReviewRepository.Row row) {
-    var item = json.readValue(row.observation(), ImportedRestaurant.class);
+    var item = observation(row.observation());
     return new MatchAdministration.Detail(
         row.id(),
         row.sourceId(),
@@ -83,6 +89,16 @@ public class MatchReviewService {
         row.state(),
         row.restaurantId(),
         repository.candidates(row.sourceId(), row.externalId()));
+  }
+
+  private ImportedRestaurant observation(String payload) {
+    var srid = json.readTree(payload).path("originalSrid");
+    if (!srid.isIntegralNumber() || srid.asInt() <= 0)
+      throw new ApiException(
+          HttpStatus.CONFLICT,
+          "SOURCE_COORDINATE_SYSTEM_REQUIRED",
+          "원래 좌표계가 없는 과거 관찰본은 다시 확인해야 합니다.");
+    return json.readValue(payload, ImportedRestaurant.class);
   }
 
   private static ApiException missing() {

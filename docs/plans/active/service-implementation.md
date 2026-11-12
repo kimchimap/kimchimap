@@ -1,6 +1,6 @@
 # 현재 우선 계획
 
-2026-11-12 확정 컨셉은 [제품 계약](../../product.md), 실행 순서는 [확정 컨셉 구현](confirmed-product-scope.md)을 따른다. 김치 공개 자격 PR #18까지 dev 병합했다. 현재 chore/remove-originless-data에서 과거 일반음식점 자료의 삭제·보존 경계를 검증한다. 아래 기록은 이전 작업 이력이며 현재 범위를 확장하지 않는다.
+2026-11-12 확정 컨셉은 [제품 계약](../../product.md), 실행 순서는 [확정 컨셉 구현](confirmed-product-scope.md)을 따른다. 자료 정리 PR #19까지 dev 병합했다. 현재 refactor/retire-general-restaurant-adapter에서 폐기 API 호출부 제거와 어댑터 미구현 상태를 검증한다. 아래 기록은 이전 작업 이력이며 현재 범위를 확장하지 않는다.
 
 # 후속 서비스 구현 계획
 

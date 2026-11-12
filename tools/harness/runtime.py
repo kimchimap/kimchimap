@@ -28,7 +28,10 @@ def local_directory(root):
 
 
 def load_local_environment(root):
-    allowed = {'POSTGRES_PASSWORD', 'MIGRATOR_PASSWORD', 'APP_PASSWORD', 'REDIS_PASSWORD', 'KAKAO_JAVASCRIPT_KEY', 'KAKAO_CLIENT_ID', 'KAKAO_CLIENT_SECRET', 'PUBLIC_DATA_SERVICE_KEY', 'PUBLIC_ORIGIN', 'JWT_PRIVATE_KEY_PATH', 'JWT_KEY_ID', 'JWT_VERIFICATION_KEYS_PATH', 'JWT_ISSUER', 'JWT_AUDIENCE', 'ACCESS_TOKEN_LIFETIME', 'SESSION_MAX_LIFETIME', 'SEARCH_CURSOR_SECRET', 'INGEST_SCHEDULING_ENABLED', 'INGEST_MODE', 'INGEST_MAX_PAGES', 'MEDIA_ROOT'}
+    retired = {'PUBLIC_DATA_SERVICE_KEY'}
+    for key in retired:
+        os.environ.pop(key, None)
+    allowed = {'POSTGRES_PASSWORD', 'MIGRATOR_PASSWORD', 'APP_PASSWORD', 'REDIS_PASSWORD', 'KAKAO_JAVASCRIPT_KEY', 'KAKAO_CLIENT_ID', 'KAKAO_CLIENT_SECRET', 'PUBLIC_ORIGIN', 'JWT_PRIVATE_KEY_PATH', 'JWT_KEY_ID', 'JWT_VERIFICATION_KEYS_PATH', 'JWT_ISSUER', 'JWT_AUDIENCE', 'ACCESS_TOKEN_LIFETIME', 'SESSION_MAX_LIFETIME', 'SEARCH_CURSOR_SECRET', 'INGEST_SCHEDULING_ENABLED', 'INGEST_MODE', 'INGEST_MAX_PAGES', 'MEDIA_ROOT'}
     for name in ['infra.env', 'integrations.env']:
         path = local_directory(root) / name
         if not path.exists():
@@ -40,6 +43,8 @@ def load_local_environment(root):
                 continue
             key, separator, value = line.partition('=')
             key = key.strip()
+            if separator and key in retired:
+                continue
             if not separator or key not in allowed:
                 raise ValueError('허용되지 않은 로컬 설정 키: ' + name)
             os.environ.setdefault(key, value.strip().strip('"').strip("'"))

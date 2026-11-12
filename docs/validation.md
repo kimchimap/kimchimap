@@ -175,3 +175,7 @@
 ## 2026-11-12 원산지 없는 과거 자료 제거
 
 PostGIS/Redis 통합에서 삭제 대상과 좋아요·품목·제보·정정·감사·다른 출처·대기 매칭 검토의 보존을 확인했다. 첫 전체 verify는 포맷만 실패했고 서비스 검사는 통과했다. spotlessApply/spotlessCheck로 수정했다. 로컬 V17 적용 후 restaurant/restaurant_source_record/restaurant_external_id/연결 ingestion_issue/매칭 후보/원산지 수는 모두 0이다. 삭제 전 업소·원천·외부 ID 각각 199건이었다. 실제 원산지 데이터 확보를 뜻하지 않는다.
+
+## 2026-11-12 일반음식점 API 어댑터 제거
+
+전체 verify 통과(`/tmp/kimchimap-adapter-verify.log`). 내부 어댑터 계약 7건·프론트 55·E2E 20·하네스 29건이 포함된다. 폐기 API 전용 네트워크 계약은 제거했고 엔진 통합 회귀와 실제 좌표계 보존 검증을 유지했다. 추가 매칭 재반영·과거 좌표계 누락 경계 통합 7건 통과. 실제 등록 원산지 수집기·외부 원산지 응답 검증은 없음이며 최종 PR 준비에서 전체를 재확인한다.

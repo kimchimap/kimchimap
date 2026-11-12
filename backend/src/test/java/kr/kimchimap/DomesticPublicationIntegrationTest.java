@@ -12,7 +12,7 @@ import java.util.UUID;
 import kr.kimchimap.auth.service.JwtService;
 import kr.kimchimap.auth.service.SessionService;
 import kr.kimchimap.global.web.ApiException;
-import kr.kimchimap.ingestion.client.PublicDataRestaurantClient;
+import kr.kimchimap.ingestion.client.SourceAdapters;
 import kr.kimchimap.ingestion.repository.IngestionJobRepository;
 import kr.kimchimap.ingestion.service.IngestionJobService;
 import kr.kimchimap.ingestion.service.IngestionWorker;
@@ -21,12 +21,10 @@ import kr.kimchimap.search.dto.SearchRequest;
 import kr.kimchimap.search.service.MapSearchService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-@TestPropertySource(properties = "app.ingestion.public-data-key=test-never-sent")
 class DomesticPublicationIntegrationTest extends ApplicationIntegrationSupport {
   @Autowired PlatformTransactionManager transactions;
   @Autowired IngestionJobService jobs;
@@ -36,7 +34,7 @@ class DomesticPublicationIntegrationTest extends ApplicationIntegrationSupport {
   @Autowired MemberService members;
   @Autowired SessionService sessions;
   @Autowired JwtService jwt;
-  @MockitoBean PublicDataRestaurantClient external;
+  @MockitoBean SourceAdapters external;
 
   @Test
   void publicReadAndLikeRequireDomesticEvidenceAndRespectWithdrawal() throws Exception {
@@ -127,7 +125,15 @@ class DomesticPublicationIntegrationTest extends ApplicationIntegrationSupport {
     assertThat(response.body()).contains("ORIGIN_QUALIFIED_SOURCE_REQUIRED");
     assertThat(call("GET", "/api/v1/admin/ingestion/sources", admin, null).body())
         .contains("\"domesticQualificationSupported\":false", "\"scheduled\":false");
-    verifyNoInteractions(external);
+    var matchAttempt =
+        call(
+            "POST",
+            "/api/v1/admin/matches/" + UUID.randomUUID() + "/reviews",
+            admin,
+            "{\"expectedVersion\":0,\"decision\":\"DISTINCT\",\"reason\":\"테스트 중단 소스 확인\"}");
+    assertThat(matchAttempt.statusCode()).isEqualTo(409);
+    assertThat(matchAttempt.body()).contains("ORIGIN_QUALIFIED_SOURCE_REQUIRED");
+    verify(external, never()).fetch(any(), anyInt(), anyInt(), any(), any());
   }
 
   private String token(boolean admin) {

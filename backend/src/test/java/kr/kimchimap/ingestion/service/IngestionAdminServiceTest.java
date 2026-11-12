@@ -16,26 +16,37 @@ import org.junit.jupiter.api.Test;
 
 class IngestionAdminServiceTest {
   @Test
-  void missingKeyDoesNotQueueAnExternalJob() {
+  void missingAdapterDoesNotQueueAnExternalJob() {
     var repository = mock(IngestionAdminRepository.class);
     var jobs = mock(IngestionJobService.class);
     UUID actor = UUID.randomUUID(),
         key = UUID.randomUUID(),
         source = IngestionJobRepository.PUBLIC_DATA_SOURCE;
     when(repository.receipt(actor, key)).thenReturn(Optional.empty());
-    when(repository.sources(false, false, false))
+    when(repository.sources(false, true))
         .thenReturn(
             List.of(
                 new IngestionAdmin.Source(
                     source, "테스트 소스", true, true, false, false, false, 86400, null, null)));
+    var policy = mock(OriginCollectionPolicy.class);
+    when(policy.supportsDomesticQualification()).thenReturn(true);
     var service =
-        new IngestionAdminService(repository, jobs, new OriginCollectionPolicy(), "", false);
+        new IngestionAdminService(
+            repository,
+            jobs,
+            policy,
+            new kr.kimchimap.ingestion.client.SourceAdapters(List.of()),
+            false);
     assertThatThrownBy(
             () ->
                 service.request(
                     actor, source, key, new IngestionAdmin.Run("INCREMENTAL", 2, "테스트 요청")))
         .isInstanceOfSatisfying(
-            ApiException.class, error -> assertThat(error.status().value()).isEqualTo(503));
+            ApiException.class,
+            error -> {
+              assertThat(error.status().value()).isEqualTo(409);
+              assertThat(error.getMessage()).contains("구현");
+            });
     verifyNoInteractions(jobs);
   }
 
