@@ -162,3 +162,55 @@ describe("브라우저 인증 세션", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("계정 종료 요청", () => {
+  it("전체 로그아웃은 CSRF와 서비스 토큰을 보내고 성공 후 캐시를 지운다", async () => {
+    const fetch = server();
+    vi.stubGlobal("fetch", fetch);
+    const clear = vi.fn();
+    disconnect = session.connectSession(clear);
+    await session.restoreSession();
+    await session.logout(true);
+    const request = fetch.mock.calls.find(([url]) =>
+      url.endsWith("/logout-all"),
+    );
+    expect(request).toBeDefined();
+    expect(new Headers(request![1]?.headers).get("X-CSRF-TOKEN")).toBe(
+      "test-csrf",
+    );
+    expect(new Headers(request![1]?.headers).get("Authorization")).toBe(
+      "Bearer test-service-access",
+    );
+    expect(clear).toHaveBeenCalledTimes(1);
+    expect(session.sessionSnapshot().status).toBe("anonymous");
+  });
+  it("탈퇴 실패는 자동 재전송하거나 성공으로 정리하지 않고 명시적 재시도를 허용한다", async () => {
+    const fetch = server();
+    vi.stubGlobal("fetch", fetch);
+    const clear = vi.fn();
+    disconnect = session.connectSession(clear);
+    await session.restoreSession();
+    const original = fetch.getMockImplementation()!;
+    fetch.mockImplementation((url, options) =>
+      options?.method === "DELETE"
+        ? Promise.resolve(new Response(null, { status: 503 }))
+        : original(url, options),
+    );
+    await expect(session.withdrawAccount()).rejects.toMatchObject({
+      status: 503,
+    });
+    expect(
+      fetch.mock.calls.filter(([, options]) => options?.method === "DELETE"),
+    ).toHaveLength(1);
+    expect(clear).not.toHaveBeenCalled();
+    expect(session.sessionSnapshot().status).toBe("authenticated");
+    fetch.mockImplementation((url, options) =>
+      options?.method === "DELETE"
+        ? Promise.resolve(new Response(null, { status: 204 }))
+        : original(url, options),
+    );
+    await session.withdrawAccount();
+    expect(clear).toHaveBeenCalledTimes(1);
+    expect(session.sessionSnapshot().status).toBe("anonymous");
+  });
+});

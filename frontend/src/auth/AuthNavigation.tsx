@@ -35,6 +35,7 @@ export function AuthNavigation() {
     <nav aria-label="회원 메뉴">
       {session.status === "authenticated" ? (
         <>
+          <Link to="/account">계정 관리</Link>
           <Link to="/reports">내 제보</Link>
           <Link to="/information-reports">내 신고</Link>
           {session.member?.role === "ADMIN" && (

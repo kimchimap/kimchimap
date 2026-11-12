@@ -174,6 +174,26 @@ class AuthSessionIntegrationTest extends ApplicationIntegrationSupport {
   }
 
   @Test
+  void withdrawalEndpointRevokesEverySessionAndSeparatesLaterRegistration() throws Exception {
+    String subject = "test-withdraw-" + UUID.randomUUID();
+    var member = members.loginWithVerifiedKakaoSubject(subject);
+    String first = jwt.issue(sessions.create(member).session());
+    String second = jwt.issue(sessions.create(member).session());
+    assertThat(request("DELETE", "/api/v1/members/me", first, null, null, null).statusCode())
+        .isEqualTo(204);
+    assertThat(me(first).statusCode()).isEqualTo(401);
+    assertThat(me(second).statusCode()).isEqualTo(401);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT provider_subject FROM app.member WHERE id=?", String.class, member.id()))
+        .isNull();
+    var registered = members.loginWithVerifiedKakaoSubject(subject);
+    assertThat(registered.id()).isNotEqualTo(member.id());
+    assertThat(registered.role()).isEqualTo("USER");
+    assertThatThrownBy(() -> members.requireActive(member.id())).isInstanceOf(ApiException.class);
+  }
+
+  @Test
   void redisDataLossDoesNotRestoreSessionFromSignedJwt() throws Exception {
     var issued =
         sessions.create(members.loginWithVerifiedKakaoSubject("test-" + UUID.randomUUID()));
