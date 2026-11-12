@@ -14,14 +14,14 @@
 
 PR #14~#23을 dev에 병합했다. 최근 병합 기준은 9905250acfda53edf386f409f363c237bdce724d다. 개별 계획은 [완료 이력](../completed/connected-browser-flow.md), 명령 결과는 [검증 기록](../../validation.md)에 있다. 기능 테스트 통과를 실사용 데이터 확보나 운영 준비 완료로 확대하지 않는다.
 
-## 현재 작업
+## 마지막 검증 작업
 
-- 브랜치: chore/final-product-validation
+- 검증 브랜치: chore/final-product-validation
 - 기준 origin/dev: 9905250acfda53edf386f409f363c237bdce724d
 - 계획: [외부 확인·문서 정리](final-product-validation.md)
 - 완료: 실제 카카오 SDK·타일·공식 인가 진입 PC/모바일 확인, 실행 가능한 외부 smoke 추가, 제보 입력을 김치 두 재료로 정리.
-- 남음: 정리 후 전체 검증·자기 검토·dev PR·브랜치 정리.
-- 다음 명령: `./scripts/harness verify`, `./scripts/harness protection-check`, PR 준비.
+- 최종 전체 검증 통과. [PR #24](https://github.com/kimchimap/kimchimap/pull/24)에 코드·검증·문서 정리를 모았다. 병합 결과와 커밋은 해당 PR의 원격 기록을 따른다.
+- 다음 재개: 아래 외부 조건을 확보한 뒤 최신 origin/dev 기반 작업 브랜치를 만들고 해당 수집기 또는 실사용 로그인 검증을 수행한다. 현재 로컬 기능 검증은 완료했다.
 
 ## 미완료·외부 조건
 

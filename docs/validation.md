@@ -196,3 +196,5 @@ PostGIS/Redis 통합에서 삭제 대상과 좋아요·품목·제보·정정·�
 최종 정리 첫 전체 검증은 단위 37·통합 83·내부 계약 7·성능 1·프론트 65·화면 E2E 24·실제 연결 PC/모바일 각 1건이 통과했으나 새 RTL 검사 옵션의 타입 오류로 typecheck/build가 실패했다. 지원하지 않는 옵션을 제거한 후 타입·빌드가 통과했고 최종 PR 준비에서 전체 검사를 재확인한다. 테스트 삭제·skip·범위 축소는 없다.
 
 로컬 DB 직접 조회: restaurant=0, origin_record=0, Flyway 최고 적용 버전=18. main/dev 유효 ruleset 재조회: PR 필수·강제 push/삭제 금지·대화 해결·기본 승인 0, main merge/dev squash. classic 보호는 없거나 조회 실패이며 ruleset의 실제 유효 규칙과 구분한다. 운영 배포와 실제 사용자 권한 변경은 수행하지 않았다.
+
+최종 PR 준비 전체 검사 exit 0: 단위 37·통합 83·내부 계약 7·성능 1·프론트 65·화면 E2E 24·실제 서버 연결 2·하네스 31, 실패/skip 0. 외부 smoke PC/모바일 2건 별도 통과. 최종 작업 PR은 [#24](https://github.com/kimchimap/kimchimap/pull/24)이며 실제 수집기 미구현 상태는 유지한다.
