@@ -351,6 +351,189 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
         .isZero();
   }
 
+  @Test
+  void newLocationIsPrivateUntilReviewedAndRegistrationIsAtomic() throws Exception {
+    User owner = user(false), admin = user(true);
+    String name = "가상 테스트 신규 김치 " + UUID.randomUUID();
+    var body = newLocation(owner, name);
+    String id = create(owner, body);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant WHERE name=?", Integer.class, name))
+        .isZero();
+    assertThat(request("GET", "/api/v1/reports", owner, null, null).body()).contains(name);
+    var decision = new java.util.HashMap<>(review("APPROVED", 0, null, List.of()));
+    assertThat(
+            request("POST", "/api/v1/admin/reports/" + id + "/reviews", admin, decision, null)
+                .statusCode())
+        .isEqualTo(400);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant WHERE name=?", Integer.class, name))
+        .isZero();
+    decision.put("locationReviewed", true);
+    var approved =
+        request("POST", "/api/v1/admin/reports/" + id + "/reviews", admin, decision, null);
+    assertThat(approved.statusCode()).isEqualTo(200);
+    UUID restaurant =
+        jdbc.queryForObject(
+            "SELECT restaurant_id FROM app.report WHERE id=?", UUID.class, UUID.fromString(id));
+    var detail = get("/api/v1/restaurants/" + restaurant);
+    assertThat(detail.statusCode()).isEqualTo(200);
+    assertThat(detail.body()).contains(name, "DOMESTIC", "reviewedAt");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT public.ST_X(location) FROM app.restaurant WHERE id=?",
+                Double.class,
+                restaurant))
+        .isEqualTo(126.978);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT public.ST_Y(location) FROM app.restaurant WHERE id=?",
+                Double.class,
+                restaurant))
+        .isEqualTo(37.5665);
+    assertThat(
+            request("POST", "/api/v1/admin/reports/" + id + "/reviews", admin, decision, null)
+                .statusCode())
+        .isEqualTo(409);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant WHERE name=?", Integer.class, name))
+        .isEqualTo(1);
+    String duplicate = create(owner, newLocation(owner, name));
+    assertThat(
+            request(
+                    "POST",
+                    "/api/v1/admin/reports/" + duplicate + "/reviews",
+                    admin,
+                    decision,
+                    null)
+                .statusCode())
+        .isEqualTo(409);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT state FROM app.report WHERE id=?",
+                String.class,
+                UUID.fromString(duplicate)))
+        .isEqualTo("PENDING");
+  }
+
+  @Test
+  void rejectsAmbiguousLocationAndNewRegistrationWithoutDomesticKimchi() throws Exception {
+    User owner = user(false), admin = user(true);
+    var body = newLocation(owner, "가상 테스트 검증 " + UUID.randomUUID());
+    body.put("restaurantId", restaurant());
+    assertThat(request("POST", "/api/v1/reports", owner, body, UUID.randomUUID()).statusCode())
+        .isEqualTo(400);
+    body.remove("restaurantId");
+    body.put(
+        "newRestaurant",
+        Map.of(
+            "name",
+            "가상 테스트 잘못된 좌표",
+            "address",
+            "테스트 주소",
+            "latitude",
+            126.978,
+            "longitude",
+            37.5665));
+    assertThat(request("POST", "/api/v1/reports", owner, body, UUID.randomUUID()).statusCode())
+        .isEqualTo(400);
+    body = newLocation(owner, "가상 테스트 미확인 " + UUID.randomUUID());
+    body.put("claims", submission(null, null, image(owner), "UNKNOWN").get("claims"));
+    String id = create(owner, body);
+    var decision = new java.util.HashMap<>(review("APPROVED", 0, null, List.of()));
+    decision.put("locationReviewed", true);
+    assertThat(
+            request("POST", "/api/v1/admin/reports/" + id + "/reviews", admin, decision, null)
+                .statusCode())
+        .isEqualTo(400);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT restaurant_id FROM app.report WHERE id=?", UUID.class, UUID.fromString(id)))
+        .isNull();
+  }
+
+  @Test
+  void pendingNewRestaurantCanBeCorrectedAndWithdrawnWithoutCreatingRestaurant() throws Exception {
+    User owner = user(false);
+    var body = newLocation(owner, "가상 테스트 수정 전 " + UUID.randomUUID());
+    String id = create(owner, body);
+    String name = "가상 테스트 수정 후 " + UUID.randomUUID();
+    body.put(
+        "newRestaurant",
+        Map.of("name", name, "address", "테스트 수정 주소", "latitude", 37.5665, "longitude", 126.978));
+    assertThat(
+            request(
+                    "PATCH",
+                    "/api/v1/reports/" + id,
+                    owner,
+                    Map.of("expectedVersion", 0, "submission", body),
+                    null)
+                .statusCode())
+        .isEqualTo(200);
+    assertThat(request("GET", "/api/v1/reports", owner, null, null).body()).contains(name);
+    assertThat(
+            request(
+                    "POST",
+                    "/api/v1/reports/" + id + "/withdraw",
+                    owner,
+                    Map.of("expectedVersion", 1, "reason", "테스트 철회"),
+                    null)
+                .statusCode())
+        .isEqualTo(200);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant WHERE name=?", Integer.class, name))
+        .isZero();
+  }
+
+  @Test
+  void concurrentNewReportsForSameRestaurantCreateOnlyOneRestaurant() throws Exception {
+    User owner = user(false), admin = user(true);
+    String name = "가상 테스트 등록 경합 " + UUID.randomUUID();
+    String firstId = create(owner, newLocation(owner, name)),
+        secondId = create(owner, newLocation(owner, name));
+    var decision = new java.util.HashMap<>(review("APPROVED", 0, null, List.of()));
+    decision.put("locationReviewed", true);
+    var start = new CountDownLatch(1);
+    try (var executor = Executors.newFixedThreadPool(2)) {
+      var results =
+          List.of(firstId, secondId).stream()
+              .map(
+                  id ->
+                      executor.submit(
+                          () -> {
+                            start.await();
+                            return request(
+                                    "POST",
+                                    "/api/v1/admin/reports/" + id + "/reviews",
+                                    admin,
+                                    decision,
+                                    null)
+                                .statusCode();
+                          }))
+              .toList();
+      start.countDown();
+      assertThat(List.of(results.get(0).get(), results.get(1).get()))
+          .containsExactlyInAnyOrder(200, 409);
+    }
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant WHERE name=?", Integer.class, name))
+        .isEqualTo(1);
+  }
+
+  private java.util.HashMap<String, Object> newLocation(User owner, String name) throws Exception {
+    var body = new java.util.HashMap<>(submission(null, null, image(owner), "DOMESTIC"));
+    body.remove("restaurantId");
+    body.put(
+        "newRestaurant",
+        Map.of("name", name, "address", "테스트 서울 주소", "latitude", 37.5665, "longitude", 126.978));
+    return body;
+  }
+
   private User user(boolean admin) {
     var member = members.loginWithVerifiedKakaoSubject("test-report-" + UUID.randomUUID());
     if (admin)

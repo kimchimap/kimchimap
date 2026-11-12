@@ -292,5 +292,28 @@
     "notImplemented": [
       "smoke-external"
     ]
+  },
+  "location-reports": {
+    "plan": "docs/plans/active/location-reports.md",
+    "checks": [
+      "verify-harness",
+      "doctor",
+      "format-backend",
+      "format-frontend",
+      "lint",
+      "typecheck",
+      "test-backend",
+      "test-frontend",
+      "test-integration",
+      "test-performance",
+      "api-check",
+      "test-e2e",
+      "build-backend",
+      "build",
+      "test-contract"
+    ],
+    "notImplemented": [
+      "smoke-external"
+    ]
   }
 }

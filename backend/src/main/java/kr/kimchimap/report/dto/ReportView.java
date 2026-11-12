@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public record ReportView(
     UUID id,
+    UUID restaurantId,
     String state,
     long version,
     Instant createdAt,

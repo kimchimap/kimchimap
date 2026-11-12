@@ -22,5 +22,6 @@ public final class ReportChanges {
       @NotBlank @Pattern(regexp = "APPROVED|REJECTED|NEEDS_MORE_INFO") String decision,
       @NotBlank @Size(max = 2000) String reason,
       UUID approvedScopeId,
+      Boolean locationReviewed,
       @NotNull @Size(max = 5) List<@NotNull UUID> privacyReviewedMediaIds) {}
 }

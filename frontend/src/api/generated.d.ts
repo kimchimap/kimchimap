@@ -1049,6 +1049,15 @@ export interface components {
             scopeId: string;
             withdrawRecordIds: string[];
         };
+        ProposedRestaurant: {
+            address: string;
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            name: string;
+            phone?: string;
+        };
         ReportClaim: {
             classification: string;
             components: components["schemas"]["ReportOriginComponent"][];
@@ -1090,17 +1099,19 @@ export interface components {
             decision: string;
             /** Format: int64 */
             expectedVersion: number;
+            locationReviewed?: boolean;
             privacyReviewedMediaIds: string[];
             reason: string;
         };
         ReportSubmission: {
             claims: components["schemas"]["ReportClaim"][];
             mediaIds: string[];
+            newRestaurant?: components["schemas"]["ProposedRestaurant"];
             /** Format: date */
             observedOn: string;
             publicationConsent?: boolean;
             /** Format: uuid */
-            restaurantId: string;
+            restaurantId?: string;
             /** Format: uuid */
             scopeId?: string;
             scopeName: string;
@@ -1116,6 +1127,8 @@ export interface components {
             createdAt?: string;
             /** Format: uuid */
             id?: string;
+            /** Format: uuid */
+            restaurantId?: string;
             reviews?: components["schemas"]["ReportReviewHistory"][];
             state?: string;
             submission?: components["schemas"]["ReportSubmission"];

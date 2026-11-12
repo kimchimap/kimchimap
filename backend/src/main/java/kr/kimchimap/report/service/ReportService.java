@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import kr.kimchimap.auth.service.TokenSecrets;
@@ -16,6 +17,7 @@ import kr.kimchimap.origin.service.OriginPublicationService;
 import kr.kimchimap.report.dto.*;
 import kr.kimchimap.report.repository.ReportRateRepository;
 import kr.kimchimap.report.repository.ReportRepository;
+import kr.kimchimap.restaurant.service.RestaurantRegistrationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class ReportService {
   private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
   private static final Set<String> STATES =
       Set.of("PENDING", "APPROVED", "REJECTED", "NEEDS_MORE_INFO", "WITHDRAWN");
+  private final RestaurantRegistrationService restaurants;
   private final ReportRepository reports;
   private final ReportRateRepository rate;
   private final MediaService media;
@@ -34,12 +37,14 @@ public class ReportService {
   private final Clock clock;
 
   public ReportService(
+      RestaurantRegistrationService restaurants,
       ReportRepository reports,
       ReportRateRepository rate,
       MediaService media,
       OriginPublicationService origins,
       ObjectMapper json,
       Clock clock) {
+    this.restaurants = restaurants;
     this.reports = reports;
     this.rate = rate;
     this.media = media;
@@ -77,7 +82,8 @@ public class ReportService {
     limit(owner);
     var input = change.submission();
     validate(input);
-    if (!input.restaurantId().equals(row.restaurantId())) throw invalid("수정할 제보의 업소를 변경할 수 없습니다.");
+    if (!Objects.equals(input.restaurantId(), row.restaurantId()))
+      throw invalid("수정할 제보의 업소를 변경할 수 없습니다.");
     media.attach(owner, input.mediaIds());
     UUID revision = UUID.randomUUID();
     reports.revision(revision, id, json.writeValueAsString(input), input.mediaIds());
@@ -116,6 +122,19 @@ public class ReportService {
       throw invalid("검토 중인 제보의 사진만 공개 대상으로 선택해 주세요.");
     UUID scope = null;
     if (change.decision().equals("APPROVED")) {
+      UUID restaurant = row.restaurantId();
+      if (input.newRestaurant() != null) {
+        if (!Boolean.TRUE.equals(change.locationReviewed()) || change.approvedScopeId() != null)
+          throw invalid("새 업소의 위치·주소·표시판을 확인하고 새 김치 품목으로 승인해 주세요.");
+        if (input.claims().stream()
+            .noneMatch(
+                claim ->
+                    claim.classification().equals("DOMESTIC")
+                        && reports.domesticKimchiIngredient(claim.ingredientId())))
+          throw invalid("국내산 배추 또는 고춧가루 근거가 있는 김치 제보만 등록할 수 있습니다.");
+        restaurant = restaurants.registerReviewed(input.newRestaurant());
+        reports.linkRestaurant(id, restaurant);
+      }
       media.publishReviewed(row.ownerId(), publicMedia, actor);
       var assertions =
           input.claims().stream()
@@ -127,7 +146,7 @@ public class ReportService {
       scope =
           origins.approve(
               new OriginPublicationRequest(
-                  row.restaurantId(),
+                  restaurant,
                   change.approvedScopeId() != null ? change.approvedScopeId() : input.scopeId(),
                   input.scopeName(),
                   input.usage(),
@@ -181,7 +200,11 @@ public class ReportService {
     if (!input.publicationConsent()
         || input.observedOn().isAfter(LocalDate.now(clock.withZone(SEOUL))))
       throw invalid("실제 관찰일과 공개 동의를 확인해 주세요.");
-    if (!reports.publishedRestaurant(input.restaurantId()))
+    if ((input.restaurantId() == null) == (input.newRestaurant() == null))
+      throw invalid("기존 업소 또는 새 업소 정보 중 하나를 선택해 주세요.");
+    if (input.newRestaurant() != null && input.scopeId() != null)
+      throw invalid("새 업소는 새 김치 품목으로 제보해 주세요.");
+    if (input.restaurantId() != null && !reports.publishedRestaurant(input.restaurantId()))
       throw new ApiException(HttpStatus.NOT_FOUND, "RESTAURANT_NOT_FOUND", "공개된 업소를 찾을 수 없습니다.");
     if (input.scopeId() != null
         && !reports.matchingScope(
@@ -226,6 +249,7 @@ public class ReportService {
   private ReportView view(ReportRepository.Row row) {
     return new ReportView(
         row.id(),
+        row.restaurantId(),
         row.state(),
         row.version(),
         row.createdAt(),
