@@ -23,7 +23,9 @@ public final class InformationReports {
       @NotNull @PositiveOrZero Long expectedVersion,
       @NotBlank @Pattern(regexp = "RESOLVED|DISMISSED") String decision,
       @NotBlank @Size(max = 2000) String reason,
-      @Valid OriginAdministration.Correction correction) {}
+      @Valid OriginAdministration.Correction correction,
+      @Valid
+          kr.kimchimap.restaurant.dto.RestaurantAdministration.Correction restaurantCorrection) {}
 
   @Schema(name = "InformationReportView")
   public record View(

@@ -73,3 +73,79 @@ test("정보 오류 신고는 실패 재시도 키를 유지하고 처리 결과
     ),
   ).toBe(false);
 });
+
+test("관리자는 신고 상세에서 폐업 정정을 함께 반영한다", async ({ page }) => {
+  await page.route("**/api/v1/auth/csrf", (route) =>
+    route.fulfill({ json: { token: "test-csrf", headerName: "X-CSRF-TOKEN" } }),
+  );
+  await page.route("**/api/v1/auth/refresh", (route) =>
+    route.fulfill({
+      json: { accessToken: "test-access", tokenType: "Bearer" },
+    }),
+  );
+  await page.route("**/api/v1/members/me", (route) =>
+    route.fulfill({ json: { id: "test-admin", role: "ADMIN" } }),
+  );
+  let resolved = false;
+  await page.route(
+    "**/api/v1/admin/information-reports/test-closure",
+    (route) =>
+      route.fulfill({
+        json: {
+          id: "test-closure",
+          restaurantId: "test-shop",
+          restaurantName: "테스트 가상 업소",
+          category: "CLOSED",
+          state: resolved ? "RESOLVED" : "PENDING",
+          version: resolved ? 1 : 0,
+          description: "폐업 안내를 확인했습니다.",
+          mediaIds: [],
+          ...(resolved ? { resolutionReason: "현장 폐업 안내 확인" } : {}),
+        },
+      }),
+  );
+  await page.route("**/api/v1/admin/restaurants/test-shop", (route) =>
+    route.fulfill({
+      json: {
+        id: "test-shop",
+        version: 2,
+        snapshot: {
+          name: "테스트 가상 업소",
+          address: "테스트 주소",
+          businessStatus: "OPEN",
+        },
+        corrections: [],
+      },
+    }),
+  );
+  await page.route(
+    "**/api/v1/admin/information-reports/test-closure/resolution",
+    (route) => {
+      expect(route.request().postDataJSON()).toMatchObject({
+        expectedVersion: 0,
+        decision: "RESOLVED",
+        reason: "현장 폐업 안내 확인",
+        restaurantCorrection: { expectedVersion: 2, businessStatus: "CLOSED" },
+      });
+      resolved = true;
+      return route.fulfill({
+        json: { id: "test-closure", state: "RESOLVED", version: 1 },
+      });
+    },
+  );
+  await page.goto("/admin/information-reports/test-closure");
+  await page.getByLabel("처리 결과").selectOption("RESOLVED");
+  await page.getByLabel("업소 정보도 함께 정정").check();
+  await page.getByLabel("영업 상태").selectOption("CLOSED");
+  await page.getByLabel("확인 내용과 처리 사유").fill("현장 폐업 안내 확인");
+  await page.getByRole("button", { name: "신고 처리 반영" }).click();
+  await expect(
+    page.getByText("현장 폐업 안내 확인", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "신고 처리 반영" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "업소 정보·정정 이력" }),
+  ).toHaveAttribute("href", "/admin/restaurants/test-shop");
+});

@@ -1,3 +1,4 @@
+import { RestaurantAdminPage } from "./restaurant/RestaurantAdminPage";
 import {
   NewInformationReportPage,
   InformationReportsPage,
@@ -51,6 +52,10 @@ export function App() {
         <Route path="/media/new" element={<PhotoUploadPage />} />
         <Route path="/admin/designations" element={<DesignationsPage />} />
         <Route path="/admin/matches" element={<MatchesPage />} />
+        <Route
+          path="/admin/restaurants/:id"
+          element={<RestaurantAdminPage />}
+        />
         <Route path="/admin/origins" element={<OriginAdminPage />} />
         <Route path="/admin/ingestion" element={<IngestionPage />} />
         <Route

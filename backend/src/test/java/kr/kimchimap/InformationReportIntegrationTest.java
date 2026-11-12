@@ -251,6 +251,140 @@ class InformationReportIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo(201);
   }
 
+  @Test
+  void businessCorrectionRequiresAdminConfirmationAndPreservesImmutableAudit() throws Exception {
+    var owner = actor(false);
+    var admin = actor(true);
+    var shop = shop(owner);
+    String path = "/api/v1/admin/restaurants/" + shop.id() + "/corrections";
+    var input = businessCorrection(0, "OPEN", "02-0000-0001");
+    assertThat(request("POST", path, owner, input, null).statusCode()).isEqualTo(403);
+    var unchecked = new java.util.HashMap<>(input);
+    unchecked.put("businessPhoneReviewed", false);
+    assertThat(request("POST", path, admin, unchecked, null).statusCode()).isEqualTo(400);
+    unchecked = new java.util.HashMap<>(input);
+    unchecked.put("locationReviewed", false);
+    assertThat(request("POST", path, admin, unchecked, null).statusCode()).isEqualTo(400);
+    assertThat(request("POST", path, admin, input, null).statusCode()).isEqualTo(200);
+    assertThat(get("/api/v1/restaurants/" + shop.id()).body())
+        .contains("02-0000-0001", "관리자 확인 정정");
+    assertThat(request("POST", path, admin, input, null).statusCode()).isEqualTo(409);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant_correction WHERE restaurant_id=?",
+                Integer.class,
+                shop.id()))
+        .isEqualTo(1);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE app.restaurant_correction SET reason='변조' WHERE restaurant_id=?",
+                    shop.id()))
+        .isInstanceOf(org.springframework.dao.DataAccessException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant_manual_override WHERE restaurant_id=?",
+                Integer.class,
+                shop.id()))
+        .isEqualTo(5);
+  }
+
+  @Test
+  void resolvingClosureUpdatesVisibilityAtomicallyAndStaleBusinessVersionLeavesReportPending()
+      throws Exception {
+    var owner = actor(false);
+    var admin = actor(true);
+    var shop = shop(owner);
+    String id = create(owner, shop.id());
+    var input =
+        new java.util.HashMap<String, Object>(
+            Map.of("expectedVersion", 0, "decision", "RESOLVED", "reason", "테스트 폐업 확인"));
+    input.put("restaurantCorrection", businessCorrection(99, "CLOSED", ""));
+    String path = "/api/v1/admin/information-reports/" + id + "/resolution";
+    assertThat(request("POST", path, admin, input, null).statusCode()).isEqualTo(409);
+    assertThat(request("GET", "/api/v1/information-reports/" + id, owner, null, null).body())
+        .contains("PENDING");
+    assertThat(get("/api/v1/restaurants/" + shop.id()).statusCode()).isEqualTo(200);
+    input.put("restaurantCorrection", businessCorrection(0, "CLOSED", ""));
+    assertThat(request("POST", path, admin, input, null).statusCode()).isEqualTo(200);
+    assertThat(get("/api/v1/restaurants/" + shop.id()).statusCode()).isEqualTo(404);
+    assertThat(request("GET", "/api/v1/information-reports/" + id, owner, null, null).body())
+        .contains("RESOLVED");
+    assertThat(
+            request(
+                    "POST",
+                    "/api/v1/admin/restaurants/" + shop.id() + "/corrections",
+                    admin,
+                    businessCorrection(1, "OPEN", ""),
+                    null)
+                .statusCode())
+        .isEqualTo(200);
+    assertThat(get("/api/v1/restaurants/" + shop.id()).statusCode()).isEqualTo(200);
+  }
+
+  @Test
+  void unrelatedCorrectionPreservesPhoneSourceAndCoordinateReviewStatus() throws Exception {
+    var owner = actor(false);
+    var admin = actor(true);
+    var shop = shop(owner);
+    UUID source =
+        jdbc.queryForObject("SELECT id FROM app.data_source WHERE code='USER_REPORT'", UUID.class);
+    jdbc.update(
+        "UPDATE app.restaurant SET name='가상 테스트 정정 업소',address='테스트 정정 주소',location=NULL,coordinate_status='REVIEW_REQUIRED',phone_display='02-0000-0001',phone_number='0200000001',phone_source_id=? WHERE id=?",
+        source,
+        shop.id());
+    var input = new java.util.HashMap<>(businessCorrection(0, "CLOSED", "02-0000-0001"));
+    input.remove("latitude");
+    input.remove("longitude");
+    assertThat(
+            request(
+                    "POST",
+                    "/api/v1/admin/restaurants/" + shop.id() + "/corrections",
+                    admin,
+                    input,
+                    null)
+                .statusCode())
+        .isEqualTo(200);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT phone_source_id FROM app.restaurant WHERE id=?", UUID.class, shop.id()))
+        .isEqualTo(source);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT coordinate_status FROM app.restaurant WHERE id=?", String.class, shop.id()))
+        .isEqualTo("REVIEW_REQUIRED");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant_manual_override WHERE restaurant_id=?",
+                Integer.class,
+                shop.id()))
+        .isEqualTo(1);
+  }
+
+  private Map<String, Object> businessCorrection(long version, String status, String phone) {
+    return Map.of(
+        "expectedVersion",
+        version,
+        "name",
+        "가상 테스트 정정 업소",
+        "address",
+        "테스트 정정 주소",
+        "businessStatus",
+        status,
+        "latitude",
+        37.5,
+        "longitude",
+        127.0,
+        "phone",
+        phone,
+        "reason",
+        "테스트 근거를 확인한 업소 정정",
+        "locationReviewed",
+        true,
+        "businessPhoneReviewed",
+        true);
+  }
+
   private Map<String, Object> correction(Shop shop) {
     UUID record =
         jdbc.queryForObject(

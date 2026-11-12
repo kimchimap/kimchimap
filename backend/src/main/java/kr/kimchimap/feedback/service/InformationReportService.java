@@ -21,16 +21,19 @@ public class InformationReportService {
   private final MediaService media;
   private final OriginAdminService origins;
   private final ObjectMapper json;
+  private final kr.kimchimap.restaurant.service.RestaurantAdminService restaurants;
 
   public InformationReportService(
       InformationReportRepository reports,
       MediaService media,
       OriginAdminService origins,
-      ObjectMapper json) {
+      ObjectMapper json,
+      kr.kimchimap.restaurant.service.RestaurantAdminService restaurants) {
     this.reports = reports;
     this.media = media;
     this.origins = origins;
     this.json = json;
+    this.restaurants = restaurants;
   }
 
   @Transactional
@@ -109,6 +112,14 @@ public class InformationReportService {
             "INVALID_INFORMATION_REPORT_RESOLUTION",
             "신고한 업소의 원산지만 정정할 수 있습니다.");
       origins.correct(actor, input.correction());
+    }
+    if (input.restaurantCorrection() != null) {
+      if (!input.decision().equals("RESOLVED"))
+        throw error(
+            HttpStatus.BAD_REQUEST,
+            "INVALID_INFORMATION_REPORT_RESOLUTION",
+            "처리 완료할 신고만 업소 정정을 함께 반영할 수 있습니다.");
+      restaurants.correct(actor, row.restaurantId(), input.restaurantCorrection());
     }
     reports.resolve(id, actor, input);
     return detail(null, id);

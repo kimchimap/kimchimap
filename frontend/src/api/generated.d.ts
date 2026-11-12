@@ -75,7 +75,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_8"];
+        get: operations["detail_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -123,7 +123,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_7"];
+        get: operations["detail_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -219,7 +219,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_6"];
+        get: operations["detail_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -253,7 +253,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["correct"];
+        post: operations["correct_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -283,7 +283,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_5"];
+        get: operations["detail_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -315,7 +315,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail_4"];
+        get: operations["detail_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -334,6 +334,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/restaurants/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/restaurants/{id}/corrections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["correct"];
         delete?: never;
         options?: never;
         head?: never;
@@ -864,6 +896,7 @@ export interface components {
             /** Format: int64 */
             expectedVersion: number;
             reason: string;
+            restaurantCorrection?: components["schemas"]["RestaurantCorrectionRequest"];
         };
         InformationReportSubmission: {
             category: string;
@@ -1273,6 +1306,53 @@ export interface components {
             expectedVersion: number;
             reason: string;
         };
+        RestaurantAdminSnapshot: {
+            address?: string;
+            businessStatus?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            name?: string;
+            phone?: string;
+            published?: boolean;
+        };
+        RestaurantAdminView: {
+            corrections?: components["schemas"]["RestaurantCorrectionAudit"][];
+            /** Format: uuid */
+            id?: string;
+            snapshot?: components["schemas"]["RestaurantAdminSnapshot"];
+            /** Format: int64 */
+            version?: number;
+        };
+        RestaurantCorrectionAudit: {
+            /** Format: uuid */
+            actorId?: string;
+            after?: components["schemas"]["RestaurantAdminSnapshot"];
+            before?: components["schemas"]["RestaurantAdminSnapshot"];
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: uuid */
+            id?: string;
+            /** Format: int64 */
+            previousVersion?: number;
+            reason?: string;
+        };
+        RestaurantCorrectionRequest: {
+            address: string;
+            businessPhoneReviewed?: boolean;
+            businessStatus: string;
+            /** Format: int64 */
+            expectedVersion: number;
+            /** Format: double */
+            latitude?: number;
+            locationReviewed?: boolean;
+            /** Format: double */
+            longitude?: number;
+            name: string;
+            phone?: string;
+            reason: string;
+        };
         RestaurantDetail: {
             address?: string;
             /** Format: date-time */
@@ -1477,7 +1557,7 @@ export interface operations {
             };
         };
     };
-    detail_8: {
+    detail_9: {
         parameters: {
             query?: never;
             header?: never;
@@ -1545,7 +1625,7 @@ export interface operations {
             };
         };
     };
-    detail_7: {
+    detail_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -1685,7 +1765,7 @@ export interface operations {
             };
         };
     };
-    detail_6: {
+    detail_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -1733,7 +1813,7 @@ export interface operations {
             };
         };
     };
-    correct: {
+    correct_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1781,7 +1861,7 @@ export interface operations {
             };
         };
     };
-    detail_5: {
+    detail_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -1828,7 +1908,7 @@ export interface operations {
             };
         };
     };
-    detail_4: {
+    detail_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -1872,6 +1952,54 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ReportView"];
+                };
+            };
+        };
+    };
+    detail_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RestaurantAdminView"];
+                };
+            };
+        };
+    };
+    correct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RestaurantCorrectionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RestaurantAdminView"];
                 };
             };
         };

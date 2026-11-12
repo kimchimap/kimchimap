@@ -73,3 +73,6 @@ P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본�
 제보 APPROVED 검수에는 kimchiReviewed=true가 필요하다. 미제공 또는 false이면 400이다. 이는 사진 원산지가 해당 김치 품목·용도에 적용된다는 관리자 확인이며 실제 납품 인증을 뜻하지 않는다. 기존 UNKNOWN 품목은 새 승인 대상으로 자동 병합하지 않는다.
 
 수집 소스 상태의 credentialConfigured를 adapterAvailable로 대체했다. 폐기한 일반음식점 키는 실행 조건이 아니며 실제 등록 어댑터가 없으면 실행을 거부한다. 현재 내부 수집 입력은 외부 API 명세가 아니다.
+
+## 업소 정보 정정
+관리자 `GET /api/v1/admin/restaurants/{id}`는 공개 제외 업소도 현재 버전과 최근 100건의 정정 이력으로 반환한다. `POST /api/v1/admin/restaurants/{id}/corrections`는 전체 스냅샷과 expectedVersion·사유를 받는다. 위치/업소 전화의 변경 확인이 필요하며 버전 불일치는 409다. 신고 resolution의 restaurantCorrection은 신고 대상 업소에만 적용하고 신고 상태와 함께 커밋한다.
