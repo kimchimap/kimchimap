@@ -1,3 +1,4 @@
+import { AccountPage } from "./auth/AccountPage";
 import { RestaurantAdminPage } from "./restaurant/RestaurantAdminPage";
 import {
   NewInformationReportPage,
@@ -46,6 +47,7 @@ export function App() {
         <Route path="/" element={<MapPage />} />
         <Route path="/about/data" element={<DataGuidePage />} />
         <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
+        <Route path="/account" element={<AccountPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/complete" element={<AuthCompletePage />} />
         <Route path="/likes" element={<LikesPage />} />

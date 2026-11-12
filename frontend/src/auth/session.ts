@@ -181,15 +181,39 @@ export function restoreSession(): Promise<void> {
 }
 
 export async function logout(all = false): Promise<void> {
-  const token = accessToken;
+  if (all) return endAccountSession("logout-all");
   clear("anonymous", true);
   await exclusive(async () => {
     const headers = await csrfHeaders();
-    if (all && token) headers.set("Authorization", `Bearer ${token}`);
+    const response = await fetch("/api/v1/auth/logout", {
+      method: "POST",
+      headers,
+      credentials: "same-origin",
+      cache: "no-store",
+      redirect: "error",
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!response.ok) throw new ApiError(response.status);
+  });
+}
+
+export function withdrawAccount(): Promise<void> {
+  return endAccountSession("withdraw");
+}
+
+async function endAccountSession(
+  action: "logout-all" | "withdraw",
+): Promise<void> {
+  const epoch = generation;
+  await exclusive(async () => {
+    if (!accessToken || epoch !== generation) throw new ApiError(401);
+    const headers = await csrfHeaders();
+    if (!accessToken || epoch !== generation) throw new ApiError(401);
+    headers.set("Authorization", `Bearer ${accessToken}`);
     const response = await fetch(
-      `/api/v1/auth/${all ? "logout-all" : "logout"}`,
+      action === "withdraw" ? "/api/v1/members/me" : "/api/v1/auth/logout-all",
       {
-        method: "POST",
+        method: action === "withdraw" ? "DELETE" : "POST",
         headers,
         credentials: "same-origin",
         cache: "no-store",
@@ -197,6 +221,8 @@ export async function logout(all = false): Promise<void> {
         signal: AbortSignal.timeout(15_000),
       },
     );
+    if (response.status === 401) clear("expired", true);
     if (!response.ok) throw new ApiError(response.status);
+    clear("anonymous", true);
   });
 }
