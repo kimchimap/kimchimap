@@ -65,3 +65,7 @@ P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본�
 관리자 승인 요청은 신규 업소일 때 `locationReviewed: true`가 필요하다. 국내산 배추·고춧가루 중 하나의 근거가 있어야 등록한다. 동일 이름·주소의 기존 업소가 있으면 `RESTAURANT_MATCH_REQUIRED` 충돌로 되돌리고 임의 병합하지 않는다. 생성·연결·원산지·검수 이력을 함께 커밋한다. 제보 응답의 `restaurantId`는 승인 후 생성된 가게를 가리킨다. 제보 인증일은 승인 검토 이력의 서버 시각이다.
 
 상세 원산지 Claim의 `approvedAt`은 USER_REPORT 근거와 연결된 실제 승인 검토 시각이다. 외부 자료나 승인 이력이 없는 기록에는 비어 있으며 수집일·검토일을 대신 넣지 않는다. 공개 조회 기준 시점 이후의 승인은 포함하지 않는다.
+
+## 정보 오류 신고
+
+`POST /api/v1/information-reports`는 UUID Idempotency-Key와 업소·유형·설명·첨부 ID(최대 3개)를 받는다. GET 목록/`/{id}`는 본인만 조회한다. 관리자 목록/상세는 `/api/v1/admin/information-reports`이며 `POST /{id}/resolution`은 expectedVersion·decision(RESOLVED/DISMISSED)·reason을 받는다. 원산지 변경 신고 처리에는 선택적 correction으로 기존 근거 철회를 같은 트랜잭션에서 수행한다. 모든 목록은 limit 기본 20/최대 50, 안정적인 시각·ID cursor를 사용한다. 접수만으로 공개 정보는 바뀌지 않는다.

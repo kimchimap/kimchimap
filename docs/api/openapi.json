@@ -402,6 +402,156 @@
         ],
         "type": "object"
       },
+      "InformationReportItem": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "restaurantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InformationReportPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InformationReportItem"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InformationReportResolution": {
+        "properties": {
+          "correction": {
+            "$ref": "#/components/schemas/OriginCorrectionRequest"
+          },
+          "decision": {
+            "minLength": 1,
+            "pattern": "RESOLVED|DISMISSED",
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "expectedVersion",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "InformationReportSubmission": {
+        "properties": {
+          "category": {
+            "minLength": 1,
+            "pattern": "ORIGIN_CHANGED|CLOSED|LOCATION|CONTACT|OTHER",
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "mediaIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 3,
+            "minItems": 0,
+            "type": "array"
+          },
+          "restaurantId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "description",
+          "mediaIds",
+          "restaurantId"
+        ],
+        "type": "object"
+      },
+      "InformationReportView": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mediaIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "resolutionReason": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "restaurantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "IngestionEvent": {
         "properties": {
           "createdAt": {
@@ -1673,7 +1823,7 @@
   "paths": {
     "/api/v1/admin/designations": {
       "get": {
-        "operationId": "list_1",
+        "operationId": "list_2",
         "parameters": [
           {
             "in": "query",
@@ -1710,7 +1860,7 @@
         ]
       },
       "post": {
-        "operationId": "create_1",
+        "operationId": "create_2",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1851,6 +2001,142 @@
         ]
       }
     },
+    "/api/v1/admin/information-reports": {
+      "get": {
+        "operationId": "list_7",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InformationReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-information-report-controller"
+        ]
+      }
+    },
+    "/api/v1/admin/information-reports/{id}": {
+      "get": {
+        "operationId": "detail_8",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InformationReportView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-information-report-controller"
+        ]
+      }
+    },
+    "/api/v1/admin/information-reports/{id}/resolution": {
+      "post": {
+        "operationId": "resolve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InformationReportResolution"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InformationReportView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-information-report-controller"
+        ]
+      }
+    },
     "/api/v1/admin/ingestion/jobs": {
       "get": {
         "operationId": "jobs",
@@ -1881,7 +2167,7 @@
     },
     "/api/v1/admin/ingestion/jobs/{id}": {
       "get": {
-        "operationId": "detail_6",
+        "operationId": "detail_7",
         "parameters": [
           {
             "in": "path",
@@ -2111,7 +2397,7 @@
     },
     "/api/v1/admin/matches": {
       "get": {
-        "operationId": "list_5",
+        "operationId": "list_6",
         "responses": {
           "200": {
             "content": {
@@ -2139,7 +2425,7 @@
     },
     "/api/v1/admin/matches/{id}": {
       "get": {
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "in": "path",
@@ -2256,7 +2542,7 @@
     },
     "/api/v1/admin/origins": {
       "get": {
-        "operationId": "list_4",
+        "operationId": "list_5",
         "parameters": [
           {
             "in": "query",
@@ -2311,7 +2597,7 @@
     },
     "/api/v1/admin/origins/{scope}/{ingredient}": {
       "get": {
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "in": "path",
@@ -2356,7 +2642,7 @@
     },
     "/api/v1/admin/reports": {
       "get": {
-        "operationId": "list_3",
+        "operationId": "list_4",
         "parameters": [
           {
             "in": "query",
@@ -2410,7 +2696,7 @@
     },
     "/api/v1/admin/reports/{id}": {
       "get": {
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "in": "path",
@@ -2626,9 +2912,143 @@
         ]
       }
     },
+    "/api/v1/information-reports": {
+      "get": {
+        "operationId": "list_1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InformationReportPage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "information-report-controller"
+        ]
+      },
+      "post": {
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InformationReportSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InformationReportView"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "information-report-controller"
+        ]
+      }
+    },
+    "/api/v1/information-reports/{id}": {
+      "get": {
+        "operationId": "detail_3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InformationReportView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "information-report-controller"
+        ]
+      }
+    },
     "/api/v1/likes": {
       "get": {
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "in": "query",

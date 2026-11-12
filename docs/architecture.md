@@ -4,7 +4,7 @@
 
 React/Vite → 동일 사이트 `/api/v1` → 단일 Spring Boot MVC → PostgreSQL/PostGIS 및 Redis. 파일 저장은 웹 루트 밖의 로컬 저장소 어댑터. Spring scheduler는 별도 제한된 executor에서 소스 어댑터를 실행한다. 메시지 브로커는 도입하지 않는다.
 
-기능 패키지: restaurant, origin, certification, search, auth, member, like, report, media, ingestion, global. 각 패키지는 controller/service/repository/entity/dto 중 필요한 계층만 둔다. global은 설정·예외·보안 기반만 포함한다.
+기능 패키지: restaurant, origin, certification, search, auth, member, like, report, feedback, media, ingestion, global. 각 패키지는 controller/service/repository/entity/dto 중 필요한 계층만 둔다. global은 설정·예외·보안 기반만 포함한다.
 
 허용 호출은 Controller→Service→Repository다. Entity는 DTO로 변환하고 API에 노출하지 않는다. 타 기능 쓰기는 해당 Service를 통해야 한다. search는 여러 기능 테이블을 읽는 전용 Repository를 둘 수 있다. ArchUnit으로 Controller→Repository, Service→Controller, repository→service, 기능 순환을 차단한다. 거대한 공통 유틸·불필요한 BaseEntity/Service/Controller·Service/Impl 쌍 금지.
 
@@ -15,3 +15,5 @@ Service가 트랜잭션 경계다. 외부 HTTP·이미지 디코딩은 긴 DB �
 공간검색: location geometry(Point,4326), GiST(location), GiST((location::geography)). `ST_Intersects(location, ST_MakeEnvelope(:west,:south,:east,:north,4326))` 또는 `ST_DWithin(location::geography,ST_SetSRID(ST_MakePoint(:longitude,:latitude),4326)::geography,:radiusMeters)` 사용. 원산지 조건을 적용한 후보를 `ST_Distance`와 id로 안정 정렬한다. 실제 인덱스 선택은 EXPLAIN (ANALYZE, BUFFERS)로 검증한다.
 
 local/test/prod 분리, UTC 저장/Asia-Seoul 표시. 앱 계정에는 DML만, Flyway 계정은 schema DDL, extension은 초기 인프라 관리자만 생성한다. 마이그레이션은 추가하며 이미 적용된 파일을 수정하지 않는다. 운영 설정 누락은 시작 실패로 만든다.
+
+feedback는 오류 신고 접수·비공개 조회·처리를 담당한다. origin 정정 Service를 호출할 수 있으며 신고 처리와 선택한 근거 철회는 같은 트랜잭션이다. origin은 feedback에 의존하지 않는다. 접수만으로 공개 자료를 변경하지 않는다.

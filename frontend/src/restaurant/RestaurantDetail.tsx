@@ -144,6 +144,11 @@ export function RestaurantDetail({ id }: { id: string }) {
       </p>
       <div className="activity-links">
         <LikeToggle restaurantId={id} />
+        <Link
+          to={`/information-reports/new?restaurantId=${encodeURIComponent(id)}`}
+        >
+          정보 오류 신고하기
+        </Link>
         <Link to={`/reports/new?restaurantId=${encodeURIComponent(id)}`}>
           원산지 제보하기
         </Link>
