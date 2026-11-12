@@ -16,12 +16,14 @@ export default defineConfig({
   webServer: [
     {
       command: "../scripts/harness dev-backend",
-      url: "http://127.0.0.1:8080/api/v1/system/status",
+      env: { SERVER_PORT: "18080" },
+      url: "http://127.0.0.1:18080/api/v1/system/status",
       timeout: 120_000,
       reuseExistingServer: false,
     },
     {
       command: "pnpm dev",
+      env: { API_PROXY_TARGET: "http://127.0.0.1:18080" },
       url: "http://localhost:5173",
       timeout: 30_000,
       reuseExistingServer: false,

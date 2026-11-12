@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 import { ApiError, getRestaurant } from "../api/client";
 import { RestaurantContact } from "./RestaurantContact";
-import { BookmarkToggle } from "../bookmark/BookmarkToggle";
+import { LikeToggle } from "../like/LikeToggle";
 
 export function RestaurantContactPage() {
   const { id = "" } = useParams();
@@ -40,7 +40,7 @@ export function RestaurantContactPage() {
           <h1>{restaurant.data.name}</h1>
           <p>{restaurant.data.address}</p>
           <RestaurantContact contact={restaurant.data.contact} />
-          <BookmarkToggle restaurantId={id} />
+          <LikeToggle restaurantId={id} />
           {session.member?.role === "ADMIN" && (
             <Link
               to={`/admin/designations?restaurantId=${encodeURIComponent(id)}`}

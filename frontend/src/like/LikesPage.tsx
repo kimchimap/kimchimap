@@ -2,14 +2,14 @@ import { useSyncExternalStore } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { sessionSnapshot, subscribeSession } from "../auth/session";
-import { getBookmarks } from "./api";
-import { BookmarkToggle } from "./BookmarkToggle";
+import { getLikes } from "./api";
+import { LikeToggle } from "./LikeToggle";
 
-export function BookmarksPage() {
+export function LikesPage() {
   const session = useSyncExternalStore(subscribeSession, sessionSnapshot);
   const query = useInfiniteQuery({
-    queryKey: ["private", session.member?.id, "bookmarks"],
-    queryFn: ({ pageParam, signal }) => getBookmarks(pageParam, signal),
+    queryKey: ["private", session.member?.id, "likes"],
+    queryFn: ({ pageParam, signal }) => getLikes(pageParam, signal),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => page.nextCursor ?? undefined,
     enabled: session.status === "authenticated",
@@ -18,26 +18,26 @@ export function BookmarksPage() {
   const items = query.data?.pages.flatMap((page) => page.items ?? []) ?? [];
   return (
     <main id="main-content">
-      <h1>내 즐겨찾기</h1>
+      <h1>내가 좋아요한 가게</h1>
       {session.status === "loading" || session.status === "unknown" ? (
         <p role="status">로그인을 확인하고 있습니다.</p>
       ) : session.status !== "authenticated" ? (
         <p>
-          즐겨찾기를 보려면 <Link to="/login">로그인</Link>해 주세요.
+          좋아요를 보려면 <Link to="/login">로그인</Link>해 주세요.
         </p>
       ) : query.isPending ? (
-        <p role="status">즐겨찾기를 불러오고 있습니다.</p>
+        <p role="status">좋아요를 불러오고 있습니다.</p>
       ) : query.isError ? (
         <div role="alert">
-          즐겨찾기를 불러오지 못했습니다.
+          좋아요를 불러오지 못했습니다.
           <button onClick={() => void query.refetch()}>다시 시도</button>
         </div>
       ) : (
         <>
           {items.length === 0 && (
             <p>
-              아직 저장한 업소가 없습니다. 마음에 드는 업소를 즐겨찾기에
-              담아보세요.
+              아직 좋아요한 가게가 없습니다. 마음에 드는 가게에 좋아요를 눌러
+              보세요.
             </p>
           )}
           <ul className="saved-restaurants">
@@ -50,7 +50,7 @@ export function BookmarksPage() {
                 </h2>
                 <p>{item.address}</p>
                 {item.restaurantId && (
-                  <BookmarkToggle restaurantId={item.restaurantId} />
+                  <LikeToggle restaurantId={item.restaurantId} />
                 )}
               </li>
             ))}

@@ -19,7 +19,7 @@ V1은 PostGIS 확장 존재를 검증한다. V2는 업소·외부 ID·scope·식
 | publication | scope + ingredient UNIQUE, 선택 revision 또는 분쟁 상태, 결정 이유, version |
 | review/audit | 행위자, 시각, 대상, 이전/새 상태, 사유, 승인 당시 불변 snapshot |
 | member/identity | USER/ADMIN, 정지/탈퇴, provider + provider subject UNIQUE; 이메일 병합 금지 |
-| bookmark | member + restaurant UNIQUE |
+| restaurant_like | member + restaurant UNIQUE |
 | report/report_revision | 작성자, restaurant 후보, 상태, version, 불변 제출본, 검토 사유 |
 | media/report_media | 소유자, 무작위 키, 원본/정제 구분, 처리·공개 상태, 크기·해시, 연결 소유권 |
 | ingestion_job/checkpoint/quarantine | source, 범위, 상태, lease/fencing token, 페이지, 변경 해시, 오류·재개점 |
@@ -46,3 +46,5 @@ V6는 bookmark의 회원/업소 유일 키와 media의 소유자·무작위 저�
 아홉 번째 마이그레이션: origin_correction은 명시적 철회 대상 UUID 목록, 이전 공개 버전, 실행자·사유·시각의 불변 감사다. 기존 origin_record와 origin_component는 변경하지 않으며 origin_withdrawal과 공개 이력을 같은 트랜잭션에 추가한다.
 
 열 번째 마이그레이션은 data_source.designation_allowed(기본 false), designation.version/reviewed_at와 불변 designation_revision을 추가한다. restaurant_match_review는 source/external별 정규화 관찰본·원래 수집 시각·작업·버전·결정 상태를 보관한다. restaurant_match_audit는 결정 당시 관찰본과 관리자·사유를 불변 보존한다. 현재까지 실제 지정 소스를 활성화하지 않았다.
+
+V12는 기존 bookmark를 restaurant_like로 이름 변경하고 업소별 합계 조회 인덱스를 추가한다. 회원·업소 유일성과 기존 데이터는 보존한다. 새로운 별도 즐겨찾기 저장소를 두지 않는다.

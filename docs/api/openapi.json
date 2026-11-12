@@ -12,51 +12,6 @@
         },
         "type": "object"
       },
-      "BookmarkItem": {
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "businessStatus": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "restaurantId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "savedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "BookmarkPage": {
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/BookmarkItem"
-            },
-            "type": "array"
-          },
-          "nextCursor": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "BookmarkStatus": {
-        "properties": {
-          "saved": {
-            "type": "boolean"
-          }
-        },
-        "type": "object"
-      },
       "Bounds": {
         "properties": {
           "east": {
@@ -728,6 +683,60 @@
           },
           "name": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LikeCount": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LikeItem": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "businessStatus": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "restaurantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "savedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LikePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LikeItem"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LikeStatus": {
+        "properties": {
+          "saved": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -2520,142 +2529,6 @@
         ]
       }
     },
-    "/api/v1/bookmarks": {
-      "get": {
-        "operationId": "list_2",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "cursor",
-            "required": false,
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "format": "int32",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BookmarkPage"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "serviceBearer": []
-          }
-        ],
-        "tags": [
-          "bookmark-controller"
-        ]
-      }
-    },
-    "/api/v1/bookmarks/{restaurantId}": {
-      "delete": {
-        "operationId": "remove",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "restaurantId",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        },
-        "security": [
-          {
-            "serviceBearer": []
-          }
-        ],
-        "tags": [
-          "bookmark-controller"
-        ]
-      },
-      "get": {
-        "operationId": "status",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "restaurantId",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BookmarkStatus"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "serviceBearer": []
-          }
-        ],
-        "tags": [
-          "bookmark-controller"
-        ]
-      },
-      "put": {
-        "operationId": "add",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "restaurantId",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        },
-        "security": [
-          {
-            "serviceBearer": []
-          }
-        ],
-        "tags": [
-          "bookmark-controller"
-        ]
-      }
-    },
     "/api/v1/catalogs/countries": {
       "get": {
         "operationId": "countries",
@@ -2699,6 +2572,142 @@
         },
         "tags": [
           "catalog-controller"
+        ]
+      }
+    },
+    "/api/v1/likes": {
+      "get": {
+        "operationId": "list_2",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikePage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "like-controller"
+        ]
+      }
+    },
+    "/api/v1/likes/{restaurantId}": {
+      "delete": {
+        "operationId": "remove",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "like-controller"
+        ]
+      },
+      "get": {
+        "operationId": "status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "like-controller"
+        ]
+      },
+      "put": {
+        "operationId": "add",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "like-controller"
         ]
       }
     },
@@ -3146,6 +3155,37 @@
         },
         "tags": [
           "restaurant-controller"
+        ]
+      }
+    },
+    "/api/v1/restaurants/{restaurantId}/likes": {
+      "get": {
+        "operationId": "count",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeCount"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "public-like-controller"
         ]
       }
     },

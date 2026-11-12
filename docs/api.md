@@ -15,7 +15,7 @@
 | GET /auth/csrf | CSRF 획득, Cache-Control no-store |
 | POST /auth/refresh, /auth/logout, /auth/logout-all | 쿠키+CSRF+Origin, 마지막 두 개는 세션 폐기 |
 | GET /members/me; DELETE /members/me | 활성 세션, 탈퇴는 세션 전부 폐기 |
-| GET /bookmarks; PUT/DELETE /bookmarks/{restaurantId} | 본인, PUT 멱등 |
+| GET /likes; PUT/DELETE /likes/{restaurantId} | 본인, PUT 멱등 |
 | POST /media; GET /media/{id} | multipart 본인 업로드, 비공개는 소유자/관리자만 |
 | POST/GET /reports; GET/PATCH /reports/{id} | 본인 제보, version 필수 수정 |
 | POST /reports/{id}/withdraw | 본인 대기 상태 철회 |
@@ -42,7 +42,7 @@ P06a 구현: GET /auth/csrf, POST /auth/refresh, POST /auth/logout, POST /auth/l
 
 P06b 구현: GET /auth/login/kakao는 Security 인가 필터가 카카오로 redirect하며, 키 미설정이면 503이다. GET /auth/callback/kakao는 Spring Security가 일회성 state와 브라우저 쿠키, PKCE·OIDC를 검증한다. 정상 callback은 서비스 Refresh 쿠키 설정 후 토큰 없는 /auth/complete로 이동한다.
 
-P07a 구현: GET /bookmarks는 cursor·limit(1~50)을 받으며 GET /bookmarks/{restaurantId}는 본인 저장 여부를 반환한다. PUT/DELETE는 멱등 204다. POST /media는 multipart file로 실제 사진을 검사해 201을 반환하고 GET /media/{id}?original=false는 소유자·관리자만 내려받는다. 원본은 original=true로 선택하며 둘 다 no-store이다. 사진 실패는 413/415/422/429/503으로 구분한다. 클라이언트의 ownerId·저장 경로·공개 여부는 받지 않는다.
+P07a 구현: GET /likes는 cursor·limit(1~50)을 받으며 GET /likes/{restaurantId}는 본인 저장 여부를 반환한다. PUT/DELETE는 멱등 204다. POST /media는 multipart file로 실제 사진을 검사해 201을 반환하고 GET /media/{id}?original=false는 소유자·관리자만 내려받는다. 원본은 original=true로 선택하며 둘 다 no-store이다. 사진 실패는 413/415/422/429/503으로 구분한다. 클라이언트의 ownerId·저장 경로·공개 여부는 받지 않는다.
 
 P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본문 24시간). 작성·보완 시 publicationConsent=true와 본인 사진 1~5개, 같은 품목의 식재료 1~10개를 받는다. 목록 limit은 1~50이며 state/cursor를 지원한다. 검수는 expectedVersion 필수이며 승인 시 approvedScopeId와 privacyReviewedMediaIds를 명시한다. GET /media/{id}/public은 개인정보 검토 후 공개된 정제본만 반환한다. 관리자 정정·지정·매칭 API는 아래 구현 계약을 따른다.
 
@@ -53,3 +53,7 @@ P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본�
 지정 관리 구현: GET /admin/designations/sources(지정 이용 범위 허가된 소스), GET /admin/designations(restaurantId 선택, 최근 50개), GET /admin/designations/{id}, POST /admin/designations, PUT /admin/designations/{id}. 생성·수정은 designation과 reason, 수정은 expectedVersion 필수다. 업소·출처·외부 식별자는 수정 불가이며 취소일과 이전 스냅샷을 보존한다. 공개 읽기도 현재 지정 재게시 허가를 확인한다.
 
 업소 매칭 구현: GET /admin/matches(대기 최대 50개), GET /admin/matches/{id}, POST /admin/matches/{id}/reviews. expectedVersion·reason과 MATCHED/대상 restaurantId 또는 DISTINCT/대상 없음으로 결정한다. 관찰본 없는 과거 후보는 reviewable=false이며 확정할 수 없다. 같은 출처의 다른 외부 식별자 연결·동시 결정·관찰본 변경은 409다. 외부 HTTP 요청은 이 경로에서 실행하지 않는다.
+
+## 좋아요 공개 합계
+
+`GET /api/v1/restaurants/{id}/likes`는 공개 자격이 있는 업소의 `count`만 반환한다. 회원 식별자·개인 목록은 공개하지 않는다. `PUT/DELETE /api/v1/likes/{id}`는 현재 인증 회원에게만 적용되며 멱등적이다. 기존 bookmarks 경로는 제거한다.

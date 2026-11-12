@@ -25,7 +25,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import tools.jackson.databind.json.JsonMapper;
 
-class BookmarksMediaIntegrationTest extends ApplicationIntegrationSupport {
+class LikesMediaIntegrationTest extends ApplicationIntegrationSupport {
   @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
   private static final Path MEDIA_ROOT;
 
@@ -50,39 +50,50 @@ class BookmarksMediaIntegrationTest extends ApplicationIntegrationSupport {
   private final JsonMapper json = JsonMapper.builder().build();
 
   @Test
-  void bookmarksAreIdempotentPrivateAndHaveStableLimitedPages() throws Exception {
+  void likesAreIdempotentPrivateAndHaveStableLimitedPages() throws Exception {
     String first = token(), other = token();
     UUID restaurant = restaurant(true), second = restaurant(true), hidden = restaurant(false);
-    assertThat(request("PUT", "/api/v1/bookmarks/" + restaurant, first).statusCode())
-        .isEqualTo(204);
-    assertThat(request("PUT", "/api/v1/bookmarks/" + restaurant, first).statusCode())
-        .isEqualTo(204);
-    assertThat(request("PUT", "/api/v1/bookmarks/" + second, first).statusCode()).isEqualTo(204);
-    assertThat(request("PUT", "/api/v1/bookmarks/" + hidden, first).statusCode()).isEqualTo(404);
-    assertThat(request("GET", "/api/v1/bookmarks", other).body())
-        .doesNotContain(restaurant.toString());
-    var page = request("GET", "/api/v1/bookmarks?limit=1", first);
+    assertThat(request("PUT", "/api/v1/likes/" + restaurant, first).statusCode()).isEqualTo(204);
+    assertThat(request("PUT", "/api/v1/likes/" + restaurant, first).statusCode()).isEqualTo(204);
+    assertThat(request("PUT", "/api/v1/likes/" + second, first).statusCode()).isEqualTo(204);
+    assertThat(get("/api/v1/restaurants/" + restaurant + "/likes").statusCode()).isEqualTo(200);
+    assertThat(
+            json.readTree(get("/api/v1/restaurants/" + restaurant + "/likes").body())
+                .path("count")
+                .asLong())
+        .isEqualTo(1);
+    assertThat(get("/api/v1/restaurants/" + hidden + "/likes").statusCode()).isEqualTo(404);
+    assertThat(request("PUT", "/api/v1/likes/" + hidden, first).statusCode()).isEqualTo(404);
+    assertThat(request("GET", "/api/v1/likes", other).body()).doesNotContain(restaurant.toString());
+    var page = request("GET", "/api/v1/likes?limit=1", first);
     assertThat(page.statusCode()).isEqualTo(200);
     var body = json.readTree(page.body());
     assertThat(body.path("items").size()).isEqualTo(1);
     String cursor = body.path("nextCursor").asString();
     var next =
-        json.readTree(request("GET", "/api/v1/bookmarks?limit=1&cursor=" + cursor, first).body());
+        json.readTree(request("GET", "/api/v1/likes?limit=1&cursor=" + cursor, first).body());
     assertThat(next.path("items").size()).isEqualTo(1);
     assertThat(next.path("items").get(0).path("restaurantId").asString()).isNotEqualTo(cursor);
-    assertThat(request("GET", "/api/v1/bookmarks?cursor=" + cursor, other).statusCode())
-        .isEqualTo(400);
-    assertThat(request("GET", "/api/v1/bookmarks?limit=51", first).statusCode()).isEqualTo(400);
-    assertThat(request("DELETE", "/api/v1/bookmarks/" + restaurant, other).statusCode())
-        .isEqualTo(204);
-    assertThat(request("GET", "/api/v1/bookmarks", first).body()).contains(restaurant.toString());
-    assertThat(request("DELETE", "/api/v1/bookmarks/" + restaurant, first).statusCode())
-        .isEqualTo(204);
-    assertThat(request("DELETE", "/api/v1/bookmarks/" + restaurant, first).statusCode())
-        .isEqualTo(204);
-    assertThat(request("GET", "/api/v1/bookmarks", first).body())
-        .doesNotContain(restaurant.toString());
-    assertThat(get("/api/v1/bookmarks").statusCode()).isEqualTo(401);
+    assertThat(request("GET", "/api/v1/likes?cursor=" + cursor, other).statusCode()).isEqualTo(400);
+    assertThat(request("GET", "/api/v1/likes?limit=51", first).statusCode()).isEqualTo(400);
+    assertThat(request("PUT", "/api/v1/likes/" + restaurant, other).statusCode()).isEqualTo(204);
+    assertThat(
+            json.readTree(get("/api/v1/restaurants/" + restaurant + "/likes").body())
+                .path("count")
+                .asLong())
+        .isEqualTo(2);
+
+    assertThat(request("DELETE", "/api/v1/likes/" + restaurant, other).statusCode()).isEqualTo(204);
+    assertThat(request("GET", "/api/v1/likes", first).body()).contains(restaurant.toString());
+    assertThat(request("DELETE", "/api/v1/likes/" + restaurant, first).statusCode()).isEqualTo(204);
+    assertThat(request("DELETE", "/api/v1/likes/" + restaurant, first).statusCode()).isEqualTo(204);
+    assertThat(request("GET", "/api/v1/likes", first).body()).doesNotContain(restaurant.toString());
+    assertThat(
+            json.readTree(get("/api/v1/restaurants/" + restaurant + "/likes").body())
+                .path("count")
+                .asLong())
+        .isZero();
+    assertThat(get("/api/v1/likes").statusCode()).isEqualTo(401);
   }
 
   @Test
@@ -176,7 +187,7 @@ class BookmarksMediaIntegrationTest extends ApplicationIntegrationSupport {
     jdbc.update(
         "INSERT INTO app.restaurant(id,name,address,business_status,coordinate_status,published) VALUES (?,?,'테스트 주소','OPEN','MISSING',?)",
         id,
-        "가상 테스트 즐겨찾기 " + id,
+        "가상 테스트 좋아요 " + id,
         published);
     DomesticOriginFixture.addRice(jdbc, transactions, id);
     return id;
