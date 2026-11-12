@@ -56,3 +56,5 @@ V14는 실제 승인 인증일 조회를 위한 report_review의 승인 revision
 V15는 information_report·information_report_media·information_report_review를 추가한다. 원산지 제보와 별개로 오류 신고 본문·첨부 연결·처리 감사를 불변 보존한다. 회원별 요청 키 유일성과 본문 해시로 동일 요청 재전송을 처리하며, PENDING에서 RESOLVED/DISMISSED로 한 번만 전이한다. 관리자 처리에는 버전·사유·행위자·시각을 남긴다.
 
 V16은 serving_scope.food_kind를 추가한다. 기존 품목은 UNKNOWN이며 이름으로 자동 분류하지 않는다. 관리자 확인을 거친 새 김치 품목은 KIMCHI다. 공개 함수는 KIMCHI 품목의 국내산 배추 또는 고춧가루 근거만 인정하며 쌀 등 다른 식재료는 공개 자격을 부여하지 않는다. [결정](decisions/0017-explicit-kimchi-scope.md).
+
+V17은 과거 일반음식점 소스만 연결된 미사용 업소를 제거한다. 품목·근거·지정·제보·좋아요·정정·검수 연결, 다른 출처 식별자/전화번호/후보가 있으면 보존한다. 삭제 대상의 미검토 자동 후보·품질 오류·원천 좌표/전화번호·외부 식별자도 함께 제거하며 작업 집계와 불변 실행 감사는 유지한다. 한 SQL 문장에서 대상 집합을 고정하고 임시 테이블 권한을 추가하지 않는다.
