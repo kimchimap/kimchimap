@@ -112,7 +112,14 @@ it("새 위치 제보는 기존 업소 조회 없이 가게 정보와 사진 입
     status: "authenticated",
     member: { id: "test-member", role: "USER" },
   });
-  vi.mocked(getCatalogs).mockResolvedValue({ ingredients: [], countries: [] });
+  vi.mocked(getCatalogs).mockResolvedValue({
+    ingredients: [
+      { id: "00000000-0000-4000-8000-000000000001", name: "배추" },
+      { id: "00000000-0000-4000-8000-000000000002", name: "고춧가루" },
+      { id: "test-rice", name: "쌀" },
+    ],
+    countries: [],
+  });
   render(
     <QueryClientProvider
       client={
@@ -130,6 +137,12 @@ it("새 위치 제보는 기존 업소 조회 없이 가게 정보와 사진 입
   expect(screen.getByLabelText("가게 주소")).toBeInTheDocument();
   expect(screen.getByText(/선택 위치: 37.5665, 126.978/)).toBeInTheDocument();
   expect(screen.getByLabelText("사진 선택")).toBeInTheDocument();
+  expect(screen.getByRole("option", { name: "배추" })).toBeInTheDocument();
+  expect(screen.queryByRole("option", { name: "쌀" })).not.toBeInTheDocument();
+  await userEvent
+    .setup()
+    .click(screen.getByRole("button", { name: "식재료 추가" }));
+  expect(screen.getByRole("button", { name: "식재료 추가" })).toBeDisabled();
 });
 it("범위 밖 제보 좌표는 새 가게 양식을 열지 않는다", () => {
   vi.mocked(sessionSnapshot).mockReturnValue({

@@ -17,6 +17,29 @@ from policy import SECTIONS, message, pr, push_refs
 BODY = '\n\n'.join('## ' + section + '\n\n하네스 검증 결과를 기록했으며 서비스는 미구현입니다.' for section in SECTIONS)
 
 
+class ExternalSmokeTests(unittest.TestCase):
+    def test_missing_credentials_prevent_external_requests(self):
+        import external_smoke
+        with patch.object(external_smoke, 'configure'), patch.dict(os.environ, {}, clear=True), patch.object(external_smoke.subprocess, 'run') as run:
+            with self.assertRaises(SystemExit):
+                external_smoke.main()
+            run.assert_not_called()
+
+    def test_external_result_is_preserved_without_credentials_in_command(self):
+        import external_smoke
+        credentials = {key: 'synthetic-private-test-value' for key in ('KAKAO_JAVASCRIPT_KEY', 'KAKAO_CLIENT_ID', 'KAKAO_CLIENT_SECRET')}
+        for code in (0, 1):
+            with self.subTest(code=code), patch.object(external_smoke, 'configure'), patch.dict(os.environ, credentials, clear=True), patch.object(external_smoke.subprocess, 'run', return_value=subprocess.CompletedProcess([], code)) as run, patch('builtins.print') as output:
+                if code:
+                    with self.assertRaises(SystemExit) as failure:
+                        external_smoke.main()
+                    self.assertEqual(failure.exception.code, code)
+                else:
+                    external_smoke.main()
+                self.assertNotIn('synthetic-private-test-value', str(run.call_args))
+                self.assertNotIn('synthetic-private-test-value', str(output.call_args_list))
+
+
 class PolicyTests(unittest.TestCase):
     def test_messages_accept(self):
         for title in ['feat: 식재료 원산지 조합 검색을 구현', 'fix!: JWT 갱신 경쟁 조건을 수정', 'docs: PostGIS 실행 방법을 정리', 'revert: 원산지 필터 변경을 되돌림', 'docs: Apple Silicon 실행 방법을 기록', 'test: 모바일과 PC 화면 동작을 검증']:

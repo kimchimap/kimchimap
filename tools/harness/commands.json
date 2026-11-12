@@ -109,15 +109,15 @@
   },
   "smoke-external": {
     "argv": [
-      "./gradlew",
-      "externalSmokeTest"
+      "python3",
+      "tools/harness/external_smoke.py"
     ],
     "requires": [
-      "backend/gradlew",
-      "backend/build.gradle.kts"
+      "tools/harness/external_smoke.py",
+      "frontend/playwright.external.config.ts"
     ],
-    "cwd": "backend",
-    "plan": "docs/plans/active/service-implementation.md"
+    "cwd": ".",
+    "plan": "docs/plans/active/final-product-validation.md"
   },
   "dev-frontend": {
     "argv": [
@@ -247,6 +247,6 @@
       "backend/src/test/java/kr/kimchimap/BrowserTestServer.java"
     ],
     "cwd": ".",
-    "plan": "docs/plans/active/connected-browser-flow.md"
+    "plan": "docs/plans/completed/connected-browser-flow.md"
   }
 }

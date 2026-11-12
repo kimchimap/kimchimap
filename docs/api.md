@@ -1,78 +1,48 @@
-# API 구현 계약 초안
+# API 계약
 
-> 2026-09-08 범위 정정: 국내산 사용 항목이 확인된 업소만 수집·공개한다. 원산지 없는 일반음식점 전체 수집은 중단한다. 과거 수집 엔진 설명은 기술 이력이며 현재 실행 허용을 뜻하지 않는다. 미등록 업소는 제보·검수로 등록한다. [결정 기록](decisions/0015-domestic-only-scope.md).
+기본 경로는 `/api/v1`이다. 실제 리소스·입력·응답·enum은 [생성 OpenAPI](api/openapi.json)와 frontend/src/api/generated.d.ts를 기준으로 한다. `api-generate`로 생성하고 `api-check`로 서버 계약과 비교한다. 아래 내용은 자체 서비스 계약이며 외부 데이터 제공 API 명세가 아니다.
 
-업소 상세의 선택적 `contact`는 `display`(출처의 표시 번호), `number`(연결용 숫자와 선택적 국제전화 `+`), `sourceName`을 반환한다. 번호가 없거나 형식 검증을 통과하지 못하면 null이다. 출처의 재게시 허용이 철회되면 연락처를 공개하지 않는다.
-
-이 문서는 자체 서비스의 설계이며 외부 제공 API 명세가 아니다. 구현 단계에서 springdoc OpenAPI 산출물을 커밋하고 타입을 생성한다. 현재 /api/v1/system/status가 실행되며 [생성 계약](api/openapi.json)과 frontend 생성 타입을 비교한다. 업소 상세와 식재료·국가 카탈로그 GET도 구현한다. 공간 검색 POST도 구현한다. 서비스 세션과 카카오 로그인도 구현했으며 제보·관리자 검수·수집·원산지 정정·지정·매칭 endpoint도 구현했다.
-
-| 메서드·경로 (/api/v1 기준) | 권한·의미 |
+| 기능 | 리소스·경계 |
 | --- | --- |
-| POST /restaurants/search | 공개, bbox 또는 center/radiusMeters 중 하나와 filters·cursor·limit |
-| GET /restaurants/{id} | 공개 상세, matched scope·공개 origin/evidence/designation |
-| GET /catalogs/ingredients, /catalogs/countries, /catalogs/filters | 공개 활성 카탈로그 |
-| GET /auth/login/kakao | OAuth 시작; callback 경로는 Security 설정에서 고정 |
-| GET /auth/csrf | CSRF 획득, Cache-Control no-store |
-| POST /auth/refresh, /auth/logout, /auth/logout-all | 쿠키+CSRF+Origin, 마지막 두 개는 세션 폐기 |
-| GET /members/me; DELETE /members/me | 활성 세션, 탈퇴는 세션 전부 폐기 |
-| GET /likes; PUT/DELETE /likes/{restaurantId} | 본인, PUT 멱등 |
-| POST /media; GET /media/{id} | multipart 본인 업로드, 비공개는 소유자/관리자만 |
-| POST/GET /reports; GET/PATCH /reports/{id} | 본인 제보, version 필수 수정 |
-| POST /reports/{id}/withdraw | 본인 대기 상태 철회 |
-| GET /admin/reports; GET /admin/reports/{id} | ADMIN |
-| POST /admin/reports/{id}/reviews | ADMIN, decision/reason/expectedVersion, 충돌 409 |
-| POST /admin/origin-corrections; POST /admin/designations | ADMIN, 사유·불변 revision |
-| GET /admin/matches; POST /admin/matches/{id}/reviews | ADMIN 매칭 검토 |
-| GET /admin/ingestion/jobs; GET /admin/ingestion/jobs/{id} | ADMIN 수집 상태 |
-| POST /admin/ingestion/sources/{id}/runs | ADMIN, 허용된 소스만, 202 + jobId |
+| 공개 검색·상세 | POST /restaurants/search, GET /restaurants/{id}, GET /restaurants/{id}/likes |
+| 카탈로그 | GET /catalogs/ingredients, /catalogs/countries |
+| 인증 | GET /auth/login/kakao, /auth/callback/kakao, /auth/csrf; POST /auth/refresh, /auth/logout, /auth/logout-all |
+| 회원 | GET/DELETE /members/me |
+| 좋아요 | GET /likes, GET/PUT/DELETE /likes/{restaurantId} |
+| 사진 | POST /media, GET /media/{id}, GET /media/{id}/public |
+| 제보 | POST/GET /reports, GET/PATCH /reports/{id}, POST /reports/{id}/withdraw |
+| 제보 검수 | GET /admin/reports 및 상세, POST /admin/reports/{id}/reviews |
+| 오류 신고 | POST/GET /information-reports 및 GET 상세, 관리자 목록·상세와 POST /admin/information-reports/{id}/resolution |
+| 업소 정정 | GET /admin/restaurants/{id}, POST /admin/restaurants/{id}/corrections |
+| 원산지·지정·매칭 | /admin/origins, /admin/origin-corrections, /admin/designations, /admin/matches |
+| 수집 | /admin/ingestion/sources, /jobs 및 상세·events·quarantines, POST /sources/{id}/runs |
 
-검색 입력: 위도 [-90,90], 경도 [-180,180], south<north/west<east, 한반도 서비스 영역 밖 데이터는 안내. 날짜변경선 bbox는 초기 미지원 400. radiusMeters 1~50000, limit 1~100, 지도 최대 200, ingredient 조건 최대 10/국가 20. 너무 넓은 bbox는 확대 안내와 truncated=true, 전체 결과처럼 표시하지 않는다. 거리순 tie-break id, cursor는 검색 조건 해시와 마지막 거리/id 및 asOf를 포함하고 변조·다른 조건 재사용을 거부한다. radius/bbox의 필터 의미는 동일하다.
+## 공개 조회
 
-응답에는 items, nextCursor, truncated, asOf, matchedScopes. 근거에 observedAt/sourceUpdatedAt/collectedAt/lastFetchSucceededAt/reviewedAt 및 상태를 분리한다. UNKNOWN을 IMPORTED로 직렬화하지 않는다. 정렬 중 데이터 변경 시 snapshot이 아닌 asOf 일관성의 한계를 명시하고 엄격 snapshot은 필요성이 있을 때 도입한다.
+지도 영역 또는 반경과 원산지 groups를 함께 받는다. 현재 화면은 동일 김치 scope의 배추/고춧가루 DOMESTIC 조건을 구성한다. 서로 다른 재료는 AND, 같은 조건 안 복수 국가는 OR다. 혼합·미확인·분쟁·만료는 순수 국내산 조건에 해당하지 않는다. SQL 파라미터를 바인딩하고 공간 계산은 DB에서 수행한다.
 
-오류는 application/problem+json: type, title(한국어), status, code(안정 영어), traceId, fieldErrors. 400 검증, 401 인증, 403 권한/CSRF, 404 미노출, 409 version, 413 파일, 415 형식, 422 처리 불가, 429 제한, 503 의존 장애. 내부 SQL/Entity/stack은 제외. 캐시 가능한 공개 GET과 인증 no-store 분리.
+반경은 미터 단위이며 최대 50km, 페이지 limit은 최대 100이다. 지도 UI 누적 상한은 200이며 넓은 영역·잘린 결과를 전체 결과처럼 표시하지 않는다. 거리 동률은 업소 ID로 정렬한다. cursor는 조건·조회 기준 시점·마지막 거리/ID를 포함하고 변조·다른 조건 재사용을 거부한다. asOf는 완전한 DB snapshot 보장이 아니다.
 
-수집 실행과 제보 생성은 Idempotency-Key를 구현하여 동일 사용자의 같은 키/본문 재전송을 재사용하고 다른 본문은 409. 보관 기본 24시간. 요청 제한 기본안: 공개 검색 IP 60/min, 갱신 세션 10/min, 업로드 사용자 10/hour, 관리자 수집 소스 동시 1개. 공유망 오탐·실측 후 조정하고 보호 기능 Redis 장애 시 거부한다.
+상세는 원산지 관찰일·원문 갱신일·수집일·마지막 수집 성공일·검토일·승인일을 구분한다. Claim.approvedAt은 실제 제보 승인 이력이며 수집일로 대체하지 않는다. 지정 정보는 별도 적용 품목·기준·지정일을 유지한다. 연락처 contact는 검증된 display/number/sourceName이며 출처의 재게시 허가가 없으면 공개하지 않는다.
 
-카카오 OAuth callback은 `/api/v1/auth/callback/kakao`, local redirect URI는 `http://localhost:5173/api/v1/auth/callback/kakao`로 고정했다. 로그인 구현 단계에서 Spring Security의 callback base URI와 일치시킨다.
+## 인증·오류
 
-검색 구현 예: `groups: [{usage: "SIDE_DISH", ingredients: [{ingredientId: "…", mode: "DOMESTIC"}, {ingredientId: "…", mode: "DOMESTIC"}]}]`. 식재료 ID는 카탈로그에서 얻는다. OriginMode는 DOMESTIC/COUNTRIES/IMPORTED_UNSPECIFIED/UNKNOWN이며 COUNTRIES일 때 countries를 지정한다. includeMixed는 COUNTRIES에서만 허용한다. maxAgeDays는 실제 observedAt 기준, evidenceKinds는 대표 공개 근거 기준이다. 전체 속성·enum은 생성 OpenAPI를 따른다. [검색 결정](decisions/0006-spatial-search.md)을 참조한다.
+카카오 callback은 `/api/v1/auth/callback/kakao`, 로컬 Redirect URI는 `http://localhost:5173/api/v1/auth/callback/kakao`다. 인가 코드·state·PKCE·OIDC를 서버에서 처리하고 Refresh 쿠키를 설정한 뒤 토큰 없는 `/auth/complete`로 이동한다. 키가 없으면 시작을 503으로 거부한다.
 
-P06a 구현: GET /auth/csrf, POST /auth/refresh, POST /auth/logout, POST /auth/logout-all, GET/DELETE /members/me. 카카오 진입·콜백은 P06b에서 연결한다. refresh/logout은 Origin과 CSRF 헤더·쿠키가 필요하다. logout-all은 Bearer도 필요하며 회원 정보·탈퇴는 활성 Bearer를 요구한다. Access Token 응답은 no-store이고 Refresh Token은 응답 본문에 포함하지 않는다.
+갱신·로그아웃은 동일 Origin과 CSRF 토큰/쿠키가 필요하다. 전체 로그아웃은 서비스 Bearer도 필요하다. 보호 API는 JWT와 활성 Redis 세션·현재 계정 상태를 검사한다. 회원 탈퇴는 전체 세션 폐기와 공급자 식별자 연결 제거를 수행하며 동일 카카오 재가입은 별도 회원이다.
 
-P06b 구현: GET /auth/login/kakao는 Security 인가 필터가 카카오로 redirect하며, 키 미설정이면 503이다. GET /auth/callback/kakao는 Spring Security가 일회성 state와 브라우저 쿠키, PKCE·OIDC를 검증한다. 정상 callback은 서비스 Refresh 쿠키 설정 후 토큰 없는 /auth/complete로 이동한다.
+오류는 application/problem+json의 한국어 안내·안정적인 code·traceId·필드 오류를 제공한다. 400 입력, 401 인증, 403 인가/CSRF, 404 비공개/미존재, 409 버전, 413 크기, 415 형식, 422 처리 불가, 429 제한, 503 의존 장애를 구분한다. 내부 SQL·Entity·스택·토큰은 노출하지 않는다. 인증·개인 자료는 no-store다.
 
-P07a 구현: GET /likes는 cursor·limit(1~50)을 받으며 GET /likes/{restaurantId}는 본인 저장 여부를 반환한다. PUT/DELETE는 멱등 204다. POST /media는 multipart file로 실제 사진을 검사해 201을 반환하고 GET /media/{id}?original=false는 소유자·관리자만 내려받는다. 원본은 original=true로 선택하며 둘 다 no-store이다. 사진 실패는 413/415/422/429/503으로 구분한다. 클라이언트의 ownerId·저장 경로·공개 여부는 받지 않는다.
+## 제보·신고·정정
 
-P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본문 24시간). 작성·보완 시 publicationConsent=true와 본인 사진 1~5개, 같은 품목의 식재료 1~10개를 받는다. 목록 limit은 1~50이며 state/cursor를 지원한다. 검수는 expectedVersion 필수이며 승인 시 approvedScopeId와 privacyReviewedMediaIds를 명시한다. GET /media/{id}/public은 개인정보 검토 후 공개된 정제본만 반환한다. 관리자 정정·지정·매칭 API는 아래 구현 계약을 따른다.
+제보 생성은 UUID Idempotency-Key와 기존 restaurantId 또는 newRestaurant 중 하나를 요구한다. 신규 정보는 이름·주소·선택 좌표·선택 업소 전화번호이며 승인 전에는 업소를 생성하지 않는다. 표시판 사진·공개 동의·관찰일·같은 품목의 원산지 주장을 받는다. UI는 현재 김치 두 재료만 선택하고 내부 모델의 확장 가능한 카탈로그는 유지한다.
 
-관리자 수집 구현: GET /admin/ingestion/sources, /jobs(최근 50개), /jobs/{id}, /jobs/{id}/events, /jobs/{id}/quarantines, POST /sources/{id}/runs(202). 재실행은 Idempotency-Key와 mode/pageBudget/reason, 페이지 예산 1~100을 받는다. 처리 이력·격리는 cursor/limit(1~100), 동일 요청 키는 24시간 재사용한다. 내부 lease 정보·외부 인증키·원문 개인정보는 제외한다.
+검수는 expectedVersion·사유·결정이 필수다. 승인은 kimchiReviewed=true, 새 업소는 locationReviewed=true가 필요하다. 배추/고춧가루 중 하나의 국내산 근거가 있어야 공개한다. 동일 이름·주소의 기존 업소는 자동 병합하지 않고 검토 충돌을 반환한다. 생성·원산지 공개·검수 이력·사진 공개 전환은 같은 트랜잭션이다. 승인 후 restaurantId로 공개 업소를 연결한다.
 
-원산지 정정 구현: GET /admin/origins(status/limit/offset), GET /admin/origins/{scope}/{ingredient}, POST /admin/origin-corrections(scopeId/ingredientId/expectedVersion/withdrawRecordIds/reason). 기록 선택은 같은 그룹의 승인·미철회 기록 1~20개이며 stale version은 409다. 원문은 보존하고 불변 철회·감사·공개 재판정을 원자 반영한다. 목록 상한은 truncated로 알린다. 검색 includeMixed 생략은 false로 처리한다.
+사진은 실제 내용·형식·픽셀·크기를 검증하고 재인코딩한다. 원본과 미승인 정제본은 소유자/관리자만 접근한다. 공개 주소는 개인정보 검토 후 공개된 정제본만 반환한다. 첨부 ID의 소유권은 서버가 검사한다.
 
-지정 관리 구현: GET /admin/designations/sources(지정 이용 범위 허가된 소스), GET /admin/designations(restaurantId 선택, 최근 50개), GET /admin/designations/{id}, POST /admin/designations, PUT /admin/designations/{id}. 생성·수정은 designation과 reason, 수정은 expectedVersion 필수다. 업소·출처·외부 식별자는 수정 불가이며 취소일과 이전 스냅샷을 보존한다. 공개 읽기도 현재 지정 재게시 허가를 확인한다.
+오류 신고는 UUID Idempotency-Key·업소·유형·설명·최대 3개 사진을 받는다. 본인 조회와 관리자 조회를 분리한다. resolution은 expectedVersion·RESOLVED/DISMISSED·사유이며 선택적 correction(원산지 철회)·restaurantCorrection(업소 정정)을 신고 대상에만 같은 트랜잭션으로 반영한다. 접수만으로 공개 정보는 바뀌지 않는다.
 
-업소 매칭 구현: GET /admin/matches(대기 최대 50개), GET /admin/matches/{id}, POST /admin/matches/{id}/reviews. expectedVersion·reason과 MATCHED/대상 restaurantId 또는 DISTINCT/대상 없음으로 결정한다. 관찰본 없는 과거 후보는 reviewable=false이며 확정할 수 없다. 같은 출처의 다른 외부 식별자 연결·동시 결정·관찰본 변경은 409다. 외부 HTTP 요청은 이 경로에서 실행하지 않는다.
+업소 정정은 전체 스냅샷·expectedVersion·사유를 받으며 이름/주소/좌표 변경은 동일 업소 확인, 전화 변경은 공개 가능한 업소 연락처 확인을 요구한다. 변경한 필드만 수집 덮어쓰기로부터 보호하고 이전/새 값·행위자·시각을 불변 기록한다. 관리자 조회는 공개 제외 업소도 최근 100건의 이력과 반환한다.
 
-## 좋아요 공개 합계
-
-`GET /api/v1/restaurants/{id}/likes`는 공개 자격이 있는 업소의 `count`만 반환한다. 회원 식별자·개인 목록은 공개하지 않는다. `PUT/DELETE /api/v1/likes/{id}`는 현재 인증 회원에게만 적용되며 멱등적이다. 기존 bookmarks 경로는 제거한다.
-
-## 신규 위치 제보
-
-`POST /api/v1/reports`는 기존 `restaurantId` 또는 `newRestaurant` 중 하나만 받는다. 신규 정보는 이름·주소·선택 좌표와 선택 전화번호다. 승인 전 업소는 생성하지 않으며 본인/관리자 제보 목록에는 제출한 이름을 표시한다. 새 업소에는 기존 품목 ID를 연결할 수 없다.
-
-관리자 승인 요청은 신규 업소일 때 `locationReviewed: true`가 필요하다. 국내산 배추·고춧가루 중 하나의 근거가 있어야 등록한다. 동일 이름·주소의 기존 업소가 있으면 `RESTAURANT_MATCH_REQUIRED` 충돌로 되돌리고 임의 병합하지 않는다. 생성·연결·원산지·검수 이력을 함께 커밋한다. 제보 응답의 `restaurantId`는 승인 후 생성된 가게를 가리킨다. 제보 인증일은 승인 검토 이력의 서버 시각이다.
-
-상세 원산지 Claim의 `approvedAt`은 USER_REPORT 근거와 연결된 실제 승인 검토 시각이다. 외부 자료나 승인 이력이 없는 기록에는 비어 있으며 수집일·검토일을 대신 넣지 않는다. 공개 조회 기준 시점 이후의 승인은 포함하지 않는다.
-
-## 정보 오류 신고
-
-`POST /api/v1/information-reports`는 UUID Idempotency-Key와 업소·유형·설명·첨부 ID(최대 3개)를 받는다. GET 목록/`/{id}`는 본인만 조회한다. 관리자 목록/상세는 `/api/v1/admin/information-reports`이며 `POST /{id}/resolution`은 expectedVersion·decision(RESOLVED/DISMISSED)·reason을 받는다. 원산지 변경 신고 처리에는 선택적 correction으로 기존 근거 철회를 같은 트랜잭션에서 수행한다. 모든 목록은 limit 기본 20/최대 50, 안정적인 시각·ID cursor를 사용한다. 접수만으로 공개 정보는 바뀌지 않는다.
-
-제보 APPROVED 검수에는 kimchiReviewed=true가 필요하다. 미제공 또는 false이면 400이다. 이는 사진 원산지가 해당 김치 품목·용도에 적용된다는 관리자 확인이며 실제 납품 인증을 뜻하지 않는다. 기존 UNKNOWN 품목은 새 승인 대상으로 자동 병합하지 않는다.
-
-수집 소스 상태의 credentialConfigured를 adapterAvailable로 대체했다. 폐기한 일반음식점 키는 실행 조건이 아니며 실제 등록 어댑터가 없으면 실행을 거부한다. 현재 내부 수집 입력은 외부 API 명세가 아니다.
-
-## 업소 정보 정정
-관리자 `GET /api/v1/admin/restaurants/{id}`는 공개 제외 업소도 현재 버전과 최근 100건의 정정 이력으로 반환한다. `POST /api/v1/admin/restaurants/{id}/corrections`는 전체 스냅샷과 expectedVersion·사유를 받는다. 위치/업소 전화의 변경 확인이 필요하며 버전 불일치는 409다. 신고 resolution의 restaurantCorrection은 신고 대상 업소에만 적용하고 신고 상태와 함께 커밋한다.
+원산지 정정은 같은 scope·식재료의 기존 기록만 철회하고 원문과 감사 이력을 보존한다. 지정·매칭·수집은 현재 소스 자격과 이용 조건을 검사한다. 수집 소스의 adapterAvailable은 실제 등록 어댑터 여부이며 현재 실사용 어댑터는 없다. 부적합 일반음식점 소스는 재실행·과거 관찰본 반영도 차단한다.

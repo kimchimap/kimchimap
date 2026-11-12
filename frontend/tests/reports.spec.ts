@@ -27,7 +27,9 @@ for (const newLocation of [false, true]) {
       }),
     );
     await page.route("**/api/v1/catalogs/ingredients", (route) =>
-      route.fulfill({ json: [{ id: "test-cabbage", name: "배추" }] }),
+      route.fulfill({
+        json: [{ id: "00000000-0000-4000-8000-000000000001", name: "배추" }],
+      }),
     );
     await page.route("**/api/v1/catalogs/countries", (route) =>
       route.fulfill({
@@ -72,7 +74,7 @@ for (const newLocation of [false, true]) {
     await page.getByLabel("표시판을 실제 확인한 날짜").fill("2026-09-01");
     await page
       .getByLabel("식재료", { exact: true })
-      .selectOption("test-cabbage");
+      .selectOption("00000000-0000-4000-8000-000000000001");
     await page.getByLabel("원산지 구분").selectOption("DOMESTIC");
     await page.getByLabel("표시판 원문").fill("배추: 국내산");
     await page.getByLabel("사진 선택").setInputFiles({
