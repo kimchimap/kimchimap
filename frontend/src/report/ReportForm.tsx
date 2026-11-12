@@ -1,3 +1,4 @@
+import { isKimchiIngredient } from "../origin/kimchi";
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
@@ -264,7 +265,9 @@ export function ReportForm({
           <section key={index}>
             <ClaimEditor
               value={claim}
-              ingredients={catalogs.data.ingredients}
+              ingredients={catalogs.data.ingredients.filter((item) =>
+                isKimchiIngredient(item.id),
+              )}
               countries={catalogs.data.countries}
               onChange={(value) =>
                 setDraft({
@@ -292,7 +295,7 @@ export function ReportForm({
         ))}
         <button
           type="button"
-          disabled={draft.claims.length >= 10}
+          disabled={draft.claims.length >= 2}
           onClick={() =>
             setDraft({
               ...draft,

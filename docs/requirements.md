@@ -1,6 +1,6 @@
 # 요구사항 추적
 
-원 요청 1~17절을 아래 ID에 대응한다. 서비스 수용 기준은 단계별 구현·검증 중이며 현재 결과는 validation.md와 후속 계획을 따른다. 이 표의 존재가 테스트 통과를 뜻하지 않는다. machine-readable 목록은 requirements.json, 세부 자동 테스트는 testing.md다.
+원 요청 1~17절을 아래 ID에 대응하되, 현재 지도·제보 범위는 2026-11-12 확정 제품 계약을 따른다. 서비스 수용 기준은 단계별 구현·검증 중이며 현재 결과는 validation.md와 후속 계획을 따른다. 이 표의 존재가 테스트 통과를 뜻하지 않는다. machine-readable 목록은 requirements.json, 세부 자동 테스트는 testing.md다.
 
 | ID | 범위 | 세부 수용 기준 |
 | --- | --- | --- |
@@ -21,3 +21,5 @@
 | R15 | 브랜치·보호 | [최신 dev·실제 remote ref 차단·병합/OID cleanup·보호 dry-run/apply](git-workflow.md) |
 | R16 | 필수 테스트 | [단위/실제 DB/Redis/계약/E2E/보안/성능, 외부 smoke 분리](testing.md) |
 | R17 | 단계·완료 보고 | [전 범위 수용 기준·명령 결과·외부 차단·다음 재개점·9항목 보고](plans/active/service-implementation.md) |
+
+requirements.json의 상태는 자동 검증된 구현과 외부 미완료를 구분한다. 실제 원산지 수집기·초기 데이터, 실제 사용자 카카오 동의·코드 교환, 라이선스·운영 준비는 아직 완료가 아니다.

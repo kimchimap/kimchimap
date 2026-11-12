@@ -1,6 +1,6 @@
 {
   "application-foundation": {
-    "plan": "docs/plans/active/application-foundation.md",
+    "plan": "docs/plans/completed/application-foundation.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -21,7 +21,7 @@
     ]
   },
   "origin-model": {
-    "plan": "docs/plans/active/origin-model.md",
+    "plan": "docs/plans/completed/origin-model.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -42,7 +42,7 @@
     ]
   },
   "spatial-search": {
-    "plan": "docs/plans/active/spatial-search.md",
+    "plan": "docs/plans/completed/spatial-search.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -64,7 +64,7 @@
     ]
   },
   "public-data-ingestion": {
-    "plan": "docs/plans/active/public-data-ingestion.md",
+    "plan": "docs/plans/completed/public-data-ingestion.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -87,7 +87,7 @@
     ]
   },
   "auth-sessions": {
-    "plan": "docs/plans/active/auth-sessions.md",
+    "plan": "docs/plans/completed/auth-sessions.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -110,7 +110,7 @@
     ]
   },
   "kakao-login": {
-    "plan": "docs/plans/active/kakao-login.md",
+    "plan": "docs/plans/completed/kakao-login.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -133,7 +133,7 @@
     ]
   },
   "bookmarks-media": {
-    "plan": "docs/plans/active/bookmarks-media.md",
+    "plan": "docs/plans/completed/bookmarks-media.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -156,7 +156,7 @@
     ]
   },
   "reports-review": {
-    "plan": "docs/plans/active/reports-review.md",
+    "plan": "docs/plans/completed/reports-review.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -179,7 +179,7 @@
     ]
   },
   "admin-ingestion": {
-    "plan": "docs/plans/active/admin-ingestion.md",
+    "plan": "docs/plans/completed/admin-ingestion.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -202,7 +202,7 @@
     ]
   },
   "origin-corrections": {
-    "plan": "docs/plans/active/origin-corrections.md",
+    "plan": "docs/plans/completed/origin-corrections.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -225,7 +225,7 @@
     ]
   },
   "admin-data-review": {
-    "plan": "docs/plans/active/admin-data-review.md",
+    "plan": "docs/plans/completed/admin-data-review.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -248,7 +248,7 @@
     ]
   },
   "domestic-publication-scope": {
-    "plan": "docs/plans/active/domestic-publication-scope.md",
+    "plan": "docs/plans/completed/domestic-publication-scope.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -271,7 +271,7 @@
     ]
   },
   "confirmed-product-scope": {
-    "plan": "docs/plans/active/confirmed-product-scope.md",
+    "plan": "docs/plans/completed/confirmed-product-scope.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -294,7 +294,7 @@
     ]
   },
   "location-reports": {
-    "plan": "docs/plans/active/location-reports.md",
+    "plan": "docs/plans/completed/location-reports.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -317,7 +317,7 @@
     ]
   },
   "kimchi-map": {
-    "plan": "docs/plans/active/kimchi-map.md",
+    "plan": "docs/plans/completed/kimchi-map.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -340,7 +340,7 @@
     ]
   },
   "information-reports": {
-    "plan": "docs/plans/active/information-reports.md",
+    "plan": "docs/plans/completed/information-reports.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -363,7 +363,7 @@
     ]
   },
   "kimchi-publication-scope": {
-    "plan": "docs/plans/active/kimchi-publication-scope.md",
+    "plan": "docs/plans/completed/kimchi-publication-scope.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -386,7 +386,7 @@
     ]
   },
   "remove-originless-data": {
-    "plan": "docs/plans/active/remove-originless-data.md",
+    "plan": "docs/plans/completed/remove-originless-data.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -409,7 +409,7 @@
     ]
   },
   "retire-general-restaurant-adapter": {
-    "plan": "docs/plans/active/retire-general-restaurant-adapter.md",
+    "plan": "docs/plans/completed/retire-general-restaurant-adapter.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -432,7 +432,7 @@
     ]
   },
   "restaurant-corrections": {
-    "plan": "docs/plans/active/restaurant-corrections.md",
+    "plan": "docs/plans/completed/restaurant-corrections.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -455,7 +455,7 @@
     ]
   },
   "account-controls": {
-    "plan": "docs/plans/active/account-controls.md",
+    "plan": "docs/plans/completed/account-controls.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -478,7 +478,7 @@
     ]
   },
   "connected-browser-flow": {
-    "plan": "docs/plans/active/connected-browser-flow.md",
+    "plan": "docs/plans/completed/connected-browser-flow.md",
     "checks": [
       "verify-harness",
       "doctor",
@@ -499,6 +499,30 @@
     ],
     "notImplemented": [
       "smoke-external"
+    ]
+  },
+  "final-product-validation": {
+    "plan": "docs/plans/active/final-product-validation.md",
+    "checks": [
+      "verify-harness",
+      "doctor",
+      "format-backend",
+      "format-frontend",
+      "lint",
+      "typecheck",
+      "test-backend",
+      "test-frontend",
+      "test-integration",
+      "test-performance",
+      "api-check",
+      "test-e2e",
+      "build-backend",
+      "build",
+      "test-contract",
+      "test-e2e-integration"
+    ],
+    "notImplemented": [
+      "허용된 원산지 소스의 실사용 수집기"
     ]
   }
 }

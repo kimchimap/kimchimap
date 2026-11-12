@@ -63,7 +63,7 @@ tasks.register<Test>("performanceTest") {
 }
 
 tasks.register<Test>("contractTest") {
-  description = "외부 API 명세와 오류 응답 계약 검증"
+  description = "소스 어댑터 내부 입력과 오류 계약 검증"
   group = "verification"
   testClassesDirs = sourceSets.test.get().output.classesDirs
   classpath = sourceSets.test.get().runtimeClasspath

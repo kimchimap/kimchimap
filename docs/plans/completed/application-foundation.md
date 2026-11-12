@@ -1,3 +1,5 @@
+> 작업 이력입니다. 현재 범위·완료 여부·외부 미확인은 [현재 계획](../active/service-implementation.md)을 따릅니다.
+
 # P01/P02: 실행 가능한 애플리케이션 기반
 
 - 목표: Java25/Node LTS/Gradle 고정, 실제 Spring MVC/React 실행·DB/Redis 연결·OpenAPI·기본 보안·단위/통합/UI 검증.

@@ -1,7 +1,7 @@
+import { kimchiIngredients } from "../origin/kimchi";
 import type { Filters } from "./types";
 
-const cabbage = "00000000-0000-4000-8000-000000000001";
-const pepper = "00000000-0000-4000-8000-000000000002";
+const { cabbage, pepper } = kimchiIngredients;
 export const choices = [
   { name: "국산 배추", ingredients: [cabbage] },
   { name: "국산 고춧가루", ingredients: [pepper] },
