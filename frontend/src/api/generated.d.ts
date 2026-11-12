@@ -958,8 +958,8 @@ export interface components {
             reason: string;
         };
         IngestionSourceStatus: {
+            adapterAvailable?: boolean;
             collectionAllowed?: boolean;
-            credentialConfigured?: boolean;
             domesticQualificationSupported?: boolean;
             /** Format: uuid */
             id?: string;

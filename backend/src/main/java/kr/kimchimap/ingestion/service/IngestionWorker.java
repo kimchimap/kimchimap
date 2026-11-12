@@ -4,7 +4,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import kr.kimchimap.ingestion.client.PublicDataRestaurantClient;
+import kr.kimchimap.ingestion.client.SourceAdapters;
 import kr.kimchimap.ingestion.client.SourceFailure;
 import kr.kimchimap.ingestion.repository.IngestionJobRepository;
 import org.springframework.stereotype.Service;
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class IngestionWorker {
   private final IngestionJobRepository jobs;
-  private final PublicDataRestaurantClient client;
+  private final SourceAdapters client;
   private final IngestionPageService pages;
   private final Clock clock;
   private final OriginCollectionPolicy collectionPolicy;
 
   public IngestionWorker(
       IngestionJobRepository jobs,
-      PublicDataRestaurantClient client,
+      SourceAdapters client,
       IngestionPageService pages,
       Clock clock,
       OriginCollectionPolicy collectionPolicy) {
@@ -39,7 +39,9 @@ public class IngestionWorker {
       return true;
     }
     try {
-      var page = client.fetch(job.nextPage(), job.pageSize(), job.sinceAt(), job.untilAt());
+      var page =
+          client.fetch(
+              job.sourceId(), job.nextPage(), job.pageSize(), job.sinceAt(), job.untilAt());
       var prepared = pages.prepare(job, page);
       pages.commit(job, page, prepared);
 

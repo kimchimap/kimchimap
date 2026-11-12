@@ -23,7 +23,7 @@ public final class IngestionAdmin {
       boolean republicationAllowed,
       boolean domesticQualificationSupported,
       boolean scheduled,
-      boolean credentialConfigured,
+      boolean adapterAvailable,
       int intervalSeconds,
       Instant nextRunAt,
       Instant lastCompletedUntil) {}

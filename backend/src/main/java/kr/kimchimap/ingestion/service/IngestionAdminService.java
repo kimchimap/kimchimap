@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import kr.kimchimap.auth.service.TokenSecrets;
 import kr.kimchimap.global.web.ApiException;
+import kr.kimchimap.ingestion.client.SourceAdapters;
 import kr.kimchimap.ingestion.dto.IngestionAdmin;
 import kr.kimchimap.ingestion.repository.IngestionAdminRepository;
 import kr.kimchimap.ingestion.repository.IngestionJobRepository;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class IngestionAdminService {
   private final IngestionAdminRepository repository;
   private final IngestionJobService jobs;
-  private final boolean credentialConfigured;
+  private final SourceAdapters adapters;
   private final boolean scheduling;
   private final OriginCollectionPolicy collectionPolicy;
 
@@ -24,19 +25,32 @@ public class IngestionAdminService {
       IngestionAdminRepository repository,
       IngestionJobService jobs,
       OriginCollectionPolicy collectionPolicy,
-      @Value("${app.ingestion.public-data-key:}") String key,
+      SourceAdapters adapters,
       @Value("${app.ingestion.scheduling-enabled:false}") boolean scheduling) {
     this.repository = repository;
     this.jobs = jobs;
     this.collectionPolicy = collectionPolicy;
-    this.credentialConfigured = !key.isBlank();
+    this.adapters = adapters;
     this.scheduling = scheduling;
   }
 
   @Transactional(readOnly = true)
   public List<IngestionAdmin.Source> sources() {
-    return repository.sources(
-        credentialConfigured, scheduling, collectionPolicy.supportsDomesticQualification());
+    return repository.sources(scheduling, collectionPolicy.supportsDomesticQualification()).stream()
+        .map(
+            source ->
+                new IngestionAdmin.Source(
+                    source.id(),
+                    source.name(),
+                    source.collectionAllowed(),
+                    source.republicationAllowed(),
+                    source.domesticQualificationSupported(),
+                    source.scheduled() && adapters.available(source.id()),
+                    adapters.available(source.id()),
+                    source.intervalSeconds(),
+                    source.nextRunAt(),
+                    source.lastCompletedUntil()))
+        .toList();
   }
 
   @Transactional(readOnly = true)
@@ -80,9 +94,10 @@ public class IngestionAdminService {
     if (!configured.collectionAllowed() || !configured.republicationAllowed())
       throw new ApiException(
           HttpStatus.CONFLICT, "SOURCE_PERMISSION_REQUIRED", "수집·저장·재게시 이용 조건을 먼저 확인해 주세요.");
-    if (!credentialConfigured)
+    collectionPolicy.requireQualifiedSource();
+    if (!configured.adapterAvailable())
       throw new ApiException(
-          HttpStatus.SERVICE_UNAVAILABLE, "SOURCE_KEY_MISSING", "수집 인증키가 설정되지 않았습니다.");
+          HttpStatus.CONFLICT, "SOURCE_ADAPTER_UNAVAILABLE", "사용 가능한 원산지 수집기가 아직 구현되지 않았습니다.");
     if (!repository.allowRequest(actor))
       throw new ApiException(
           HttpStatus.TOO_MANY_REQUESTS,

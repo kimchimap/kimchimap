@@ -30,7 +30,7 @@ PostGIS upstream 초기화 후 init-roles.sh가 앱 schema와 migrator/app 역�
 | format-backend / format-frontend | Spotless/프론트 formatter 검사 |
 | lint / typecheck | frontend lint/typecheck 실행 |
 | test-backend / test-frontend | 실제 단위·UI 테스트 실행 |
-| test-integration / test-contract | DB/Redis 통합, 공식 구조의 합성 외부 API 계약 검사 |
+| test-integration / test-contract | DB/Redis 통합, 수집 어댑터 내부 계약 검사 |
 | test-e2e / test-performance | Playwright 실행, 실제 공간 실행계획 검사 |
 | api-generate / api-check | OpenAPI 생성 및 프론트 생성 타입/계약 비교 |
 | build / build-backend | 프론트 build / 백엔드 bootJar 실행 |
@@ -44,7 +44,7 @@ PostGIS upstream 초기화 후 init-roles.sh가 앱 schema와 migrator/app 역�
 
 후속 로컬 frontend는 localhost:5173, backend는 localhost:8080으로 고정하고 Vite /api 프록시를 구성한다. 카카오 JS 키는 브라우저 공개 키로 취급하되 REST/Client Secret은 VITE_*에 넣지 않는다. OAuth redirect/도메인 등록·쿼터·실제 smoke는 별도 문서 결과로 남긴다.
 
-verify-harness는 하네스 전용이다. 현재 앱 기반 검증은 verify-unit application-foundation으로 실행하고 실제 formatter·linter·타입·단위·DB/Redis·API·E2E·build를 모두 확인한다. 전체 verify에는 외부 API 계약 테스트도 포함한다. 실제 외부 연동은 별도로 실행한다.
+verify-harness는 하네스 전용이다. 현재 앱 기반 검증은 verify-unit application-foundation으로 실행하고 실제 formatter·linter·타입·단위·DB/Redis·API·E2E·build를 모두 확인한다. 전체 verify에는 수집 어댑터 내부 계약 테스트도 포함한다. 실제 외부 연동은 별도로 실행한다.
 
 
 ## 현재 실행 가능한 앱 명령
@@ -53,7 +53,7 @@ dev-backend/dev-frontend, format-backend/format-frontend, lint/typecheck, test-b
 
 `toolchain-install` → `scripts/runtime pnpm install --frozen-lockfile --ignore-scripts` → `infra-up` 후 서버/UI를 실행한다. E2E 전 `scripts/runtime pnpm --dir frontend exec playwright install chromium`이 필요하다. E2E는 기존 서버를 재사용하지 않고 직접 실행·종료한다.
 
-`.local/integrations.env`에는 KAKAO_JAVASCRIPT_KEY/KAKAO_CLIENT_ID(REST API 키)/KAKAO_CLIENT_SECRET/PUBLIC_DATA_SERVICE_KEY(Decoding)를 입력한다. 카카오 도메인은 http://localhost:5173, 로그인 callback 계약은 http://localhost:5173/api/v1/auth/callback/kakao다. 파일 권한600, git-common-dir 기준 .local을 읽는다. env 파일은 shell로 실행하지 않고 허용 키만 파싱한다.
+`.local/integrations.env`에는 KAKAO_JAVASCRIPT_KEY/KAKAO_CLIENT_ID(REST API 키)/KAKAO_CLIENT_SECRET를 입력한다. 카카오 도메인은 http://localhost:5173, 로그인 callback 계약은 http://localhost:5173/api/v1/auth/callback/kakao다. 파일 권한600, git-common-dir 기준 .local을 읽는다. env 파일은 shell로 실행하지 않고 허용 키만 파싱한다.
 
 공간 검색 검증: `./scripts/harness verify-unit spatial-search`. 실제 2만 건 검색 실행 계획은 `./scripts/harness test-performance`로 재현한다. SEARCH_CURSOR_SECRET은 운영에서 32바이트 이상으로 설정하며 로컬 미설정 시 프로세스 메모리에만 생성된다. 키 변경·로컬 재시작은 기존 검색 cursor를 무효화한다.
 
@@ -102,3 +102,5 @@ P06a는 로그인 이후의 JWT·Refresh 세션 기반을 제공한다. 실제 �
 E2E는 전용 백엔드 포트 18080을 사용하고 Vite의 서버 측 API_PROXY_TARGET을 같은 포트로 지정한다. 일반 개발 기본값은 8080이다. 기존 다른 프로젝트 서버를 종료하거나 E2E 서버로 재사용하지 않는다.
 
 지도 실행은 gitignore된 연동 설정의 KAKAO_JAVASCRIPT_KEY를 Vite 시작 시 읽는다. 브라우저용 JavaScript 키만 번들에 주입하며 REST 키와 Client Secret은 주입하지 않는다. 자동 테스트는 KIMCHIMAP_DISABLE_MAP=1로 외부 SDK를 차단하고 경계 mock을 사용한다. 이 성공은 외부 카카오 연동 확인을 뜻하지 않는다.
+
+일반음식점 API 키는 더 이상 사용하지 않는다. 기존 integrations.env에 남아 있어도 파일은 보존하고 실행 환경으로 전달하지 않는다. 현재 test-contract는 내부 표준 입력/어댑터 계약이며 실제 외부 원산지 API 계약 검증은 소스 확보 후 추가한다.

@@ -13,6 +13,7 @@ public record ImportedRestaurant(
     NormalizedCoordinate coordinate,
     String originalX,
     String originalY,
+    int originalSrid,
     BusinessPhone phone,
     String originalPhone,
     Instant sourceUpdatedAt,

@@ -138,18 +138,20 @@ public class RestaurantImportRepository {
     params.put("sourceModified", timestamp(row.sourceModifiedAt()));
     params.put("x", row.originalX());
     params.put("y", row.originalY());
+    params.put("srid", row.originalSrid());
     params.put("originalPhone", row.originalPhone());
     jdbc.sql(
             """
         INSERT INTO app.restaurant_source_record(source_id, external_id, content_hash, source_updated_at, source_modified_at,
           original_x, original_y, original_srid, original_phone, first_collected_at, last_fetch_succeeded_at, last_seen_job_id)
-        VALUES (:source, :external, :hash, :sourceUpdated, :sourceModified, :x, :y, 5174, :originalPhone, :fetched, :fetched, :job)
+        VALUES (:source, :external, :hash, :sourceUpdated, :sourceModified, :x, :y, :srid, :originalPhone, :fetched, :fetched, :job)
         ON CONFLICT (source_id, external_id) DO UPDATE SET
           content_hash = CASE WHEN :retain THEN restaurant_source_record.content_hash ELSE EXCLUDED.content_hash END,
           source_updated_at = CASE WHEN :retain THEN restaurant_source_record.source_updated_at ELSE EXCLUDED.source_updated_at END,
           source_modified_at = CASE WHEN :retain THEN restaurant_source_record.source_modified_at ELSE EXCLUDED.source_modified_at END,
           original_x = CASE WHEN :retain THEN restaurant_source_record.original_x ELSE EXCLUDED.original_x END,
           original_y = CASE WHEN :retain THEN restaurant_source_record.original_y ELSE EXCLUDED.original_y END,
+          original_srid = CASE WHEN :retain THEN restaurant_source_record.original_srid ELSE EXCLUDED.original_srid END,
           original_phone = CASE WHEN :retain THEN restaurant_source_record.original_phone ELSE EXCLUDED.original_phone END,
           last_fetch_succeeded_at = EXCLUDED.last_fetch_succeeded_at, last_seen_job_id = EXCLUDED.last_seen_job_id,
           missing_since_job_id = NULL

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OriginCollectionPolicy {
   public boolean supportsDomesticQualification() {
-    // 일반음식점 API에는 원산지 필드가 없어 수집 대상을 선별할 수 없다.
+    // 이용 범위와 국내산 판정 명세를 확인한 원산지 어댑터가 아직 없다.
     return false;
   }
 

@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import kr.kimchimap.auth.service.JwtService;
 import kr.kimchimap.auth.service.SessionService;
-import kr.kimchimap.ingestion.client.PublicDataRestaurantClient;
+import kr.kimchimap.ingestion.client.SourceAdapters;
 import kr.kimchimap.ingestion.dto.SourceRestaurant;
 import kr.kimchimap.ingestion.repository.IngestionJobRepository;
 import kr.kimchimap.ingestion.service.IngestionJobService;
@@ -43,7 +43,7 @@ class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
   @Autowired JwtService jwt;
   @Autowired IngestionJobService jobs;
   @Autowired IngestionWorker worker;
-  @MockitoBean PublicDataRestaurantClient source;
+  @MockitoBean SourceAdapters source;
   private final JsonMapper json = JsonMapper.builder().build();
   private static final UUID PUBLIC_SOURCE = IngestionJobRepository.PUBLIC_DATA_SOURCE;
 
@@ -241,6 +241,28 @@ class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
   }
 
   @Test
+  void legacyObservationWithoutDeclaredCoordinateSystemCannotBeApplied() throws Exception {
+    var fixture = match();
+    jdbc.update(
+        "UPDATE app.restaurant_match_review SET observation=observation-'originalSrid' WHERE id=?",
+        fixture.id());
+    var response =
+        request(
+            "POST",
+            "/api/v1/admin/matches/" + fixture.id() + "/reviews",
+            token(true),
+            Map.of("expectedVersion", 0, "decision", "DISTINCT", "reason", "테스트 과거 좌표계 확인"));
+    assertThat(response.statusCode()).isEqualTo(409);
+    assertThat(response.body()).contains("SOURCE_COORDINATE_SYSTEM_REQUIRED");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM app.restaurant_match_audit WHERE external_id=?",
+                Integer.class,
+                fixture.external()))
+        .isZero();
+  }
+
+  @Test
   void differentExternalIdsCannotConcurrentlyAttachToSameSourceAndRestaurant() throws Exception {
     String admin = token(true);
     var first = match();
@@ -304,24 +326,24 @@ class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
     var row =
         new SourceRestaurant(
             Map.of(
-                "OPN_ATMY_GRP_CD",
-                "test-municipal",
-                "MNG_NO",
+                "coordinateSrid",
+                "5174",
+                "externalId",
                 suffix,
-                "BPLC_NM",
+                "name",
                 name,
-                "ROAD_NM_ADDR",
+                "address",
                 address,
-                "SALS_STTS_NM",
-                "영업/정상",
-                "DAT_UPDT_PNT",
-                "20260901000000"));
-    when(source.fetch(anyInt(), anyInt(), any(), any()))
-        .thenReturn(new PublicDataRestaurantClient.Page(1, 1, 1, List.of(row)));
+                "businessStatus",
+                "OPEN",
+                "sourceUpdatedAt",
+                "2026-08-31T15:00:00Z"));
+    when(source.fetch(any(), anyInt(), anyInt(), any(), any()))
+        .thenReturn(new kr.kimchimap.ingestion.client.SourceAdapter.Page(1, 1, 1, List.of(row)));
     UUID job = jobs.request("INCREMENTAL", 1, 1);
     assertThat(worker.processOne(job)).isTrue();
     assertThat(jobs.get(job).status()).isEqualTo("SUCCEEDED");
-    String external = "test-municipal:" + suffix;
+    String external = suffix;
     UUID id =
         jdbc.queryForObject(
             "SELECT id FROM app.restaurant_match_review WHERE source_id=? AND external_id=?",

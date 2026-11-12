@@ -3,10 +3,6 @@ package kr.kimchimap.ingestion.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.ResolverStyle;
 import java.util.HexFormat;
 import java.util.TreeMap;
 import kr.kimchimap.ingestion.dto.SourceRestaurant;
@@ -28,14 +24,11 @@ public class RestaurantSourceNormalizer {
   }
 
   public ImportedRestaurant normalize(SourceRestaurant row) {
-    String municipality = row.get("OPN_ATMY_GRP_CD");
-    String management = row.get("MNG_NO");
-    String name = row.get("BPLC_NM");
-    String address =
-        row.get("ROAD_NM_ADDR").isEmpty() ? row.get("LOTNO_ADDR") : row.get("ROAD_NM_ADDR");
-    if (municipality.isEmpty()
-        || management.isEmpty()
-        || municipality.length() + management.length() > 198
+    String externalId = row.get("externalId");
+    String name = row.get("name");
+    String address = row.get("address");
+    if (externalId.isEmpty()
+        || externalId.length() > 200
         || name.isEmpty()
         || name.length() > 200
         || address.isEmpty()
@@ -43,27 +36,28 @@ public class RestaurantSourceNormalizer {
       throw new IllegalArgumentException("SOURCE_REQUIRED_FIELD_INVALID");
     }
     String state =
-        switch (row.get("SALS_STTS_NM")) {
-          case "영업/정상" -> "OPEN";
-          case "폐업" -> "CLOSED";
+        switch (row.get("businessStatus")) {
+          case "OPEN" -> "OPEN";
+          case "CLOSED" -> "CLOSED";
           default -> "UNKNOWN";
         };
-    var coordinate =
-        coordinates.normalize(number(row.get("CRD_INFO_X")), number(row.get("CRD_INFO_Y")), 5174);
-    String phone = row.get("TELNO");
+    int sourceSrid = srid(row.get("coordinateSrid"));
+    var coordinate = coordinates.normalize(number(row.get("x")), number(row.get("y")), sourceSrid);
+    String phone = row.get("phone");
     return new ImportedRestaurant(
-        municipality + ":" + management,
+        externalId,
         name,
         address,
         state,
-        row.get("SALS_STTS_CD") + ":" + row.get("SALS_STTS_NM"),
+        row.get("originalStatus"),
         coordinate,
-        row.get("CRD_INFO_X"),
-        row.get("CRD_INFO_Y"),
+        row.get("x"),
+        row.get("y"),
+        sourceSrid,
         BusinessPhone.parse(phone),
         phone.length() <= 64 ? phone : null,
-        date(row.get("DAT_UPDT_PNT")),
-        date(row.get("LAST_MDFCN_PNT")),
+        date(row.get("sourceUpdatedAt")),
+        date(row.get("sourceModifiedAt")),
         hash(row));
   }
 
@@ -78,23 +72,25 @@ public class RestaurantSourceNormalizer {
 
   private Instant date(String value) {
     if (value.isEmpty()) return null;
-    for (String format : java.util.List.of("uuuuMMddHHmmss", "uuuu-MM-dd HH:mm:ss")) {
-      try {
-        return LocalDateTime.parse(
-                value, DateTimeFormatter.ofPattern(format).withResolverStyle(ResolverStyle.STRICT))
-            .atZone(ZoneId.of("Asia/Seoul"))
-            .toInstant();
-      } catch (java.time.format.DateTimeParseException exception) {
-        /* 다음에 확인된 형식을 검사한다. */
-      }
+    try {
+      return Instant.parse(value);
+    } catch (java.time.format.DateTimeParseException exception) {
+      throw new IllegalArgumentException("SOURCE_DATE_INVALID");
     }
-    throw new IllegalArgumentException("SOURCE_DATE_INVALID");
+  }
+
+  private int srid(String value) {
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException exception) {
+      throw new IllegalArgumentException("SOURCE_COORDINATE_SYSTEM_INVALID");
+    }
   }
 
   private String hash(SourceRestaurant row) {
     var fields = new TreeMap<>(row.fields());
-    fields.remove("DAT_UPDT_PNT");
-    fields.remove("LAST_MDFCN_PNT");
+    fields.remove("sourceUpdatedAt");
+    fields.remove("sourceModifiedAt");
     fields.replaceAll((name, value) -> value.strip());
     try {
       return HexFormat.of()

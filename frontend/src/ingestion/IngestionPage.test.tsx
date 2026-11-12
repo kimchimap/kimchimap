@@ -45,7 +45,7 @@ it("일반 회원은 수집 관리 조회를 하지 않는다", () => {
   expect(screen.getByRole("alert")).toHaveTextContent("관리자만");
   expect(readAdmin).not.toHaveBeenCalled();
 });
-it("인증키 없는 소스의 실행을 차단하고 일부 처리 상태를 표시한다", async () => {
+it("수집기 없는 소스의 실행을 차단하고 일부 처리 상태를 표시한다", async () => {
   vi.mocked(readAdmin).mockImplementation(async (path) =>
     path === "sources"
       ? [
@@ -55,7 +55,7 @@ it("인증키 없는 소스의 실행을 차단하고 일부 처리 상태를 �
             domesticQualificationSupported: true,
             collectionAllowed: true,
             republicationAllowed: true,
-            credentialConfigured: false,
+            adapterAvailable: false,
           },
         ]
       : [{ id: "test-job", status: "PARTIAL", readCount: 100 }],
@@ -78,7 +78,7 @@ it("재실행은 사유와 제한 페이지 수를 전달하고 접수 상태를
             domesticQualificationSupported: true,
             collectionAllowed: true,
             republicationAllowed: true,
-            credentialConfigured: true,
+            adapterAvailable: true,
           },
         ]
       : [],
@@ -99,7 +99,7 @@ it("재실행은 사유와 제한 페이지 수를 전달하고 접수 상태를
   expect(await screen.findByRole("status")).toHaveTextContent("접수했습니다");
 });
 
-it("원산지 없는 소스는 키와 이용 허가가 있어도 재실행을 제공하지 않는다", async () => {
+it("원산지 없는 소스는 수집기와 이용 허가가 있어도 재실행을 제공하지 않는다", async () => {
   vi.mocked(readAdmin).mockImplementation(async (path) =>
     path === "sources"
       ? [
@@ -108,7 +108,7 @@ it("원산지 없는 소스는 키와 이용 허가가 있어도 재실행을 �
             name: "테스트 일반음식점",
             collectionAllowed: true,
             republicationAllowed: true,
-            credentialConfigured: true,
+            adapterAvailable: true,
             domesticQualificationSupported: false,
           },
         ]

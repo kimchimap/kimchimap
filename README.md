@@ -35,7 +35,7 @@ Git·Python3.9 이상·Docker가 필요합니다. macOS/Linux ARM64·AMD64 런�
 ./scripts/harness verify
 ```
 
-단위 검증은 하네스·환경·포맷·타입·실제 DB/Redis·API 타입·모바일/PC E2E·양쪽 빌드를 포함합니다. `./scripts/harness verify`는 외부 API 합성 계약과 공간 실행계획을 포함한 현재 전체 품질 검사를 실행합니다. 검사 통과는 실제 외부 로그인·초기 데이터 확보·운영 준비 완료를 뜻하지 않습니다.
+단위 검증은 하네스·환경·포맷·타입·실제 DB/Redis·API 타입·모바일/PC E2E·양쪽 빌드를 포함합니다. `./scripts/harness verify`는 수집 어댑터 내부 계약과 공간 실행계획을 포함한 현재 전체 품질 검사를 실행합니다. 검사 통과는 실제 외부 로그인·초기 데이터 확보·운영 준비 완료를 뜻하지 않습니다.
 
 [개발 지침](AGENTS.md) → [문서 목차](docs/index.md) → [후속 계획](docs/plans/active/service-implementation.md).
 [실행 명령](docs/local-development.md), [검증 기록](docs/validation.md), [기여 안내](CONTRIBUTING.md), [보안 제보](SECURITY.md).
