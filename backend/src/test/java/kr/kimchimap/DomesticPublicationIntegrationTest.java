@@ -55,9 +55,35 @@ class DomesticPublicationIntegrationTest extends ApplicationIntegrationSupport {
     assertThat(search.search(request).items()).isEmpty();
     assertThat(get("/api/v1/restaurants/" + id).statusCode()).isEqualTo(404);
     assertThat(call("PUT", "/api/v1/likes/" + id, token, null).statusCode()).isEqualTo(404);
-    UUID record = DomesticOriginFixture.addRice(jdbc, transactions, id);
+    UUID unknownScope =
+        DomesticOriginFixture.add(jdbc, transactions, id, "UNKNOWN", "napa-cabbage");
+    DomesticOriginFixture.add(jdbc, transactions, id, "KIMCHI", "rice");
+    assertThat(search.search(request).items()).isEmpty();
+    assertThat(get("/api/v1/restaurants/" + id).statusCode()).isEqualTo(404);
+    assertThat(call("PUT", "/api/v1/likes/" + id, token, null).statusCode()).isEqualTo(404);
+    UUID record = DomesticOriginFixture.addKimchi(jdbc, transactions, id);
     assertThat(search.search(request).items()).extracting(item -> item.id()).containsExactly(id);
     assertThat(get("/api/v1/restaurants/" + id).statusCode()).isEqualTo(200);
+    assertThat(get("/api/v1/restaurants/" + id).body()).doesNotContain(unknownScope.toString());
+    var cabbageOnly =
+        new SearchRequest(
+            request.center(),
+            null,
+            request.radiusMeters(),
+            List.of(
+                new SearchRequest.ScopeFilter(
+                    null,
+                    List.of(
+                        new SearchRequest.IngredientFilter(
+                            UUID.fromString("00000000-0000-4000-8000-000000000001"),
+                            SearchRequest.OriginMode.DOMESTIC,
+                            null,
+                            false)))),
+            null,
+            null,
+            20,
+            null);
+    assertThat(search.search(cabbageOnly).items()).isEmpty();
     assertThat(call("PUT", "/api/v1/likes/" + id, token, null).statusCode()).isEqualTo(204);
     assertThat(call("GET", "/api/v1/likes", token, null).body()).contains(id.toString());
     jdbc.update(

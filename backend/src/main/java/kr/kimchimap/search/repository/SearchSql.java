@@ -95,7 +95,7 @@ final class SearchSql {
 
   String scopePredicate(int groupIndex) {
     var group = request.groups().get(groupIndex);
-    var sql = new StringBuilder("ss.scope_precision = 'SPECIFIC_ITEM'");
+    var sql = new StringBuilder("ss.scope_precision = 'SPECIFIC_ITEM' AND ss.food_kind = 'KIMCHI'");
     if (group.usage() != null) {
       String name = "usage" + groupIndex;
       parameters.put(name, group.usage().name());

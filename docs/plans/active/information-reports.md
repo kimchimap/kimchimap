@@ -13,3 +13,5 @@
 - 외부 차단: 허가 미확인 자료는 사용하지 않으며 초기 데이터 확보와 별개로 진행.
 - 검증: 전체 verify 통과. 프론트 55건, 모바일·PC E2E 20건. 이후 추가 사진 회귀를 포함한 신고 통합 5건 통과. 로그: /tmp/kimchimap-feedback-verify.log, /tmp/kimchimap-feedback-photo-test.log.
 - 다음: PR 준비 검사 후 dev squash 병합, 공개 자격을 김치 품목으로 제한하는 다음 작업.
+
+최종 PR 준비 통과: 단위 37·통합 76·계약 5·성능 1·프론트 55·E2E 20, 실패/skip 0. PR #17은 e367b9b1a79aeac07f3f74aea7d68c3311d68598로 dev 병합했고 임시 브랜치를 삭제했다. 다음 작업은 kimchi-publication-scope.md.

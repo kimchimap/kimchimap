@@ -287,6 +287,7 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
   const [reason, setReason] = useState("");
   const [scope, setScope] = useState(report.submission?.scopeId ?? "");
   const [locationReviewed, setLocationReviewed] = useState(false);
+  const [kimchiReviewed, setKimchiReviewed] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -310,6 +311,7 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
             decision,
             reason,
             locationReviewed,
+            kimchiReviewed,
             privacyReviewedMediaIds: decision === "APPROVED" ? photos : [],
             ...(decision === "APPROVED" && scope
               ? { approvedScopeId: scope }
@@ -323,6 +325,7 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
       );
       await client.invalidateQueries({ queryKey: ["private"] });
       await client.invalidateQueries({ queryKey: ["restaurant"] });
+      await client.invalidateQueries({ queryKey: ["restaurant-search"] });
     } catch (cause) {
       setError(reportError(cause));
     } finally {
@@ -355,6 +358,14 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
             </select>
             {decision === "APPROVED" && (
               <>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={kimchiReviewed}
+                    onChange={(e) => setKimchiReviewed(e.target.checked)}
+                  />
+                  표시판의 원산지가 해당 김치 품목·용도에 적용됨을 확인했습니다.
+                </label>
                 {report.submission?.newRestaurant && (
                   <label>
                     <input
@@ -428,9 +439,10 @@ function ReportAction({ report, admin }: { report: Report; admin: boolean }) {
           disabled={
             admin &&
             decision === "APPROVED" &&
-            (report.submission?.newRestaurant
-              ? !locationReviewed
-              : !restaurant.isSuccess)
+            (!kimchiReviewed ||
+              (report.submission?.newRestaurant
+                ? !locationReviewed
+                : !restaurant.isSuccess))
           }
         >
           {busy ? "처리 중…" : admin ? "검수 결과 반영" : "제보 철회"}

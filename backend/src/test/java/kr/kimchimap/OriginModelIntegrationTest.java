@@ -22,7 +22,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
   @Test
   void contactRequiresUsableNumberAndPermissionToRepublish() throws Exception {
     var f = fixture(true, true);
-    DomesticOriginFixture.addRice(jdbc, transactions, f.restaurant());
+    DomesticOriginFixture.addKimchi(jdbc, transactions, f.restaurant());
     String path = "/api/v1/restaurants/" + f.restaurant();
     assertThat(mapper.readTree(get(path).body()).path("contact").isNull()).isTrue();
     jdbc.update(
@@ -70,7 +70,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
     UUID cabbage = claim(f, CABBAGE, "DOMESTIC", "KR", "APPROVED", null);
     var stew = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision) VALUES (?, ?, ?, 'STEW', 'SPECIFIC_ITEM')",
+        "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision, food_kind) VALUES (?, ?, ?, 'STEW', 'SPECIFIC_ITEM','KIMCHI')",
         stew,
         f.restaurant(),
         "테스트 찌개 김치");
@@ -110,7 +110,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
     var f = fixture(true, true);
     claim(f, CABBAGE, "DOMESTIC", "KR", "APPROVED", null);
     claim(f, CABBAGE, "IMPORTED_SPECIFIED", "CN", "APPROVED", null);
-    DomesticOriginFixture.addRice(jdbc, transactions, f.restaurant());
+    DomesticOriginFixture.addKimchi(jdbc, transactions, f.restaurant());
     var response = mapper.readTree(get("/api/v1/restaurants/" + f.restaurant()).body());
     var origin =
         response
@@ -126,7 +126,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
     var expired = fixture(true, true);
     claim(expired, CABBAGE, "DOMESTIC", "KR", "APPROVED", Instant.parse("2026-03-01T00:00:00Z"));
     assertThat(get("/api/v1/restaurants/" + expired.restaurant()).statusCode()).isEqualTo(404);
-    DomesticOriginFixture.addRice(jdbc, transactions, expired.restaurant());
+    DomesticOriginFixture.addKimchi(jdbc, transactions, expired.restaurant());
     assertThat(get("/api/v1/restaurants/" + expired.restaurant()).body()).contains("EXPIRED");
   }
 
@@ -153,7 +153,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
         "테스트 제도 원문 기준");
     jdbc.update("UPDATE app.data_source SET designation_allowed=true WHERE id=?", pending.source());
     assertThat(get("/api/v1/restaurants/" + pending.restaurant()).statusCode()).isEqualTo(404);
-    DomesticOriginFixture.addRice(jdbc, transactions, pending.restaurant());
+    DomesticOriginFixture.addKimchi(jdbc, transactions, pending.restaurant());
     var response = get("/api/v1/restaurants/" + pending.restaurant());
     assertThat(response.body()).contains("테스트 지정", "반찬 김치");
     assertThat(
@@ -272,7 +272,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
         "APPROVED",
         null);
     assertThat(get("/api/v1/restaurants/" + f.restaurant()).statusCode()).isEqualTo(404);
-    DomesticOriginFixture.addRice(jdbc, transactions, f.restaurant());
+    DomesticOriginFixture.addKimchi(jdbc, transactions, f.restaurant());
     var response = get("/api/v1/restaurants/" + f.restaurant());
     assertThat(response.statusCode()).isEqualTo(200);
     assertThat(response.body())
@@ -288,7 +288,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
         "INSERT INTO app.origin_withdrawal(record_id, reason, actor_reference, withdrawn_at) VALUES (?, '테스트 정정', 'test-admin', CURRENT_TIMESTAMP)",
         id);
     assertThat(get("/api/v1/restaurants/" + f.restaurant()).statusCode()).isEqualTo(404);
-    DomesticOriginFixture.addRice(jdbc, transactions, f.restaurant());
+    DomesticOriginFixture.addKimchi(jdbc, transactions, f.restaurant());
     assertThat(get("/api/v1/restaurants/" + f.restaurant()).body()).contains("UNAVAILABLE");
     assertThat(
             jdbc.queryForObject(
@@ -302,8 +302,8 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
     claim(f, CABBAGE, "DOMESTIC", "KR", "APPROVED", null);
     jdbc.update(
         """
-        INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision)
-        SELECT gen_random_uuid(), ?, '테스트 대량 품목', 'OTHER', 'SPECIFIC_ITEM' FROM generate_series(1, 200)
+        INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision, food_kind)
+        SELECT gen_random_uuid(), ?, '테스트 대량 품목', 'OTHER', 'SPECIFIC_ITEM','KIMCHI' FROM generate_series(1, 200)
         """,
         f.restaurant());
     var response = get("/api/v1/restaurants/" + f.restaurant());
@@ -327,7 +327,7 @@ class OriginModelIntegrationTest extends ApplicationIntegrationSupport {
               f.restaurant(),
               published);
           jdbc.update(
-              "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision) VALUES (?, ?, '테스트 반찬 김치', 'SIDE_DISH', 'SPECIFIC_ITEM')",
+              "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision, food_kind) VALUES (?, ?, '테스트 반찬 김치', 'SIDE_DISH', 'SPECIFIC_ITEM','KIMCHI')",
               f.scope(),
               f.restaurant());
           jdbc.update(

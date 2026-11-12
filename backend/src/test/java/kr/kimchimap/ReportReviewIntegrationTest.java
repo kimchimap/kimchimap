@@ -83,6 +83,17 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo(404);
     assertThat(request("GET", "/api/v1/admin/reports", owner, null, null).statusCode())
         .isEqualTo(403);
+    var unchecked = new java.util.HashMap<>(review("APPROVED", 0, null, List.of()));
+    unchecked.remove("kimchiReviewed");
+    assertThat(
+            request("POST", "/api/v1/admin/reports/" + id + "/reviews", admin, unchecked, null)
+                .statusCode())
+        .isEqualTo(400);
+    unchecked.put("kimchiReviewed", false);
+    assertThat(
+            request("POST", "/api/v1/admin/reports/" + id + "/reviews", admin, unchecked, null)
+                .statusCode())
+        .isEqualTo(400);
     var approved =
         request(
             "POST",
@@ -240,13 +251,13 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
     }
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id=(SELECT id FROM app.ingredient WHERE code='napa-cabbage')",
                 Integer.class,
                 restaurant))
         .isEqualTo(1);
     UUID scope =
         jdbc.queryForObject(
-            "SELECT id FROM app.serving_scope WHERE restaurant_id=? AND usage='SIDE_DISH'",
+            "SELECT id FROM app.serving_scope WHERE restaurant_id=? AND name='테스트 반찬 김치'",
             UUID.class,
             restaurant);
     String conflicting =
@@ -267,7 +278,7 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo("DISPUTED");
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id=(SELECT id FROM app.ingredient WHERE code='napa-cabbage')",
                 Integer.class,
                 restaurant))
         .isEqualTo(2);
@@ -312,7 +323,7 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
     assertThat(get("/api/v1/media/" + image + "?original=true").statusCode()).isEqualTo(401);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id=(SELECT id FROM app.ingredient WHERE code='napa-cabbage')",
                 Integer.class,
                 restaurant))
         .isEqualTo(1);
@@ -345,7 +356,7 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo(400);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id=(SELECT id FROM app.ingredient WHERE code='napa-cabbage')",
                 Integer.class,
                 restaurant))
         .isZero();
@@ -560,7 +571,7 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
         "INSERT INTO app.restaurant(id,name,address,business_status,coordinate_status,published) VALUES (?,?,'테스트 주소','OPEN','MISSING',true)",
         id,
         "가상 테스트 제보 업소 " + id);
-    DomesticOriginFixture.addRice(jdbc, transactions, id);
+    DomesticOriginFixture.addKimchi(jdbc, transactions, id);
     return id;
   }
 
@@ -607,6 +618,7 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
   private Map<String, Object> review(String decision, long version, UUID scope, List<UUID> images) {
     var result = new java.util.HashMap<String, Object>();
     result.put("decision", decision);
+    result.put("kimchiReviewed", true);
     result.put("expectedVersion", version);
     result.put("reason", "테스트 표시판 검토");
     result.put("privacyReviewedMediaIds", images);

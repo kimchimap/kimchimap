@@ -44,7 +44,7 @@ public class OriginWriteRepository {
 
   public Optional<UUID> lockScope(UUID scope, UUID restaurant, String usage) {
     return jdbc.sql(
-            "SELECT id FROM app.serving_scope WHERE id=:scope AND restaurant_id=:restaurant AND usage=:usage FOR UPDATE")
+            "SELECT id FROM app.serving_scope WHERE id=:scope AND restaurant_id=:restaurant AND usage=:usage AND food_kind='KIMCHI' FOR UPDATE")
         .param("scope", scope)
         .param("restaurant", restaurant)
         .param("usage", usage)
@@ -55,7 +55,7 @@ public class OriginWriteRepository {
   public UUID createScope(UUID restaurant, String name, String usage) {
     UUID id = UUID.randomUUID();
     jdbc.sql(
-            "INSERT INTO app.serving_scope(id,restaurant_id,name,original_name,usage,scope_precision) VALUES (:id,:restaurant,:name,:name,:usage,'SPECIFIC_ITEM')")
+            "INSERT INTO app.serving_scope(id,restaurant_id,name,original_name,usage,scope_precision,food_kind) VALUES (:id,:restaurant,:name,:name,:usage,'SPECIFIC_ITEM','KIMCHI')")
         .param("id", id)
         .param("restaurant", restaurant)
         .param("name", name)

@@ -140,6 +140,7 @@ test("관리자 검수 충돌은 공개 성공으로 표시하지 않는다", as
   await page.route("**/api/v1/admin/reports/test-report/reviews", (route) => {
     expect(route.request().postDataJSON()).toMatchObject({
       expectedVersion: 3,
+      kimchiReviewed: true,
       decision: "APPROVED",
       privacyReviewedMediaIds: [],
       reason: "테스트 표시판 확인",
@@ -152,6 +153,11 @@ test("관리자 검수 충돌은 공개 성공으로 표시하지 않는다", as
   await page.goto("/admin/reports/test-report");
   await page.getByLabel("검수 결과").selectOption("APPROVED");
   await page.getByLabel("검수 사유").fill("테스트 표시판 확인");
+  await page
+    .getByRole("checkbox", {
+      name: "표시판의 원산지가 해당 김치 품목·용도에 적용됨을 확인했습니다.",
+    })
+    .check();
   await page.getByRole("button", { name: "검수 결과 반영" }).click();
   await expect(page.getByRole("alert")).toContainText("다른 변경이 먼저 반영");
   await expect(

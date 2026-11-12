@@ -1472,6 +1472,9 @@
             "minimum": 0,
             "type": "integer"
           },
+          "kimchiReviewed": {
+            "type": "boolean"
+          },
           "locationReviewed": {
             "type": "boolean"
           },
