@@ -164,7 +164,11 @@ footer {
 }
 .skip-link {
   position: fixed;
-  top: -80px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   left: 16px;
   z-index: 10;
   padding: 12px;
@@ -172,6 +176,10 @@ footer {
 }
 .skip-link:focus {
   top: 12px;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
 }
 @media (max-width: 640px) {
   header {

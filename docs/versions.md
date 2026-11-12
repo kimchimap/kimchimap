@@ -29,3 +29,5 @@ Wrapper JAR SHA256: `7a9ce74cff467ca1bf60a4fcd9f05185acceda4d0f382434d393e178642
 PostGIS 자체는 ARM64를 지원하지만 선택한 공식 Docker 태그의 manifest는 AMD64만 제공한다. [ADR0003](decisions/0003-local-platform.md)과 이미지 digest를 참조한다. ARM64 네이티브 PostGIS로 실행했다고 보고하지 않는다.
 
 인증 추가 확인(2026-09-07): Spring Boot 4.1.1 BOM이 선택한 Spring Security OAuth2 JOSE/Resource Server 7.1.1, Nimbus JOSE JWT 10.9.1을 사용한다. Gradle 실제 의존성 트리를 확인했으며 직접 버전을 덮어쓰지 않았다. 근거: [Spring Security JWT 공식 문서](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html). PKCE S256·issuer·JWKS·client_secret_post는 [카카오 OIDC 공식 명세](https://developers.kakao.com/docs/ko/kakaologin/rest-api)에서 확인했고 OAuth 연결은 다음 작업이다.
+
+카카오 지도 웹 SDK는 제공사가 운영하는 공식 dapi.kakao.com/v2/maps/sdk.js 로더를 사용한다. 자체 패키지 버전을 추측해 고정하지 않는다. 2026-09-08 공식 가이드·문서와 실제 SDK/타일 로딩을 확인했고 서비스의 잠금 파일과 별도로 외부 제공사의 변경 가능성을 관리한다. 내부 SDK 경계 테스트와 별도 실연동 검증이 필요하다. 이 지도 작업에서 Java·프론트 패키지 버전은 변경하지 않았다.

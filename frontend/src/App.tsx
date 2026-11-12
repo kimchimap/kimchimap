@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { MapPage } from "./map/MapPage";
+import { DataGuidePage } from "./map/DataGuidePage";
+import { RestaurantDetailPage } from "./restaurant/RestaurantDetail";
 import { Link, Route, Routes } from "react-router";
-import { getSystemStatus } from "./api/client";
-import { RestaurantContactPage } from "./restaurant/RestaurantContactPage";
 import { AuthNavigation } from "./auth/AuthNavigation";
 import { AuthCompletePage, LoginPage } from "./auth/LoginPage";
 import { LikesPage } from "./like/LikesPage";
@@ -20,72 +20,6 @@ import { OriginAdminPage } from "./origin/OriginAdminPage";
 import { DesignationsPage } from "./certification/DesignationsPage";
 import { MatchesPage } from "./matching/MatchesPage";
 
-function Home() {
-  const connection = useQuery({
-    queryKey: ["system-status"],
-    queryFn: ({ signal }) => getSystemStatus(signal),
-  });
-  return (
-    <main id="main-content">
-      <section className="intro" aria-labelledby="intro-title">
-        <p className="eyebrow">원산지를 알고 고르는 한 끼</p>
-        <h1 id="intro-title">
-          우리 동네 김치,
-          <br />
-          어디에서 왔을까요?
-        </h1>
-        <p>
-          식재료의 원산지와 확인 근거를 함께 살펴보는
-          <br className="desktop-break" /> 국산김치맵을 준비하고 있습니다.
-        </p>
-      </section>
-      <section className="notice" aria-labelledby="notice-title">
-        <div className="notice-icon" aria-hidden="true">
-          준비 중
-        </div>
-        <div>
-          <h2 id="notice-title">확인된 정보를 차근차근 담겠습니다</h2>
-          <p>
-            원산지 정보는 아직 확보하지 못했습니다. 정보가 없다는 것은
-            수입산이라는 뜻이 아닙니다.
-          </p>
-        </div>
-      </section>
-      <section className="principles" aria-label="정보 제공 원칙">
-        <article>
-          <span aria-hidden="true">01</span>
-          <h2>메뉴와 용도를 구분해요</h2>
-          <p>반찬용 김치와 찌개에 쓰이는 김치의 원산지는 다를 수 있습니다.</p>
-        </article>
-        <article>
-          <span aria-hidden="true">02</span>
-          <h2>근거를 함께 보여드려요</h2>
-          <p>원산지 표시판 확인과 협회 지정 정보를 구분합니다.</p>
-        </article>
-        <article>
-          <span aria-hidden="true">03</span>
-          <h2>확인한 날짜를 알려드려요</h2>
-          <p>정보를 가져온 날짜와 실제 원산지를 확인한 날짜는 다릅니다.</p>
-        </article>
-      </section>
-      <nav className="activity-links" aria-label="내 활동">
-        <Link to="/likes">좋아요</Link>
-        <Link to="/reports">내 제보</Link>
-      </nav>
-      <div className="connection" role="status">
-        {connection.isPending
-          ? "서버 연결을 확인하고 있습니다."
-          : connection.isError
-            ? "서버 연결을 확인하지 못했습니다."
-            : "서버가 정상적으로 연결되었습니다."}
-        {connection.isError && (
-          <button onClick={() => void connection.refetch()}>다시 시도</button>
-        )}
-      </div>
-    </main>
-  );
-}
-
 export function App() {
   return (
     <>
@@ -103,7 +37,9 @@ export function App() {
         <AuthNavigation />
       </header>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<MapPage />} />
+        <Route path="/about/data" element={<DataGuidePage />} />
+        <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/complete" element={<AuthCompletePage />} />
         <Route path="/likes" element={<LikesPage />} />
@@ -117,10 +53,6 @@ export function App() {
         <Route path="/reports/:id" element={<ReportDetailPage />} />
         <Route path="/admin/reports" element={<ReportsPage admin />} />
         <Route path="/admin/reports/:id" element={<ReportDetailPage admin />} />
-        <Route
-          path="/restaurants/:id/contact"
-          element={<RestaurantContactPage />}
-        />
         <Route
           path="*"
           element={

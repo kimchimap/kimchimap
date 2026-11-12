@@ -382,6 +382,18 @@ class ReportReviewIntegrationTest extends ApplicationIntegrationSupport {
     assertThat(detail.statusCode()).isEqualTo(200);
     assertThat(detail.body()).contains(name, "DOMESTIC", "reviewedAt");
     assertThat(
+            json.readTree(detail.body())
+                .path("scopes")
+                .get(0)
+                .path("origins")
+                .get(0)
+                .path("claims")
+                .get(0)
+                .path("approvedAt")
+                .asString())
+        .isEqualTo(
+            json.readTree(approved.body()).path("reviews").get(0).path("createdAt").asString());
+    assertThat(
             jdbc.queryForObject(
                 "SELECT public.ST_X(location) FROM app.restaurant WHERE id=?",
                 Double.class,

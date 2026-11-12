@@ -23,7 +23,10 @@ export default defineConfig({
     },
     {
       command: "pnpm dev",
-      env: { API_PROXY_TARGET: "http://127.0.0.1:18080" },
+      env: {
+        KIMCHIMAP_DISABLE_MAP: "1",
+        API_PROXY_TARGET: "http://127.0.0.1:18080",
+      },
       url: "http://localhost:5173",
       timeout: 30_000,
       reuseExistingServer: false,

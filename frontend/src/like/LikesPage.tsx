@@ -44,7 +44,7 @@ export function LikesPage() {
             {items.map((item) => (
               <li key={item.restaurantId}>
                 <h2>
-                  <Link to={`/restaurants/${item.restaurantId}/contact`}>
+                  <Link to={`/restaurants/${item.restaurantId}`}>
                     {item.name}
                   </Link>
                 </h2>

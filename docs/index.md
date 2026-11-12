@@ -11,6 +11,6 @@
 
 Codex는 루트 AGENTS.md와 작업 디렉터리의 지침을 함께 읽는다. [공식 AGENTS.md 안내](https://learn.chatgpt.com/docs/agent-configuration/agents-md)에 따라 짧은 실행 지침과 상세 문서를 분리한다. 외부 키·권한·데이터 허가를 지침만으로 획득했다고 해석하지 않는다.
 
-현재 작업: [지정·업소 매칭 검토](plans/active/admin-data-review.md), [지정·매칭 결정](decisions/0013-admin-data-review.md). 카카오 로그인은 [계획](plans/active/kakao-login.md), [결정](decisions/0008-kakao-login.md)을 참고한다. 완료한 업소·원산지 모델은 [계획](plans/active/origin-model.md), [불변 기록 결정](decisions/0005-origin-revisions.md)을 참고한다.
+현재 작업: [지도·목록·상세](plans/active/map-experience.md), [지도 화면 결정](decisions/0014-map-experience.md). 카카오 로그인은 [계획](plans/active/kakao-login.md), [결정](decisions/0008-kakao-login.md)을 참고한다. 완료한 업소·원산지 모델은 [계획](plans/active/origin-model.md), [불변 기록 결정](decisions/0005-origin-revisions.md)을 참고한다.
 
 공간 검색: [결정](decisions/0006-spatial-search.md), [측정](performance.md), [진행 계획](plans/active/spatial-search.md).

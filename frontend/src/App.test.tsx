@@ -40,7 +40,7 @@ describe("공개 시작 화면", () => {
       ),
     );
     vi.stubGlobal("fetch", fetchMock);
-    renderApp("/restaurants/test-restaurant/contact");
+    renderApp("/restaurants/test-restaurant");
     expect(
       await screen.findByRole("heading", { name: "가상 테스트 업소" }),
     ).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe("공개 시작 화면", () => {
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 404 })),
     );
-    renderApp("/restaurants/test-restaurant/contact");
+    renderApp("/restaurants/test-restaurant");
     expect(
       await screen.findByText("공개된 업소 정보를 찾을 수 없습니다."),
     ).toBeInTheDocument();
@@ -67,20 +67,28 @@ describe("공개 시작 화면", () => {
       screen.queryByRole("link", { name: "전화 걸기" }),
     ).not.toBeInTheDocument();
   });
-  it("원산지 데이터가 없다는 안내와 실제 API 연결 상태를 표시한다", async () => {
+  it("미확인 정보 안내와 실제 API 연결 상태를 표시한다", async () => {
     vi.stubGlobal(
       "fetch",
       vi
         .fn()
-        .mockResolvedValue(
-          new Response(
-            JSON.stringify({ serviceName: "국산김치맵", status: "UP" }),
+        .mockImplementation((url: string) =>
+          Promise.resolve(
+            new Response(
+              JSON.stringify(
+                url.endsWith("/search")
+                  ? { items: [], truncated: false }
+                  : url.includes("/catalogs/")
+                    ? []
+                    : { serviceName: "국산김치맵", status: "UP" },
+              ),
+            ),
           ),
         ),
     );
     renderApp();
     expect(
-      screen.getByText(/원산지 정보는 아직 확보하지 못했습니다/),
+      screen.getByText(/정보가 없다는 것은 수입산이라는 뜻이 아닙니다/),
     ).toBeInTheDocument();
     expect(
       await screen.findByText("서버가 정상적으로 연결되었습니다."),

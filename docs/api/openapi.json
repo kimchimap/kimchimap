@@ -58,6 +58,10 @@
       },
       "Claim": {
         "properties": {
+          "approvedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
           "classification": {
             "type": "string"
           },

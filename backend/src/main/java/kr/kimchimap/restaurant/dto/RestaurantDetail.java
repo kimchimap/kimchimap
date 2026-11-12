@@ -47,6 +47,7 @@ public record RestaurantDetail(
       Instant collectedAt,
       Instant lastFetchSucceededAt,
       Instant reviewedAt,
+      Instant approvedAt,
       Instant validFrom,
       Instant validUntil,
       String freshness) {}
