@@ -462,6 +462,9 @@
             "maxLength": 2000,
             "minLength": 0,
             "type": "string"
+          },
+          "restaurantCorrection": {
+            "$ref": "#/components/schemas/RestaurantCorrectionRequest"
           }
         },
         "required": [
@@ -1631,6 +1634,146 @@
         ],
         "type": "object"
       },
+      "RestaurantAdminSnapshot": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "businessStatus": {
+            "type": "string"
+          },
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "published": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "RestaurantAdminView": {
+        "properties": {
+          "corrections": {
+            "items": {
+              "$ref": "#/components/schemas/RestaurantCorrectionAudit"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/RestaurantAdminSnapshot"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RestaurantCorrectionAudit": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "after": {
+            "$ref": "#/components/schemas/RestaurantAdminSnapshot"
+          },
+          "before": {
+            "$ref": "#/components/schemas/RestaurantAdminSnapshot"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "previousVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RestaurantCorrectionRequest": {
+        "properties": {
+          "address": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "businessPhoneReviewed": {
+            "type": "boolean"
+          },
+          "businessStatus": {
+            "minLength": 1,
+            "pattern": "OPEN|CLOSED|UNKNOWN",
+            "type": "string"
+          },
+          "expectedVersion": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "latitude": {
+            "format": "double",
+            "maximum": 39.5,
+            "minimum": 32,
+            "type": "number"
+          },
+          "locationReviewed": {
+            "type": "boolean"
+          },
+          "longitude": {
+            "format": "double",
+            "maximum": 132,
+            "minimum": 124,
+            "type": "number"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "phone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "businessStatus",
+          "expectedVersion",
+          "name",
+          "reason"
+        ],
+        "type": "object"
+      },
       "RestaurantDetail": {
         "properties": {
           "address": {
@@ -2060,7 +2203,7 @@
     },
     "/api/v1/admin/information-reports/{id}": {
       "get": {
-        "operationId": "detail_8",
+        "operationId": "detail_9",
         "parameters": [
           {
             "in": "path",
@@ -2170,7 +2313,7 @@
     },
     "/api/v1/admin/ingestion/jobs/{id}": {
       "get": {
-        "operationId": "detail_7",
+        "operationId": "detail_8",
         "parameters": [
           {
             "in": "path",
@@ -2428,7 +2571,7 @@
     },
     "/api/v1/admin/matches/{id}": {
       "get": {
-        "operationId": "detail_6",
+        "operationId": "detail_7",
         "parameters": [
           {
             "in": "path",
@@ -2510,7 +2653,7 @@
     },
     "/api/v1/admin/origin-corrections": {
       "post": {
-        "operationId": "correct",
+        "operationId": "correct_1",
         "requestBody": {
           "content": {
             "application/json": {
@@ -2600,7 +2743,7 @@
     },
     "/api/v1/admin/origins/{scope}/{ingredient}": {
       "get": {
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "in": "path",
@@ -2699,7 +2842,7 @@
     },
     "/api/v1/admin/reports/{id}": {
       "get": {
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "in": "path",
@@ -2776,6 +2919,88 @@
         ],
         "tags": [
           "admin-report-controller"
+        ]
+      }
+    },
+    "/api/v1/admin/restaurants/{id}": {
+      "get": {
+        "operationId": "detail_4",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantAdminView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-restaurant-controller"
+        ]
+      }
+    },
+    "/api/v1/admin/restaurants/{id}/corrections": {
+      "post": {
+        "operationId": "correct",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestaurantCorrectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantAdminView"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ],
+        "tags": [
+          "admin-restaurant-controller"
         ]
       }
     },

@@ -155,9 +155,16 @@ export function RestaurantDetail({ id }: { id: string }) {
       </div>
       <RestaurantContact contact={data.contact ?? null} />
       {session.member?.role === "ADMIN" && (
-        <Link to={`/admin/designations?restaurantId=${encodeURIComponent(id)}`}>
-          지정 정보 관리
-        </Link>
+        <>
+          <Link to={`/admin/restaurants/${encodeURIComponent(id)}`}>
+            업소 정보·정정 이력
+          </Link>
+          <Link
+            to={`/admin/designations?restaurantId=${encodeURIComponent(id)}`}
+          >
+            지정 정보 관리
+          </Link>
+        </>
       )}
       <section>
         <h2>메뉴·용도별 원산지</h2>

@@ -12,14 +12,13 @@ import { sessionSnapshot, subscribeSession } from "../auth/session";
 import { PhotoUpload } from "../media/PhotoUpload";
 import { PrivatePhoto } from "../report/PrivatePhoto";
 import { reportError } from "../report/api";
+import { InformationReportResolutionForm } from "./InformationReportResolutionForm";
 import {
   categories,
   states,
   getReport,
   listReports,
-  resolveReport,
   submitReport,
-  type Detail,
   type Submission,
 } from "./api";
 
@@ -242,6 +241,11 @@ function ReportDetail({ id, admin }: { id: string; admin: boolean }) {
   return (
     <>
       <h2>{data.restaurantName}</h2>
+      {admin && data.restaurantId && (
+        <Link to={`/admin/restaurants/${data.restaurantId}`}>
+          업소 정보·정정 이력
+        </Link>
+      )}
       <p>
         {categories[data.category ?? ""]} · {states[data.state ?? ""]}
       </p>
@@ -263,66 +267,9 @@ function ReportDetail({ id, admin }: { id: string; admin: boolean }) {
         </section>
       )}
       {admin && data.state === "PENDING" && (
-        <ResolutionForm key={data.version} report={data} />
+        <InformationReportResolutionForm key={data.version} report={data} />
       )}
       <button onClick={() => void query.refetch()}>최신 내용 다시 확인</button>
     </>
-  );
-}
-function ResolutionForm({ report }: { report: Detail }) {
-  const client = useQueryClient();
-  const [decision, setDecision] = useState("DISMISSED"),
-    [reason, setReason] = useState("");
-  const mutation = useMutation({
-    mutationFn: () =>
-      resolveReport(report.id!, {
-        expectedVersion: report.version!,
-        decision,
-        reason,
-      }),
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: ["private"] });
-      await client.invalidateQueries({ queryKey: ["restaurant"] });
-      await client.invalidateQueries({ queryKey: ["restaurant-search"] });
-    },
-  });
-  return (
-    <form
-      className="report-form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!mutation.isPending) mutation.mutate();
-      }}
-    >
-      <p>
-        실제 근거와 업소 정보를 확인한 뒤 처리 내용을 남겨 주세요. 상태
-        변경만으로 원산지·위치·전화번호가 자동 수정되지는 않습니다.
-      </p>
-      <Link to="/admin/origins">원산지 근거 확인·정정</Link>
-      <fieldset disabled={mutation.isPending}>
-        <legend>관리자 처리</legend>
-        <label htmlFor="issue-decision">처리 결과</label>
-        <select
-          id="issue-decision"
-          value={decision}
-          onChange={(e) => setDecision(e.target.value)}
-        >
-          <option value="DISMISSED">기각</option>
-          <option value="RESOLVED">처리 완료</option>
-        </select>
-        <label htmlFor="issue-reason">확인 내용과 처리 사유</label>
-        <textarea
-          id="issue-reason"
-          required
-          maxLength={2000}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-        />
-        <button type="submit">
-          {mutation.isPending ? "처리 중…" : "신고 처리 반영"}
-        </button>
-      </fieldset>
-      {mutation.isError && <p role="alert">{reportError(mutation.error)}</p>}
-    </form>
   );
 }

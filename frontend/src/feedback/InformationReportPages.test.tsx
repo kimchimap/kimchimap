@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from "react-router";
 import { beforeEach, expect, it, vi } from "vitest";
 import { sessionSnapshot } from "../auth/session";
 import { getReport, listReports, resolveReport } from "./api";
+import { getAdminRestaurant } from "../restaurant/admin-api";
 import { ApiError } from "../api/client";
 import {
   InformationReportsPage,
@@ -20,6 +21,10 @@ vi.mock("./api", async (original) => ({
   listReports: vi.fn(),
   getReport: vi.fn(),
   resolveReport: vi.fn(),
+}));
+vi.mock("../restaurant/admin-api", async (original) => ({
+  ...(await original<typeof import("../restaurant/admin-api")>()),
+  getAdminRestaurant: vi.fn(),
 }));
 beforeEach(() => {
   vi.clearAllMocks();
@@ -115,4 +120,55 @@ it("관리자 처리 충돌은 대기 상태를 유지하고 최신 내용 확�
     reason: "테스트 재확인",
   });
   expect(screen.getByText(/원산지가 달라요 · 검토 대기/)).toBeInTheDocument();
+});
+
+it("신고 처리와 폐업 정정을 같은 요청으로 전달한다", async () => {
+  vi.mocked(sessionSnapshot).mockReturnValue({
+    status: "authenticated",
+    member: { id: "admin", role: "ADMIN" },
+  });
+  vi.mocked(getReport).mockResolvedValue({
+    id: "test-report",
+    restaurantId: "shop",
+    state: "PENDING",
+    version: 2,
+    category: "CLOSED",
+    mediaIds: [],
+  });
+  vi.mocked(getAdminRestaurant).mockResolvedValue({
+    id: "shop",
+    version: 5,
+    snapshot: {
+      name: "테스트 가상 업소",
+      address: "테스트 주소",
+      businessStatus: "OPEN",
+    },
+  });
+  vi.mocked(resolveReport).mockRejectedValue(new ApiError(409));
+  show(true, true);
+  const user = userEvent.setup();
+  await user.selectOptions(
+    await screen.findByLabelText("처리 결과"),
+    "RESOLVED",
+  );
+  await user.click(screen.getByLabelText("업소 정보도 함께 정정"));
+  await user.selectOptions(await screen.findByLabelText("영업 상태"), "CLOSED");
+  await user.type(
+    screen.getByLabelText("확인 내용과 처리 사유"),
+    "폐업 현장 확인",
+  );
+  await user.click(screen.getByRole("button", { name: "신고 처리 반영" }));
+  await screen.findByRole("alert");
+  expect(resolveReport).toHaveBeenCalledWith(
+    "test-report",
+    expect.objectContaining({
+      expectedVersion: 2,
+      decision: "RESOLVED",
+      restaurantCorrection: expect.objectContaining({
+        expectedVersion: 5,
+        businessStatus: "CLOSED",
+        reason: "폐업 현장 확인",
+      }),
+    }),
+  );
 });
