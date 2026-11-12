@@ -476,5 +476,29 @@
     "notImplemented": [
       "smoke-external"
     ]
+  },
+  "connected-browser-flow": {
+    "plan": "docs/plans/active/connected-browser-flow.md",
+    "checks": [
+      "verify-harness",
+      "doctor",
+      "format-backend",
+      "format-frontend",
+      "lint",
+      "typecheck",
+      "test-backend",
+      "test-frontend",
+      "test-integration",
+      "test-performance",
+      "api-check",
+      "test-e2e",
+      "build-backend",
+      "build",
+      "test-contract",
+      "test-e2e-integration"
+    ],
+    "notImplemented": [
+      "smoke-external"
+    ]
   }
 }

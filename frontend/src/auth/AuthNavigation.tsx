@@ -13,6 +13,7 @@ export function AuthNavigation() {
   const client = useQueryClient();
   const session = useSyncExternalStore(subscribeSession, sessionSnapshot);
   const [error, setError] = useState("");
+  const [signingOut, setSigningOut] = useState(false);
   useEffect(() => {
     const disconnect = connectSession(() => {
       void client.cancelQueries({ queryKey: ["private"] });
@@ -22,6 +23,8 @@ export function AuthNavigation() {
     return disconnect;
   }, [client]);
   async function signOut() {
+    if (signingOut) return;
+    setSigningOut(true);
     setError("");
     try {
       await logout();
@@ -29,11 +32,15 @@ export function AuthNavigation() {
       setError(
         "기기 내 로그인 정보는 지웠지만 서버 로그아웃을 확인하지 못했습니다. 다시 시도해 주세요.",
       );
+    } finally {
+      setSigningOut(false);
     }
   }
   return (
     <nav aria-label="회원 메뉴">
-      {session.status === "authenticated" ? (
+      {signingOut ? (
+        <span role="status">로그아웃 중…</span>
+      ) : session.status === "authenticated" ? (
         <>
           <Link to="/account">계정 관리</Link>
           <Link to="/reports">내 제보</Link>
@@ -59,7 +66,9 @@ export function AuthNavigation() {
       {error && (
         <div role="alert">
           {error}
-          <button onClick={() => void signOut()}>로그아웃 다시 시도</button>
+          <button disabled={signingOut} onClick={() => void signOut()}>
+            로그아웃 다시 시도
+          </button>
         </div>
       )}
     </nav>

@@ -142,6 +142,61 @@ class KakaoLoginIntegrationTest extends ApplicationIntegrationSupport {
     }
   }
 
+  static void enableBrowserAuthorization() {
+    PROVIDER.createContext(
+        "/authorize",
+        exchange -> {
+          try {
+            Map<String, String> input = parameters(exchange.getRequestURI().getRawQuery());
+            if (!"http://localhost:5173/api/v1/auth/callback/kakao"
+                    .equals(input.get("redirect_uri"))
+                || !"test-client".equals(input.get("client_id"))
+                || !"S256".equals(input.get("code_challenge_method"))) {
+              exchange.sendResponseHeaders(400, -1);
+              return;
+            }
+            String actor = input.get("actor");
+            if (!java.util.Set.of("user", "admin").contains(actor == null ? "" : actor)) {
+              String query =
+                  exchange
+                      .getRequestURI()
+                      .getRawQuery()
+                      .replace("&", "&amp;")
+                      .replace("\"", "&quot;")
+                      .replace("<", "&lt;");
+              byte[] body =
+                  ("<!doctype html><html lang=ko><meta charset=utf-8><title>테스트 로그인 공급자</title><h1>통제된 테스트 로그인</h1><a href=\"/authorize?"
+                          + query
+                          + "&amp;actor=user\">테스트 회원</a> <a href=\"/authorize?"
+                          + query
+                          + "&amp;actor=admin\">테스트 관리자</a></html>")
+                      .getBytes(StandardCharsets.UTF_8);
+              exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
+              exchange.sendResponseHeaders(200, body.length);
+              exchange.getResponseBody().write(body);
+              return;
+            }
+            String code = UUID.randomUUID().toString();
+            GRANTS.put(
+                code,
+                new Grant(
+                    input.get("code_challenge"), input.get("nonce"), "test-browser-" + actor, ""));
+            exchange
+                .getResponseHeaders()
+                .set(
+                    "Location",
+                    input.get("redirect_uri")
+                        + "?code="
+                        + code
+                        + "&state="
+                        + URLEncoder.encode(input.get("state"), StandardCharsets.UTF_8));
+            exchange.sendResponseHeaders(302, -1);
+          } finally {
+            exchange.close();
+          }
+        });
+  }
+
   @AfterAll
   static void stopProvider() {
     PROVIDER.stop(0);

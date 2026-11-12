@@ -104,3 +104,6 @@ E2E는 전용 백엔드 포트 18080을 사용하고 Vite의 서버 측 API_PROX
 지도 실행은 gitignore된 연동 설정의 KAKAO_JAVASCRIPT_KEY를 Vite 시작 시 읽는다. 브라우저용 JavaScript 키만 번들에 주입하며 REST 키와 Client Secret은 주입하지 않는다. 자동 테스트는 KIMCHIMAP_DISABLE_MAP=1로 외부 SDK를 차단하고 경계 mock을 사용한다. 이 성공은 외부 카카오 연동 확인을 뜻하지 않는다.
 
 일반음식점 API 키는 더 이상 사용하지 않는다. 기존 integrations.env에 남아 있어도 파일은 보존하고 실행 환경으로 전달하지 않는다. 현재 test-contract는 내부 표준 입력/어댑터 계약이며 실제 외부 원산지 API 계약 검증은 소스 확보 후 추가한다.
+
+## 실제 서버 연결 브라우저 테스트
+`./scripts/harness test-e2e-integration`은 PC·모바일마다 새 임시 저장소를 사용한다. 18080·5173 포트가 비어 있어야 하며 기존 서버를 자동 종료하지 않는다. 테스트 클래스 경로의 browserTestServer만 통제된 OIDC 공급자·테스트 관리자를 생성한다. 일반 bootRun/bootJar에는 이 초기화나 공급자가 포함되지 않는다. 기존 test-e2e는 오류·SDK mock 화면 검증으로 유지하며 verify는 두 종류를 모두 호출한다.

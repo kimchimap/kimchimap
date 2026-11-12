@@ -234,5 +234,19 @@
     ],
     "cwd": "backend",
     "plan": "docs/plans/active/service-implementation.md"
+  },
+  "test-e2e-integration": {
+    "argv": [
+      "pnpm",
+      "--dir",
+      "frontend",
+      "test:e2e:integration"
+    ],
+    "requires": [
+      "frontend/package.json",
+      "backend/src/test/java/kr/kimchimap/BrowserTestServer.java"
+    ],
+    "cwd": ".",
+    "plan": "docs/plans/active/connected-browser-flow.md"
   }
 }

@@ -214,3 +214,15 @@ describe("계정 종료 요청", () => {
     expect(session.sessionSnapshot().status).toBe("anonymous");
   });
 });
+
+it("로그아웃 뒤 남은 보호 요청은 쿠키로 세션을 다시 갱신하지 않는다", async () => {
+  const fetch = server();
+  vi.stubGlobal("fetch", fetch);
+  await session.restoreSession();
+  await session.logout();
+  fetch.mockClear();
+  await expect(
+    session.authenticatedFetch("/api/v1/reports"),
+  ).rejects.toMatchObject({ status: 401 });
+  expect(fetch).not.toHaveBeenCalled();
+});
