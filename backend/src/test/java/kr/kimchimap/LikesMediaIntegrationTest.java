@@ -189,7 +189,7 @@ class LikesMediaIntegrationTest extends ApplicationIntegrationSupport {
         id,
         "가상 테스트 좋아요 " + id,
         published);
-    DomesticOriginFixture.addRice(jdbc, transactions, id);
+    DomesticOriginFixture.addKimchi(jdbc, transactions, id);
     return id;
   }
 

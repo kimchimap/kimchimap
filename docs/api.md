@@ -69,3 +69,5 @@ P07b 구현: 제보 생성은 UUID Idempotency-Key 필수(동일 사용자·본�
 ## 정보 오류 신고
 
 `POST /api/v1/information-reports`는 UUID Idempotency-Key와 업소·유형·설명·첨부 ID(최대 3개)를 받는다. GET 목록/`/{id}`는 본인만 조회한다. 관리자 목록/상세는 `/api/v1/admin/information-reports`이며 `POST /{id}/resolution`은 expectedVersion·decision(RESOLVED/DISMISSED)·reason을 받는다. 원산지 변경 신고 처리에는 선택적 correction으로 기존 근거 철회를 같은 트랜잭션에서 수행한다. 모든 목록은 limit 기본 20/최대 50, 안정적인 시각·ID cursor를 사용한다. 접수만으로 공개 정보는 바뀌지 않는다.
+
+제보 APPROVED 검수에는 kimchiReviewed=true가 필요하다. 미제공 또는 false이면 400이다. 이는 사진 원산지가 해당 김치 품목·용도에 적용된다는 관리자 확인이며 실제 납품 인증을 뜻하지 않는다. 기존 UNKNOWN 품목은 새 승인 대상으로 자동 병합하지 않는다.

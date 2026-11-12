@@ -64,7 +64,7 @@ class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
         permitted,
         "test-designation-" + permitted,
         "테스트 지정 제공기관");
-    DomesticOriginFixture.addRice(jdbc, transactions, restaurant);
+    DomesticOriginFixture.addKimchi(jdbc, transactions, restaurant);
     var body = designation(restaurant, permitted);
     assertThat(
             request(
@@ -113,10 +113,10 @@ class DataReviewIntegrationTest extends ApplicationIntegrationSupport {
         .isEqualTo(409);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=? AND ingredient_id<>(SELECT id FROM app.ingredient WHERE code='rice')",
+                "SELECT count(*) FROM app.origin_record WHERE restaurant_id=?",
                 Integer.class,
                 restaurant))
-        .isZero();
+        .isEqualTo(1);
     assertThatThrownBy(
             () ->
                 jdbc.update(

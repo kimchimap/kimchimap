@@ -87,7 +87,7 @@ public class RestaurantReadRepository {
     return jdbc.sql(
             """
         SELECT id, name, usage, scope_precision AS precision FROM app.serving_scope
-        WHERE restaurant_id = :id ORDER BY id LIMIT 201
+        WHERE restaurant_id = :id AND food_kind = 'KIMCHI' ORDER BY id LIMIT 201
         """)
         .param("id", id)
         .query(ScopeRow.class)
@@ -109,6 +109,7 @@ public class RestaurantReadRepository {
                r.revision, EXISTS (SELECT 1 FROM app.origin_withdrawal w WHERE w.record_id = r.id
                  AND w.withdrawn_at <= :asOf) AS withdrawn, (e.publicly_visible AND s.republication_allowed) AS publicly_visible
         FROM app.origin_record r JOIN app.ingredient i ON i.id = r.ingredient_id
+        JOIN app.serving_scope scope ON scope.id=r.scope_id AND scope.food_kind='KIMCHI'
         JOIN app.evidence e ON e.id = r.evidence_id
         JOIN app.data_source s ON s.id = e.source_id
         WHERE r.restaurant_id = :id AND r.review_status = 'APPROVED'

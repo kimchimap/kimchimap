@@ -45,7 +45,7 @@ class SearchPerformanceTest extends ApplicationIntegrationSupport {
           """
                       .replace("%%", "%"));
               jdbc.update(
-                  "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision) SELECT id, id, '테스트 반찬 김치', 'SIDE_DISH', 'SPECIFIC_ITEM' FROM app.restaurant");
+                  "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision, food_kind) SELECT id, id, '테스트 반찬 김치', 'SIDE_DISH', 'SPECIFIC_ITEM','KIMCHI' FROM app.restaurant");
               jdbc.update(
                   """
           INSERT INTO app.evidence(id, restaurant_id, source_id, source_identifier, kind, publicly_visible, collected_at, last_fetch_succeeded_at)

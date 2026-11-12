@@ -23,5 +23,6 @@ public final class ReportChanges {
       @NotBlank @Size(max = 2000) String reason,
       UUID approvedScopeId,
       Boolean locationReviewed,
+      Boolean kimchiReviewed,
       @NotNull @Size(max = 5) List<@NotNull UUID> privacyReviewedMediaIds) {}
 }

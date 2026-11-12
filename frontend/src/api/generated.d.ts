@@ -1229,6 +1229,7 @@ export interface components {
             decision: string;
             /** Format: int64 */
             expectedVersion: number;
+            kimchiReviewed?: boolean;
             locationReviewed?: boolean;
             privacyReviewedMediaIds: string[];
             reason: string;

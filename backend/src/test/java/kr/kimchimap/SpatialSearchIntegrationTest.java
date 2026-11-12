@@ -391,7 +391,7 @@ class SpatialSearchIntegrationTest extends ApplicationIntegrationSupport {
         s.id(),
         longitude);
     jdbc.update(
-        "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision) VALUES (?, ?, '테스트 김치', 'SIDE_DISH', 'SPECIFIC_ITEM')",
+        "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision, food_kind) VALUES (?, ?, '테스트 김치', 'SIDE_DISH', 'SPECIFIC_ITEM','KIMCHI')",
         s.scope(),
         s.id());
     jdbc.update(
@@ -405,7 +405,7 @@ class SpatialSearchIntegrationTest extends ApplicationIntegrationSupport {
   private Shop anotherScope(Shop s, String usage) {
     var scope = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision) VALUES (?, ?, '테스트 별도 김치', ?, 'SPECIFIC_ITEM')",
+        "INSERT INTO app.serving_scope(id, restaurant_id, name, usage, scope_precision, food_kind) VALUES (?, ?, '테스트 별도 김치', ?, 'SPECIFIC_ITEM','KIMCHI')",
         scope,
         s.id(),
         usage);

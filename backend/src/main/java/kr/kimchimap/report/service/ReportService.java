@@ -122,6 +122,8 @@ public class ReportService {
       throw invalid("검토 중인 제보의 사진만 공개 대상으로 선택해 주세요.");
     UUID scope = null;
     if (change.decision().equals("APPROVED")) {
+      if (!Boolean.TRUE.equals(change.kimchiReviewed()))
+        throw invalid("사진의 원산지 표시가 해당 김치 품목·용도에 적용되는지 확인해 주세요.");
       UUID restaurant = row.restaurantId();
       if (input.newRestaurant() != null) {
         if (!Boolean.TRUE.equals(change.locationReviewed()) || change.approvedScopeId() != null)
