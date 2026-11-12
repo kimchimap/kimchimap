@@ -43,6 +43,7 @@ public class RestaurantReadRepository {
       Instant collectedAt,
       Instant lastFetchSucceededAt,
       Instant reviewedAt,
+      Instant approvedAt,
       Instant validFrom,
       Instant validUntil,
       long revision,
@@ -100,7 +101,11 @@ public class RestaurantReadRepository {
                r.classification, r.original_expression, e.kind AS evidence_kind,
                s.name AS source_name, e.public_reference, e.public_summary,
                r.observed_at, r.observed_precision, r.source_updated_at, r.source_updated_precision,
-               e.collected_at, e.last_fetch_succeeded_at, r.reviewed_at, r.valid_from, r.valid_until,
+               e.collected_at, e.last_fetch_succeeded_at, r.reviewed_at,
+               (SELECT max(rv.created_at) FROM app.report_review rv
+                  WHERE s.code='USER_REPORT' AND rv.revision_id::text=e.source_identifier
+                    AND rv.decision='APPROVED' AND rv.created_at <= :asOf) AS approved_at,
+               r.valid_from, r.valid_until,
                r.revision, EXISTS (SELECT 1 FROM app.origin_withdrawal w WHERE w.record_id = r.id
                  AND w.withdrawn_at <= :asOf) AS withdrawn, (e.publicly_visible AND s.republication_allowed) AS publicly_visible
         FROM app.origin_record r JOIN app.ingredient i ON i.id = r.ingredient_id

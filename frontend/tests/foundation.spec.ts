@@ -7,11 +7,11 @@ test("공개 화면은 실제 서버에 연결하고 가상 업소를 노출하�
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "우리 동네 김치",
   );
-  await expect(page.getByRole("status")).toContainText(
-    "서버가 정상적으로 연결되었습니다.",
-  );
   await expect(
-    page.getByText(/원산지 정보는 아직 확보하지 못했습니다/),
+    page.getByText("서버가 정상적으로 연결되었습니다.", { exact: true }),
+  ).toContainText("서버가 정상적으로 연결되었습니다.");
+  await expect(
+    page.getByText(/정보가 없다는 것은 수입산이라는 뜻이 아닙니다/),
   ).toBeVisible();
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,

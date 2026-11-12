@@ -138,9 +138,7 @@ function MatchForm({ data }: { data: MatchDetail }) {
         <p role="status">
           검토가 반영되었습니다.{" "}
           {data.restaurantId && (
-            <Link
-              to={`/restaurants/${encodeURIComponent(data.restaurantId)}/contact`}
-            >
+            <Link to={`/restaurants/${encodeURIComponent(data.restaurantId)}`}>
               업소 확인
             </Link>
           )}

@@ -173,6 +173,7 @@ public class RestaurantQueryService {
         row.collectedAt(),
         row.lastFetchSucceededAt(),
         row.reviewedAt(),
+        row.approvedAt(),
         row.validFrom(),
         row.validUntil(),
         freshness);

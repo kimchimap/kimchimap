@@ -637,6 +637,8 @@ export interface components {
             longitude: number;
         };
         Claim: {
+            /** Format: date-time */
+            approvedAt?: string;
             classification?: string;
             /** Format: date-time */
             collectedAt?: string;

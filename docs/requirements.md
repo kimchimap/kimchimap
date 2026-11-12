@@ -1,6 +1,6 @@
 # 요구사항 추적
 
-원 요청 1~17절을 아래 ID에 대응한다. 서비스 수용 기준은 모두 미구현이며 이 표의 존재가 테스트 통과를 뜻하지 않는다. machine-readable 목록은 requirements.json, 세부 자동 테스트는 testing.md다.
+원 요청 1~17절을 아래 ID에 대응한다. 서비스 수용 기준은 단계별 구현·검증 중이며 현재 결과는 validation.md와 후속 계획을 따른다. 이 표의 존재가 테스트 통과를 뜻하지 않는다. machine-readable 목록은 requirements.json, 세부 자동 테스트는 testing.md다.
 
 | ID | 범위 | 세부 수용 기준 |
 | --- | --- | --- |

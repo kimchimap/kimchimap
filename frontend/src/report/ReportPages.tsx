@@ -228,9 +228,7 @@ function ReportDetail({ id, admin }: { id: string; admin: boolean }) {
         </p>
       )}
       {report.state === "APPROVED" && report.restaurantId && (
-        <Link to={`/restaurants/${report.restaurantId}/contact`}>
-          등록된 가게 보기
-        </Link>
+        <Link to={`/restaurants/${report.restaurantId}`}>등록된 가게 보기</Link>
       )}
       <h2>검토 이력</h2>
       {!report.reviews?.length && <p>아직 검토 이력이 없습니다.</p>}
